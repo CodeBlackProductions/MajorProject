@@ -1,6 +1,7 @@
-using System.Linq;
-using UnityEditor;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Searcher.SearcherWindow;
 
 public static class SteeringBehaviours
 {
@@ -73,5 +74,57 @@ public static class SteeringBehaviours
         futurePos = _Target.position + _Target.velocity * time;
 
         return Avoid(futurePos, _Pos, _MaxVelocity, _VisionRadius);
+    }
+
+    public static Vector3 Flock(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _CohesionWeight, float _SeparationWeight, float _AlignmentWeight)
+    {
+        Vector3 flocking = Vector3.zero;
+        flocking += FlockCohesion(_Neighbours, _Pos) * _CohesionWeight;
+        flocking += FlockSeparation(_Neighbours, _Pos) * _SeparationWeight;
+        flocking += FlockAlignment(_Neighbours) * _AlignmentWeight;
+
+        return flocking;
+    }
+
+    private static Vector3 FlockCohesion(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos)
+    {
+        Vector3 cohesion = Vector3.zero;
+
+        foreach (var neighbour in _Neighbours)
+        {
+            cohesion += neighbour.Value.position - _Pos;
+        }
+
+        cohesion /= _Neighbours.Count;
+
+        return cohesion;
+    }
+
+    private static Vector3 FlockSeparation(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos)
+    {
+        Vector3 separation = Vector3.zero;
+
+        foreach (var neighbour in _Neighbours)
+        {
+            separation += _Pos - neighbour.Value.position;
+        }
+
+        separation /= _Neighbours.Count;
+
+        return separation;
+    }
+
+    private static Vector3 FlockAlignment(Dictionary<Guid, Rigidbody> _Neighbours)
+    {
+        Vector3 alignment = Vector3.zero;
+
+        foreach (var neighbour in _Neighbours)
+        {
+            alignment += neighbour.Value.velocity;
+        }
+
+        alignment /= _Neighbours.Count;
+
+        return alignment;
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum Weight
 {
-    AllyCohesion, AllySeparation, AllyAlignment, EnemyCohesion, EnemySeparation, EnemyAlignment
+    AllyCohesion, AllySeparation, AllyAlignment, EnemyCohesion, EnemySeparation, EnemyAlignment, TargetCohesion
 }
 
 [CreateAssetMenu(fileName = "SO_NewFlockingWeights", menuName = "Boids/SO_FlockingWeights")]
@@ -15,6 +15,7 @@ public class SO_FlockingWeights : ScriptableObject
     [SerializeField][Range(0.0f, 1.0f)] private float m_EnemyCohesionWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_EnemySeparationWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_EnemyAlignmentWeight = 0;
+    [SerializeField][Range(0.0f, 1.0f)] private float m_TargetCohesionWeight = 0;
 
 
     private Dictionary<Weight, float> m_Weights = new Dictionary<Weight, float>();
@@ -31,6 +32,8 @@ public class SO_FlockingWeights : ScriptableObject
         m_Weights.Add(Weight.EnemyCohesion, m_EnemyCohesionWeight);
         m_Weights.Add(Weight.EnemySeparation, m_EnemySeparationWeight);
         m_Weights.Add(Weight.EnemyAlignment, m_EnemyAlignmentWeight);
+
+        m_Weights.Add(Weight.TargetCohesion, m_TargetCohesionWeight);
     }
 
     private void OnValidate()
@@ -42,5 +45,7 @@ public class SO_FlockingWeights : ScriptableObject
         m_Weights[Weight.EnemyCohesion] = m_EnemyCohesionWeight;
         m_Weights[Weight.EnemySeparation] = m_EnemySeparationWeight;
         m_Weights[Weight.EnemyAlignment] = m_EnemyAlignmentWeight;
+
+        m_Weights[Weight.TargetCohesion] = m_TargetCohesionWeight;
     }
 }
