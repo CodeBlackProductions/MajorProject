@@ -135,10 +135,10 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!114 &5778622919176450660
 MonoBehaviour:
@@ -178,7 +178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 057d94fc193fd09498731c5b511fd2c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TestTarget: {fileID: 0}
 --- !u!114 &8405673673184748662
 MonoBehaviour:
   m_ObjectHideFlags: 0

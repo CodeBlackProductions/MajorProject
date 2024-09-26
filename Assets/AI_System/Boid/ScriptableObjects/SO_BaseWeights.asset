@@ -15,6 +15,6 @@ MonoBehaviour:
   m_AllyCohesionWeight: 0.5
   m_AllySeparationWeight: 0.6
   m_AllyAlignmentWeight: 0.5
-  m_EnemyCohesionWeight: 0.4
-  m_EnemySeparationWeight: 0.3
+  m_EnemyCohesionWeight: 1
+  m_EnemySeparationWeight: 0.2
   m_EnemyAlignmentWeight: 0

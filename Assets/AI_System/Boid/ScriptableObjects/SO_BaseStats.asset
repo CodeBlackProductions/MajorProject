@@ -16,3 +16,5 @@ MonoBehaviour:
   m_MovSpeed: 25
   m_VisRange: 20
   m_Mass: 1
+  m_AtkRange: 2
+  m_TurnRate: 0.2

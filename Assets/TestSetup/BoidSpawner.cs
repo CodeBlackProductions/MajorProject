@@ -1,19 +1,32 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoidSpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject prefab;
+    [SerializeField] private int spawnAmount;
+
+    private List<KeyValuePair<Guid, GameObject>> spawned = new List<KeyValuePair<Guid, GameObject>>();
 
     private void Start()
     {
-        GameObject temp1 = GameObject.Instantiate(prefab, transform.position, Quaternion.identity);
-        GameObject temp2 = GameObject.Instantiate(prefab, transform.position + transform.forward * 100 + transform.right * 100, Quaternion.identity);
-        GameObject temp3 = GameObject.Instantiate(prefab, transform.position + transform.forward * 150 + transform.right * 50, Quaternion.identity);
+        for (int i = 0; i < spawnAmount; i++)
+        {
+            KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
+            temp.Value.transform.position = transform.position + transform.forward * 10 * i + transform.right * 10 * i;
+            spawned.Add(temp);
+        }
 
-        temp1.GetComponent<BoidFlockingManager>().m_TestTarget = temp2;
-        temp1.GetComponent<BoidFlockingManager>().m_TestTarget2 = temp3;
-        temp2.GetComponent<BoidFlockingManager>().m_TestTarget = temp1;
-        temp2.GetComponent<BoidFlockingManager>().m_TestTarget2 = temp3;
-        temp3.GetComponent<BoidFlockingManager>().m_TestTarget = temp1;
+        foreach (var boid in spawned)
+        {
+            KeyValuePair<Guid, GameObject> temp = boid;
+            foreach (var enemy in spawned)
+            {
+                if (temp.Key != enemy.Key)
+                {
+                    temp.Value.GetComponent<BoidDataManager>().AddNeighbour(Team.Enemy, enemy.Key, enemy.Value.GetComponent<Rigidbody>());
+                }
+            }
+        }
     }
 }

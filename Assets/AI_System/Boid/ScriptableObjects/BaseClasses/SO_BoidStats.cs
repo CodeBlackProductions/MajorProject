@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum Stat
 {
-    Health, MovSpeed, VisRange, Mass
+    Health, MovSpeed, VisRange, Mass, AtkRange, TurnRate
 }
 
 [CreateAssetMenu(fileName = "SO_NewBoidStats", menuName = "Boids/SO_BoidStats")]
@@ -13,6 +13,8 @@ public class SO_BoidStats : ScriptableObject
     [SerializeField] private float m_MovSpeed = 0;
     [SerializeField] private float m_VisRange = 0;
     [SerializeField] private float m_Mass = 0;
+    [SerializeField] private float m_AtkRange = 0;
+    [SerializeField] private float m_TurnRate = 0;
 
     private Dictionary<Stat, float> m_Stats = new Dictionary<Stat, float>();
 
@@ -25,6 +27,8 @@ public class SO_BoidStats : ScriptableObject
         m_Stats.Add(Stat.MovSpeed, m_MovSpeed);
         m_Stats.Add(Stat.VisRange, m_VisRange);
         m_Stats.Add(Stat.Mass, m_Mass);
+        m_Stats.Add(Stat.AtkRange, m_AtkRange);
+        m_Stats.Add(Stat.TurnRate, m_TurnRate);
     }
 
     private void OnValidate()
@@ -33,5 +37,6 @@ public class SO_BoidStats : ScriptableObject
         m_Stats[Stat.MovSpeed] = m_MovSpeed;
         m_Stats[Stat.VisRange] = m_VisRange;
         m_Stats[Stat.Mass] = m_Mass;
+        m_Stats[Stat.TurnRate] = m_TurnRate;
     }
 }
