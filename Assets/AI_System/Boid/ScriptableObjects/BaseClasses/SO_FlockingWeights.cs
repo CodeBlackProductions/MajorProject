@@ -3,19 +3,24 @@ using UnityEngine;
 
 public enum Weight
 {
-    AllyCohesion, AllySeparation, AllyAlignment, EnemyCohesion, EnemySeparation, EnemyAlignment, TargetCohesion
+    FAllyCohesion, FAllySeparation, FAllyAlignment, FEnemyCohesion, FEnemySeparation, FEnemyAlignment, MovTarget, EnemyPursue, EnemyAvoidance
 }
 
 [CreateAssetMenu(fileName = "SO_NewFlockingWeights", menuName = "Boids/SO_FlockingWeights")]
 public class SO_FlockingWeights : ScriptableObject
 {
+    [Header("Flocking")]
     [SerializeField][Range(0.0f, 1.0f)] private float m_AllyCohesionWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_AllySeparationWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_AllyAlignmentWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_EnemyCohesionWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_EnemySeparationWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_EnemyAlignmentWeight = 0;
-    [SerializeField][Range(0.0f, 1.0f)] private float m_TargetCohesionWeight = 0;
+
+    [Header("Other Behaviours")]
+    [SerializeField][Range(0.0f, 1.0f)] private float m_MovTargetWeight = 0;
+    [SerializeField][Range(0.0f, 1.0f)] private float m_TargetEnemyPursueWeight = 0;
+    [SerializeField][Range(0.0f, 1.0f)] private float m_EnemyAvoidanceWeight = 0;
 
 
     private Dictionary<Weight, float> m_Weights = new Dictionary<Weight, float>();
@@ -25,27 +30,31 @@ public class SO_FlockingWeights : ScriptableObject
     private void OnEnable()
     {
         m_Weights.Clear();
-        m_Weights.Add(Weight.AllyCohesion, m_AllyCohesionWeight);
-        m_Weights.Add(Weight.AllySeparation, m_AllySeparationWeight);
-        m_Weights.Add(Weight.AllyAlignment, m_AllyAlignmentWeight);
+        m_Weights.Add(Weight.FAllyCohesion, m_AllyCohesionWeight);
+        m_Weights.Add(Weight.FAllySeparation, m_AllySeparationWeight);
+        m_Weights.Add(Weight.FAllyAlignment, m_AllyAlignmentWeight);
 
-        m_Weights.Add(Weight.EnemyCohesion, m_EnemyCohesionWeight);
-        m_Weights.Add(Weight.EnemySeparation, m_EnemySeparationWeight);
-        m_Weights.Add(Weight.EnemyAlignment, m_EnemyAlignmentWeight);
+        m_Weights.Add(Weight.FEnemyCohesion, m_EnemyCohesionWeight);
+        m_Weights.Add(Weight.FEnemySeparation, m_EnemySeparationWeight);
+        m_Weights.Add(Weight.FEnemyAlignment, m_EnemyAlignmentWeight);
 
-        m_Weights.Add(Weight.TargetCohesion, m_TargetCohesionWeight);
+        m_Weights.Add(Weight.MovTarget, m_MovTargetWeight);
+        m_Weights.Add(Weight.EnemyPursue, m_TargetEnemyPursueWeight);
+        m_Weights.Add(Weight.EnemyAvoidance, m_EnemyAvoidanceWeight);
     }
 
     private void OnValidate()
     {
-        m_Weights[Weight.AllyCohesion] = m_AllyCohesionWeight;
-        m_Weights[Weight.AllySeparation] = m_AllySeparationWeight;
-        m_Weights[Weight.AllyAlignment] = m_AllyAlignmentWeight;
+        m_Weights[Weight.FAllyCohesion] = m_AllyCohesionWeight;
+        m_Weights[Weight.FAllySeparation] = m_AllySeparationWeight;
+        m_Weights[Weight.FAllyAlignment] = m_AllyAlignmentWeight;
 
-        m_Weights[Weight.EnemyCohesion] = m_EnemyCohesionWeight;
-        m_Weights[Weight.EnemySeparation] = m_EnemySeparationWeight;
-        m_Weights[Weight.EnemyAlignment] = m_EnemyAlignmentWeight;
+        m_Weights[Weight.FEnemyCohesion] = m_EnemyCohesionWeight;
+        m_Weights[Weight.FEnemySeparation] = m_EnemySeparationWeight;
+        m_Weights[Weight.FEnemyAlignment] = m_EnemyAlignmentWeight;
 
-        m_Weights[Weight.TargetCohesion] = m_TargetCohesionWeight;
+        m_Weights[Weight.MovTarget] = m_MovTargetWeight;
+        m_Weights[Weight.EnemyPursue] = m_TargetEnemyPursueWeight;
+        m_Weights[Weight.EnemyAvoidance] = m_EnemyAvoidanceWeight;
     }
 }

@@ -35,66 +35,116 @@ public class BoidFlockingManager : MonoBehaviour
         Dictionary<Guid, Rigidbody> nearbyAllies = m_DataManager.QueryNeighbours(Team.Ally);
         Vector3 movTarget = m_DataManager.QueryNextMovTarget();
 
-        if (nearbyAllies != null)
+        if (m_Incombat)
         {
-            desiredVelocity += SteeringBehaviours.Flock(
-                nearbyAllies,
-                m_Rigidbody.position,
-                m_WeightManager.QueryWeight(Weight.AllyCohesion),
-                m_WeightManager.QueryWeight(Weight.AllySeparation),
-                m_WeightManager.QueryWeight(Weight.AllyAlignment));
+            desiredVelocity = InCombat(nearbyAllies, nearbyEnemies, targetEnemy, movSpeed, slowRadius, stopRange);
+        }
+        else
+        {
+            desiredVelocity = OutOfCombat(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, movSpeed, slowRadius, stopRange, visRange);
         }
 
-        if (nearbyEnemies != null && !m_Incombat)
+        UpdateBoid(desiredVelocity);
+    }
+
+    private Vector3 OutOfCombat(Dictionary<Guid, Rigidbody> _NearbyAllies, Dictionary<Guid, Rigidbody> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, Vector3 _MovTarget, float _MovSpeed, float _SlowRadius, float _StopRange, float _VisRange)
+    {
+        Vector3 movementVelocity = Vector3.zero;
+
+        if (_TargetEnemy.Value != null)
         {
-            foreach (var enemy in nearbyEnemies)
+            if (Vector3.Distance(_TargetEnemy.Value.position, m_Rigidbody.position) > _VisRange)
             {
-                if (enemy.Key != targetEnemy.Key)
+                movementVelocity += SteeringBehaviours.Pursue(_TargetEnemy.Value, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.EnemyPursue);
+            }
+            else if (Vector3.Distance(_TargetEnemy.Value.position, m_Rigidbody.position) > _StopRange)
+            {
+                movementVelocity += SteeringBehaviours.Arrive(_TargetEnemy.Value.position, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange);
+            }
+            else
+            {
+                m_Incombat = true;
+                return movementVelocity;
+            }
+        }
+
+        if (_NearbyAllies != null)
+        {
+            movementVelocity += SteeringBehaviours.Flock(
+                _NearbyAllies,
+                m_Rigidbody.position,
+                m_WeightManager.QueryWeight(Weight.FAllyCohesion),
+                m_WeightManager.QueryWeight(Weight.FAllySeparation),
+                m_WeightManager.QueryWeight(Weight.FAllyAlignment));
+        }
+
+        if (_NearbyEnemies != null)
+        {
+            foreach (var enemy in _NearbyEnemies)
+            {
+                if (enemy.Key != _TargetEnemy.Key)
                 {
-                    if (Vector3.Distance(enemy.Value.position, m_Rigidbody.position) > visRange)
+                    if (Vector3.Distance(enemy.Value.position, m_Rigidbody.position) > _VisRange)
                     {
-                        desiredVelocity += SteeringBehaviours.Evade(enemy.Value, m_Rigidbody.position, movSpeed, visRange) * m_WeightManager.QueryWeight(Weight.EnemySeparation) * 0.5f;
+                        movementVelocity += SteeringBehaviours.Evade(enemy.Value, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.EnemyAvoidance) * 0.5f;
                     }
-                    else if (Vector3.Distance(enemy.Value.position, m_Rigidbody.position) > slowRadius)
+                    else if (Vector3.Distance(enemy.Value.position, m_Rigidbody.position) > _SlowRadius)
                     {
-                        desiredVelocity += SteeringBehaviours.Evade(enemy.Value, m_Rigidbody.position, movSpeed, visRange) * m_WeightManager.QueryWeight(Weight.EnemySeparation);
+                        movementVelocity += SteeringBehaviours.Evade(enemy.Value, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.EnemyAvoidance);
                     }
                     else
                     {
-                        desiredVelocity += SteeringBehaviours.Evade(enemy.Value, m_Rigidbody.position, movSpeed, visRange) * m_WeightManager.QueryWeight(Weight.EnemySeparation) * 0.25f;
+                        movementVelocity += SteeringBehaviours.Evade(enemy.Value, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.EnemyAvoidance) * 0.25f;
                     }
                 }
             }
         }
 
-        if (targetEnemy.Value != null)
+        if (_MovTarget != Vector3.zero)
         {
-            if (Vector3.Distance(targetEnemy.Value.position, m_Rigidbody.position) > visRange)
-            {
-                desiredVelocity += SteeringBehaviours.Pursue(targetEnemy.Value, m_Rigidbody.position, movSpeed, slowRadius, stopRange) * m_WeightManager.QueryWeight(Weight.EnemyCohesion);
-                m_Incombat = false;
-            }
-            else if (Vector3.Distance(targetEnemy.Value.position, m_Rigidbody.position) > stopRange)
-            {
-                desiredVelocity += SteeringBehaviours.Arrive(targetEnemy.Value.position, m_Rigidbody.position, movSpeed, slowRadius, stopRange);
-                m_Incombat = false;
-            }
-            else
-            {
-                m_Incombat = true;
-            }
+            movementVelocity += SteeringBehaviours.Arrive(_MovTarget, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget);
         }
 
-        if (movTarget != Vector3.zero)
+        return movementVelocity;
+    }
+
+    private Vector3 InCombat(Dictionary<Guid, Rigidbody> _NearbyAllies, Dictionary<Guid, Rigidbody> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, float _MovSpeed, float _SlowRadius, float _StopRange)
+    {
+        Vector3 combatVelocity = Vector3.zero;
+
+        if (_TargetEnemy.Value != null)
         {
-            desiredVelocity += SteeringBehaviours.Arrive(movTarget, m_Rigidbody.position, movSpeed, slowRadius, stopRange) * m_WeightManager.QueryWeight(Weight.TargetCohesion);
+            if (Vector3.Distance(_TargetEnemy.Value.position, m_Rigidbody.position) > _StopRange)
+            {
+                m_Incombat = false;
+                return combatVelocity;
+            }
+            combatVelocity += SteeringBehaviours.Arrive(_TargetEnemy.Value.position, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange);
         }
 
-        if (m_Incombat) 
+        if (_NearbyAllies != null)
         {
-            desiredVelocity *= 0.1f;
+            combatVelocity += SteeringBehaviours.Flock(
+                _NearbyAllies,
+                m_Rigidbody.position,
+                m_WeightManager.QueryWeight(Weight.FAllyCohesion),
+                m_WeightManager.QueryWeight(Weight.FAllySeparation),
+                m_WeightManager.QueryWeight(Weight.FAllyAlignment));
         }
-        UpdateBoid(desiredVelocity);
+
+        if (_NearbyEnemies != null)
+        {
+            combatVelocity += SteeringBehaviours.Flock(
+                _NearbyAllies,
+                m_Rigidbody.position,
+                m_WeightManager.QueryWeight(Weight.FEnemyCohesion),
+                m_WeightManager.QueryWeight(Weight.FEnemySeparation),
+                m_WeightManager.QueryWeight(Weight.FEnemyAlignment));
+        }
+
+        combatVelocity *= 0.2f;
+
+        return combatVelocity;
     }
 
     private void UpdateBoid(Vector3 _DesiredVelocity)
