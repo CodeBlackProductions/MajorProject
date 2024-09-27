@@ -11,11 +11,14 @@ public class BoidDataManager : MonoBehaviour
 {
     [SerializeField] private SO_BoidStats m_BaseStats;
 
-    private Dictionary<Stat, float> m_Stats = new Dictionary<Stat, float>();
+    private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringAllies = new Dictionary<Guid, Rigidbody>();
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
+    private Vector3 m_FormationPosition = Vector3.zero;
+
+    public Vector3 FormationPosition { get => m_FormationPosition; set => m_FormationPosition = value; }
 
     private void Awake()
     {
@@ -30,17 +33,17 @@ public class BoidDataManager : MonoBehaviour
         }
     }
 
-    public void SetStat(Stat _Stat, float _Value)
+    public void SetStat(BoidStat _Stat, float _Value)
     {
         m_Stats[_Stat] = _Value;
     }
 
-    public void ResetToBaseStat(Stat _Stat)
+    public void ResetToBaseStat(BoidStat _Stat)
     {
         m_Stats[_Stat] = m_BaseStats.Stats[_Stat];
     }
 
-    public float QueryStat(Stat _Stat)
+    public float QueryStat(BoidStat _Stat)
     {
         return m_Stats[_Stat];
     }
@@ -150,7 +153,7 @@ public class BoidDataManager : MonoBehaviour
 
     public Vector3 QueryNextMovTarget()
     {
-        if (m_MovTargets.Count > 0 && Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[Stat.AtkRange])
+        if (m_MovTargets.Count > 0 && Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.AtkRange])
         {
             m_CurrentMovTarget = m_MovTargets.Dequeue();
         }

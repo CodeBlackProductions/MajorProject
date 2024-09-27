@@ -1,18 +1,47 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(FormationDataManager))]
 public class FormationBoidManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private List<KeyValuePair<Guid, GameObject>> m_Boids = new List<KeyValuePair<Guid, GameObject>>();
+
+    private FormationDataManager m_DataManager;
+
+    public List<KeyValuePair<Guid, GameObject>> Boids { get => m_Boids;}
+
+    private void Awake()
     {
-        
+        m_DataManager = GetComponent<FormationDataManager>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void AddBoid(KeyValuePair<Guid, GameObject> _Boid)
     {
-        
+        if (m_Boids.Count < m_DataManager.QueryStat(FormationStat.MaxUnitCount) && !m_Boids.Contains(_Boid))
+        {
+            m_Boids.Add(_Boid);
+        }
+    }
+
+    public void RemoveBoid(KeyValuePair<Guid, GameObject> _Boid)
+    {
+        if (m_Boids.Contains(_Boid))
+        {
+            m_Boids.Remove(_Boid);
+        }
+
+        if (m_Boids.Count <= 0)
+        {
+            Destroy(this.gameObject);
+        }
+    }
+
+    public void UpdateFormationPos() 
+    {
+        for (int i = 0; i < m_Boids.Count; i++) 
+        {
+            m_Boids[i].Value.GetComponent<BoidDataManager>().FormationPosition = m_DataManager.QueryBoidPosition(i);
+        }
     }
 }

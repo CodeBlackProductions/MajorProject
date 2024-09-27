@@ -21,3 +21,4 @@ MonoBehaviour:
   m_MovTargetWeight: 0
   m_TargetEnemyPursueWeight: 0.7
   m_EnemyAvoidanceWeight: 0.1
+  m_FormationCohesion: 0.9

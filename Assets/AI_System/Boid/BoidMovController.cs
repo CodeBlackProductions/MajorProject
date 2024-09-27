@@ -1,9 +1,12 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(BoidFlockingManager))]
 public class BoidMovController : MonoBehaviour
 {
+    [SerializeField] private bool m_ShowDebug = false;
+
     private Vector3 m_Velocity = Vector3.zero;
     private Rigidbody m_rigidbody;
     private BoidDataManager m_DataManager;
@@ -24,6 +27,11 @@ public class BoidMovController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (float.IsNaN(m_Velocity.x) || float.IsNaN(m_Velocity.y) || float.IsNaN(m_Velocity.z))
+        {
+            throw new Exception("Velocity should not be NaN when trying to move!");
+        }
+
         if (m_Velocity.normalized != Vector3.zero)
         {
             m_rigidbody.transform.forward = m_Velocity.normalized;
@@ -34,16 +42,16 @@ public class BoidMovController : MonoBehaviour
 
     private void UpdateVelocity(Vector3 _DesiredVelocity)
     {
-       Vector3 steeringVelocity = _DesiredVelocity - m_Velocity;
-        float maxSteering = m_DataManager.QueryStat(Stat.TurnRate);
-        float maxVelocity = m_DataManager.QueryStat(Stat.MovSpeed);
+        Vector3 steeringVelocity = _DesiredVelocity - m_Velocity;
+        float maxSteering = m_DataManager.QueryStat(BoidStat.TurnRate);
+        float maxVelocity = m_DataManager.QueryStat(BoidStat.MovSpeed);
 
         if (steeringVelocity.magnitude > maxSteering)
         {
             steeringVelocity.Normalize();
             steeringVelocity *= maxSteering;
         }
-        steeringVelocity /= m_DataManager.QueryStat(Stat.Mass);
+        steeringVelocity /= m_DataManager.QueryStat(BoidStat.Mass);
 
         m_Velocity += steeringVelocity;
         if (m_Velocity.magnitude > maxVelocity)
@@ -55,12 +63,15 @@ public class BoidMovController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(Stat.VisRange));
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(Stat.AtkRange));
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(Stat.MovSpeed) * 0.5f);
-        Gizmos.color = Color.white;
+        if (m_ShowDebug)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(BoidStat.VisRange));
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(BoidStat.AtkRange));
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(BoidStat.MovSpeed) * 0.5f);
+            Gizmos.color = Color.white;
+        }
     }
 }

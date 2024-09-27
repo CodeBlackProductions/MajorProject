@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Stat
+public enum BoidStat
 {
     Health, MovSpeed, VisRange, Mass, AtkRange, TurnRate
 }
@@ -16,27 +16,27 @@ public class SO_BoidStats : ScriptableObject
     [SerializeField] private float m_AtkRange = 0;
     [SerializeField] private float m_TurnRate = 0;
 
-    private Dictionary<Stat, float> m_Stats = new Dictionary<Stat, float>();
+    private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
 
-    public Dictionary<Stat, float> Stats { get => m_Stats; }
+    public Dictionary<BoidStat, float> Stats { get => m_Stats; }
 
     private void OnEnable()
     {
         m_Stats.Clear();
-        m_Stats.Add(Stat.Health, m_Health);
-        m_Stats.Add(Stat.MovSpeed, m_MovSpeed);
-        m_Stats.Add(Stat.VisRange, m_VisRange);
-        m_Stats.Add(Stat.Mass, m_Mass);
-        m_Stats.Add(Stat.AtkRange, m_AtkRange);
-        m_Stats.Add(Stat.TurnRate, m_TurnRate);
+        m_Stats.Add(BoidStat.Health, m_Health);
+        m_Stats.Add(BoidStat.MovSpeed, m_MovSpeed);
+        m_Stats.Add(BoidStat.VisRange, m_VisRange);
+        m_Stats.Add(BoidStat.Mass, m_Mass);
+        m_Stats.Add(BoidStat.AtkRange, m_AtkRange);
+        m_Stats.Add(BoidStat.TurnRate, m_TurnRate);
     }
 
     private void OnValidate()
     {
-        m_Stats[Stat.Health] = m_Health;
-        m_Stats[Stat.MovSpeed] = m_MovSpeed;
-        m_Stats[Stat.VisRange] = m_VisRange;
-        m_Stats[Stat.Mass] = m_Mass;
-        m_Stats[Stat.TurnRate] = m_TurnRate;
+        m_Stats[BoidStat.Health] = m_Health;
+        m_Stats[BoidStat.MovSpeed] = m_MovSpeed;
+        m_Stats[BoidStat.VisRange] = m_VisRange;
+        m_Stats[BoidStat.Mass] = m_Mass;
+        m_Stats[BoidStat.TurnRate] = m_TurnRate;
     }
 }
