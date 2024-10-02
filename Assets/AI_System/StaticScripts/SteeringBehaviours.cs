@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow;
 
 public static class SteeringBehaviours
 {
@@ -126,5 +125,119 @@ public static class SteeringBehaviours
         alignment /= _Neighbours.Count;
 
         return alignment;
+    }
+
+    public static Vector3 ObstacleAvoidance(Vector3[] _Obstacles, float[] _ObstacleSizes, Vector3 _Pos, Vector3 _Velocity, float _VisionRange, float _MaxVelocity, float _AvoidanceRangeFactor, float _AvoidanceForce)
+    {
+        float speedFactor = _Velocity.magnitude / _MaxVelocity;
+        Vector3 vision = _Pos + _Velocity.normalized * (_VisionRange * _AvoidanceRangeFactor * speedFactor);
+        Vector3 halfVision = vision * 0.5f;
+
+        List<KeyValuePair<Vector3, float>> collidingObstacles = new List<KeyValuePair<Vector3, float>>();
+        for (int i = 0; i < _Obstacles.Length; i++)
+        {
+            if (Collides(_Obstacles[i], _ObstacleSizes[i], vision) || Collides(_Obstacles[i], _ObstacleSizes[i], halfVision) || Collides(_Obstacles[i], _ObstacleSizes[i], _Pos))
+            {
+                KeyValuePair<Vector3, float> kvp = new KeyValuePair<Vector3, float>(_Obstacles[i], _ObstacleSizes[i]);
+                collidingObstacles.Add(kvp);
+            }
+        }
+
+        if (collidingObstacles.Count == 0)
+        {
+            return Vector3.zero;
+        }
+
+        KeyValuePair<Vector3, float> closest = FindClosestObstacle(collidingObstacles, _Pos);
+
+        Vector3 avoidance = _Pos - closest.Key;
+        avoidance = avoidance.normalized * _AvoidanceForce;
+
+        return avoidance;
+    }
+
+    public static Vector3 Queue(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, Vector3 _Velocity, Vector3 _Steering, float _VisionRange, float _MaxVelocity, float _QueueRangeFactor, float _StopFactor)
+    {
+        float speedFactor = _Velocity.magnitude / _MaxVelocity;
+        Vector3 vision = _Pos + _Velocity.normalized * (_VisionRange * _QueueRangeFactor * speedFactor);
+        Vector3 halfVision = vision * 0.5f;
+        float visionRadius = _VisionRange * _QueueRangeFactor * speedFactor;
+        bool Colliding = false;
+        bool tooClose = false;
+
+        foreach (var neighbour in _Neighbours)
+        {
+            Vector3 neighbourPos = neighbour.Value.position;
+            if (Collides(neighbourPos, 1, vision) || Collides(neighbourPos, 1, halfVision) || Collides(neighbourPos, 1, _Pos))
+            {
+                Colliding = true;
+            }
+            if (Vector3.Distance(_Pos, neighbourPos) <= visionRadius)
+            {
+                tooClose = true;
+            }
+        }
+
+        if (!Colliding)
+        {
+            return Vector3.zero;
+        }
+
+        Vector3 desiredVelo = Vector3.zero;
+
+        desiredVelo += BrakeForce(_Velocity, _Steering, _StopFactor);
+        desiredVelo += FlockSeparation(_Neighbours, _Pos);
+
+        if (tooClose)
+        {
+            desiredVelo += HardStop(_Velocity, _StopFactor);
+        }
+
+        return desiredVelo;
+    }
+
+    private static Vector3 HardStop(Vector3 _Velocity, float _StopFactor)
+    {
+        return (_Velocity * (1 - _StopFactor)) * -1;
+    }
+
+    private static Vector3 BrakeForce(Vector3 _Velocity, Vector3 _Steering, float _StopFactor)
+    {
+        Vector3 brake = _Steering * -1 * (1 - _StopFactor);
+
+        return _Velocity * -1 + brake;
+    }
+
+    private static bool Collides(Vector3 _ObstaclePos, float _ObstacleRadius, Vector3 _CollidingPos)
+    {
+        float dist = Vector3.Distance(_ObstaclePos, _CollidingPos);
+
+        if (dist < _ObstacleRadius)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private static KeyValuePair<Vector3, float> FindClosestObstacle(List<KeyValuePair<Vector3, float>> _Obstacles, Vector3 _Pos)
+    {
+        float dist = float.MaxValue;
+        int index = -1;
+        for (int i = 0; i < _Obstacles.Count; i++)
+        {
+            float temp = Vector3.Distance(_Obstacles[i].Key, _Pos);
+            if (temp < dist)
+            {
+                dist = temp;
+                index = i;
+            }
+        }
+
+        if (index == -1)
+        {
+            return new KeyValuePair<Vector3, float>();
+        }
+
+        return _Obstacles[index];
     }
 }

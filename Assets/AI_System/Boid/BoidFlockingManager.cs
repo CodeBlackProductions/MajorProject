@@ -51,6 +51,10 @@ public class BoidFlockingManager : MonoBehaviour
             desiredVelocity += SteeringBehaviours.Arrive(formationPos, m_Rigidbody.position, movSpeed, slowRadius, 0.1f) * formationWeight;
         }
 
+        desiredVelocity += SteeringBehaviours.ObstacleAvoidance(OBSTACLES, _Obstacles SIZES, m_Rigidbody.position, m_Rigidbody.velocity, movSpeed, 0.5f, 25);
+
+        desiredVelocity += SteeringBehaviours.Queue(nearbyAllies, m_Rigidbody.position, m_Rigidbody.velocity, desiredVelocity - m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 0.3f);
+
         UpdateBoid(desiredVelocity);
     }
 
