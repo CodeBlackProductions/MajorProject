@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public enum Team
@@ -14,6 +13,7 @@ public class BoidDataManager : MonoBehaviour
     private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringAllies = new Dictionary<Guid, Rigidbody>();
+    private List<Transform> m_NearbyObstacles = new List<Transform>();
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
     private Vector3 m_FormationPosition = Vector3.zero;
@@ -159,5 +159,45 @@ public class BoidDataManager : MonoBehaviour
         }
 
         return m_CurrentMovTarget;
+    }
+
+    public void AddObstacle(Transform _Obstacle)
+    {
+        if (!m_NearbyObstacles.Contains(_Obstacle))
+        {
+            m_NearbyObstacles.Add(_Obstacle);
+        }
+    }
+
+    public void RemoveObstacle(Transform _Obstacle)
+    {
+        if (m_NearbyObstacles.Contains(_Obstacle))
+        {
+            m_NearbyObstacles.Remove(_Obstacle);
+        }
+    }
+
+    public Vector3[] QueryObstaclePositions()
+    {
+        Vector3[] positions = new Vector3[m_NearbyObstacles.Count];
+
+        for (int i = 0; i < m_NearbyObstacles.Count; i++)
+        {
+            positions[i] = m_NearbyObstacles[i].position;
+        }
+
+        return positions;
+    }
+
+    public float[] QueryObstacleSizes()
+    {
+        float[] sizes = new float[m_NearbyObstacles.Count];
+
+        for (int i = 0; i < m_NearbyObstacles.Count; i++)
+        {
+            sizes[i] = 4;
+        }
+
+        return sizes;
     }
 }

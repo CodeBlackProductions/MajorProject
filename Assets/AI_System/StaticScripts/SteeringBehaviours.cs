@@ -75,23 +75,25 @@ public static class SteeringBehaviours
         return Avoid(futurePos, _Pos, _MaxVelocity, _VisionRadius);
     }
 
-    public static Vector3 Flock(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _CohesionWeight, float _SeparationWeight, float _AlignmentWeight)
+    public static Vector3 Flock(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity, float _CohesionWeight, float _SeparationWeight, float _AlignmentWeight)
     {
         Vector3 flocking = Vector3.zero;
-        flocking += FlockCohesion(_Neighbours, _Pos) * _CohesionWeight;
-        flocking += FlockSeparation(_Neighbours, _Pos) * _SeparationWeight;
+        flocking += FlockCohesion(_Neighbours, _Pos, _VisRange, _MaxVelocity) * _CohesionWeight;
+        flocking += FlockSeparation(_Neighbours, _Pos, _VisRange, _MaxVelocity) * _SeparationWeight;
         flocking += FlockAlignment(_Neighbours) * _AlignmentWeight;
 
         return flocking;
     }
 
-    private static Vector3 FlockCohesion(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos)
+    private static Vector3 FlockCohesion(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity)
     {
         Vector3 cohesion = Vector3.zero;
 
         foreach (var neighbour in _Neighbours)
         {
-            cohesion += neighbour.Value.position - _Pos;
+            float dist = (neighbour.Value.position - _Pos).magnitude;
+            float distFactor = CalculateDistanceFactor(dist, _VisRange);
+            cohesion += (neighbour.Value.position - _Pos).normalized * distFactor * _MaxVelocity;
         }
 
         cohesion /= _Neighbours.Count;
@@ -99,13 +101,16 @@ public static class SteeringBehaviours
         return cohesion;
     }
 
-    private static Vector3 FlockSeparation(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos)
+    private static Vector3 FlockSeparation(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity)
     {
         Vector3 separation = Vector3.zero;
 
         foreach (var neighbour in _Neighbours)
         {
-            separation += _Pos - neighbour.Value.position;
+            float dist = (neighbour.Value.position - _Pos).magnitude;
+            float distFactor = CalculateDistanceFactor(dist, _VisRange);
+            float closeScaling = Mathf.Pow(1 + (1 / (dist + 0.1f)), 3);
+            separation += (neighbour.Value.position - _Pos).normalized * (1 - distFactor) * closeScaling * -1 * _MaxVelocity;
         }
 
         separation /= _Neighbours.Count;
@@ -186,7 +191,7 @@ public static class SteeringBehaviours
         Vector3 desiredVelo = Vector3.zero;
 
         desiredVelo += BrakeForce(_Velocity, _Steering, _StopFactor);
-        desiredVelo += FlockSeparation(_Neighbours, _Pos);
+        desiredVelo += FlockSeparation(_Neighbours, _Pos, _VisionRange, _MaxVelocity);
 
         if (tooClose)
         {
@@ -239,5 +244,23 @@ public static class SteeringBehaviours
         }
 
         return _Obstacles[index];
+    }
+
+    private static float CalculateDistanceFactor(float _dist, float _RefDist)
+    {
+        float result = Mathf.InverseLerp(0, _RefDist, _dist);
+
+        return result;
+    }
+
+    public static Vector3 Cohesion(Vector3 _TargetPos, Vector3 _Pos, float _VisRange, float _MaxVelocity)
+    {
+        Vector3 cohesion = Vector3.zero;
+
+        float dist = (_TargetPos - _Pos).magnitude;
+        float distFactor = CalculateDistanceFactor(dist, _VisRange);
+        cohesion += (_TargetPos - _Pos).normalized * distFactor * _MaxVelocity;
+
+        return cohesion;
     }
 }

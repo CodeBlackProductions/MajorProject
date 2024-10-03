@@ -10,6 +10,7 @@ public class BoidSpawner : MonoBehaviour
     [SerializeField] private Material m_spawnMaterialB;
 
     [SerializeField] private GameObject m_formationPrefab;
+    [SerializeField] private Transform[] m_Obstacles;
 
     private List<KeyValuePair<Guid, GameObject>> TeamA = new List<KeyValuePair<Guid, GameObject>>();
     private List<KeyValuePair<Guid, GameObject>> TeamB = new List<KeyValuePair<Guid, GameObject>>();
@@ -21,6 +22,11 @@ public class BoidSpawner : MonoBehaviour
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialA;
             temp.Value.transform.position = transform.position + transform.right * 10 * i;
+
+            for (int o = 0; o < m_Obstacles.Length; o++)
+            {
+                temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o]);
+            }
             TeamA.Add(temp);
         }
 
@@ -29,6 +35,11 @@ public class BoidSpawner : MonoBehaviour
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialB;
             temp.Value.transform.position = transform.position + transform.forward * 100 + transform.right * 10 * i;
+
+            for (int o = 0; o < m_Obstacles.Length; o++)
+            {
+                temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o]);
+            }
             TeamB.Add(temp);
         }
 
