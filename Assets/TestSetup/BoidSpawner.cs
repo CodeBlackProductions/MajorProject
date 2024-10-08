@@ -9,6 +9,8 @@ public class BoidSpawner : MonoBehaviour
     [SerializeField] private int m_spawnAmountTeamB;
     [SerializeField] private Material m_spawnMaterialB;
 
+    [SerializeField] private bool m_SpawnFormations;
+
     [SerializeField] private GameObject m_formationPrefab;
     [SerializeField] private Transform[] m_Obstacles;
 
@@ -34,7 +36,7 @@ public class BoidSpawner : MonoBehaviour
         {
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialB;
-            temp.Value.transform.position = transform.position + transform.forward * 100 + transform.right * 10 * i;
+            temp.Value.transform.position = transform.position + transform.forward * 200 + transform.right * 10 * i;
 
             for (int o = 0; o < m_Obstacles.Length; o++)
             {
@@ -75,16 +77,19 @@ public class BoidSpawner : MonoBehaviour
             }
         }
 
-        GameObject TestFormation = GameObject.Instantiate(m_formationPrefab);
-        for (int i = 0; i < TeamA.Count; i++)
+        if (m_SpawnFormations)
         {
-            TestFormation.GetComponent<FormationBoidManager>().AddBoid(TeamA[i]);
-        }
+            GameObject TestFormation = GameObject.Instantiate(m_formationPrefab);
+            for (int i = 0; i < TeamA.Count; i++)
+            {
+                TestFormation.GetComponent<FormationBoidManager>().AddBoid(TeamA[i]);
+            }
 
-        TestFormation = GameObject.Instantiate(m_formationPrefab);
-        for (int i = 0; i < TeamB.Count; i++)
-        {
-            TestFormation.GetComponent<FormationBoidManager>().AddBoid(TeamB[i]);
+            TestFormation = GameObject.Instantiate(m_formationPrefab);
+            for (int i = 0; i < TeamB.Count; i++)
+            {
+                TestFormation.GetComponent<FormationBoidManager>().AddBoid(TeamB[i]);
+            }
         }
     }
 }

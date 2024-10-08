@@ -8,6 +8,7 @@ public class BoidMovController : MonoBehaviour
     [SerializeField] private bool m_ShowDebug = false;
 
     private Vector3 m_Velocity = Vector3.zero;
+    private Vector3 m_Facing = Vector3.zero;
     private Rigidbody m_rigidbody;
     private BoidDataManager m_DataManager;
 
@@ -32,15 +33,11 @@ public class BoidMovController : MonoBehaviour
             throw new Exception("Velocity should not be NaN when trying to move!");
         }
 
-        if (m_Velocity.normalized != Vector3.zero)
-        {
-            m_rigidbody.transform.forward = m_Velocity.normalized;
-        }
-
         m_rigidbody.velocity = m_Velocity;
+        m_rigidbody.transform.forward = m_Facing;
     }
 
-    private void UpdateVelocity(Vector3 _DesiredVelocity)
+    private void UpdateVelocity(Vector3 _DesiredVelocity, Vector3 _DesiredFacing)
     {
         Vector3 steeringVelocity = _DesiredVelocity - m_Velocity;
         float maxSteering = m_DataManager.QueryStat(BoidStat.TurnRate);
@@ -52,12 +49,16 @@ public class BoidMovController : MonoBehaviour
             steeringVelocity *= maxSteering;
         }
         steeringVelocity /= m_DataManager.QueryStat(BoidStat.Mass);
-
         m_Velocity += steeringVelocity;
         if (m_Velocity.magnitude > maxVelocity)
         {
             m_Velocity.Normalize();
             m_Velocity *= maxVelocity;
+        }
+
+        if (_DesiredFacing != Vector3.zero)
+        {
+            m_Facing = _DesiredFacing;
         }
     }
 

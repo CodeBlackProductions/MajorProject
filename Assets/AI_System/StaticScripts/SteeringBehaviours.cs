@@ -253,13 +253,18 @@ public static class SteeringBehaviours
         return result;
     }
 
-    public static Vector3 Cohesion(Vector3 _TargetPos, Vector3 _Pos, float _VisRange, float _MaxVelocity)
+    public static Vector3 FormationCohesion(Vector3 _TargetPos, Vector3 _Pos, float _VisRange, float _MaxVelocity)
     {
         Vector3 cohesion = Vector3.zero;
 
         float dist = (_TargetPos - _Pos).magnitude;
         float distFactor = CalculateDistanceFactor(dist, _VisRange);
-        cohesion += (_TargetPos - _Pos).normalized * distFactor * _MaxVelocity;
+        distFactor = distFactor <= 0.1f ? 0 : distFactor * 2;
+        if (distFactor >= 1)
+        {
+            distFactor = 2f;
+        }
+        cohesion = (_TargetPos - _Pos).normalized * distFactor * _MaxVelocity;
 
         return cohesion;
     }
