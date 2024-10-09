@@ -39,6 +39,7 @@ public class BoidPool : MonoBehaviour
         {
             GameObject temp = GameObject.Instantiate(m_BoidPrefab);
             Guid tempGUID =  Guid.NewGuid();
+            temp.GetComponent<BoidDataManager>().Guid = tempGUID;
 
             m_InUsePool.Add(tempGUID, temp);
 

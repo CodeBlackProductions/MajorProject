@@ -24,6 +24,7 @@ public class BoidSpawner : MonoBehaviour
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialA;
             temp.Value.transform.position = transform.position + transform.right * 10 * i;
+            temp.Value.GetComponent<BoidDataManager>().Team = Team.Ally;
 
             for (int o = 0; o < m_Obstacles.Length; o++)
             {
@@ -37,6 +38,7 @@ public class BoidSpawner : MonoBehaviour
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialB;
             temp.Value.transform.position = transform.position + transform.forward * 200 + transform.right * 10 * i;
+            temp.Value.GetComponent<BoidDataManager>().Team = Team.Enemy;
 
             for (int o = 0; o < m_Obstacles.Length; o++)
             {

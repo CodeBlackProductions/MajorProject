@@ -17,8 +17,12 @@ public class BoidDataManager : MonoBehaviour
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
     private Vector3 m_FormationPosition = Vector3.zero;
+    private Guid m_Guid;
+    private Team m_Team;
 
     public Vector3 FormationPosition { get => m_FormationPosition; set => m_FormationPosition = value; }
+    public Guid Guid { get => m_Guid; set => m_Guid = value; }
+    public Team Team { get => m_Team; set => m_Team = value; }
 
     private void Awake()
     {
