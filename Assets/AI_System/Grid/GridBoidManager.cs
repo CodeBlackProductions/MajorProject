@@ -69,7 +69,7 @@ public class GridBoidManager : MonoBehaviour
     {
         Vector2Int gridCoord = new Vector2Int();
         gridCoord.x = Mathf.RoundToInt(_Pos.x / m_DataManager.CellSize);
-        gridCoord.y = Mathf.RoundToInt(_Pos.y / m_DataManager.CellSize);
+        gridCoord.y = Mathf.RoundToInt(_Pos.z / m_DataManager.CellSize);
 
         return gridCoord;
     }
