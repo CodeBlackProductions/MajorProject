@@ -47,38 +47,6 @@ public class BoidSpawner : MonoBehaviour
             TeamB.Add(temp);
         }
 
-        foreach (var boid in TeamA)
-        {
-            KeyValuePair<Guid, GameObject> temp = boid;
-            foreach (var enemy in TeamB)
-            {
-                temp.Value.GetComponent<BoidDataManager>().AddNeighbour(Team.Enemy, enemy.Key, enemy.Value.GetComponent<Rigidbody>());
-            }
-            foreach (var ally in TeamA)
-            {
-                if (ally.Key != boid.Key)
-                {
-                    temp.Value.GetComponent<BoidDataManager>().AddNeighbour(Team.Ally, ally.Key, ally.Value.GetComponent<Rigidbody>());
-                }
-            }
-        }
-
-        foreach (var boid in TeamB)
-        {
-            KeyValuePair<Guid, GameObject> temp = boid;
-            foreach (var enemy in TeamA)
-            {
-                temp.Value.GetComponent<BoidDataManager>().AddNeighbour(Team.Enemy, enemy.Key, enemy.Value.GetComponent<Rigidbody>());
-            }
-            foreach (var ally in TeamB)
-            {
-                if (ally.Key != boid.Key)
-                {
-                    temp.Value.GetComponent<BoidDataManager>().AddNeighbour(Team.Ally, ally.Key, ally.Value.GetComponent<Rigidbody>());
-                }
-            }
-        }
-
         if (m_SpawnFormations)
         {
             GameObject TestFormation = GameObject.Instantiate(m_formationPrefab);

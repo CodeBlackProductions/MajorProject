@@ -31,10 +31,11 @@ public class BoidFlockingManager : MonoBehaviour
         Vector3 desiredVelocity = Vector3.zero;
 
         float movSpeed = m_DataManager.QueryStat(BoidStat.MovSpeed);
-        float slowRadius = movSpeed * 0.5f;
         float stopRange = m_DataManager.QueryStat(BoidStat.AtkRange);
         float visRange = m_DataManager.QueryStat(BoidStat.VisRange);
+        float slowRadius = visRange * 0.5f;
         float formationWeight = m_WeightManager.QueryWeight(Weight.FormationCohesion);
+        float obstacleAvoidanceWeight = m_WeightManager.QueryWeight(Weight.ObstacleAvoidance);
 
         Dictionary<Guid, Rigidbody> nearbyEnemies = m_DataManager.QueryNeighbours(Team.Enemy);
         KeyValuePair<Guid, Rigidbody> targetEnemy = m_DataManager.QueryClosestNeighbour(Team.Enemy);
@@ -43,6 +44,7 @@ public class BoidFlockingManager : MonoBehaviour
         float[] obstacleSizes = m_DataManager.QueryObstacleSizes();
         Vector3 movTarget = m_DataManager.QueryNextMovTarget();
         Vector3 formationPos = m_DataManager.FormationPosition;
+        Vector3 avoidance = Vector3.zero;
 
         if (m_Incombat)
         {
@@ -53,9 +55,13 @@ public class BoidFlockingManager : MonoBehaviour
             desiredVelocity = OutOfCombat(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, formationPos, movSpeed, slowRadius, stopRange, visRange);
         }
 
-        desiredVelocity += SteeringBehaviours.ObstacleAvoidance(nearbyObstacles, obstacleSizes, m_Rigidbody.position, m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 30);
+        avoidance = SteeringBehaviours.ObstacleAvoidance(nearbyObstacles, obstacleSizes, m_Rigidbody.position, m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 30) * obstacleAvoidanceWeight;
 
-        desiredVelocity += SteeringBehaviours.Queue(nearbyAllies, m_Rigidbody.position, m_Rigidbody.velocity, desiredVelocity - m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 0.3f);
+        if (avoidance != Vector3.zero)
+        {
+            desiredVelocity += avoidance;
+            desiredVelocity += SteeringBehaviours.Queue(nearbyAllies, m_Rigidbody.position, m_Rigidbody.velocity, desiredVelocity - m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 0.5f) * obstacleAvoidanceWeight;
+        }
 
         UpdateBoid(desiredVelocity, targetEnemy);
     }
@@ -99,17 +105,13 @@ public class BoidFlockingManager : MonoBehaviour
         {
             foreach (var ally in _NearbyAllies)
             {
-                if (Vector3.Distance(ally.Value.position, m_Rigidbody.position) > _VisRange)
+                if (Vector3.Distance(_FormationPos, m_Rigidbody.position) > _SlowRadius && Vector3.Distance(ally.Value.position, m_Rigidbody.position) > _SlowRadius)
                 {
-                    movementVelocity += SteeringBehaviours.Evade(ally.Value, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation) * 0.5f;
+                    movementVelocity += SteeringBehaviours.Evade(ally.Value, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
                 }
-                else if (Vector3.Distance(ally.Value.position, m_Rigidbody.position) > _SlowRadius)
+                else if (Vector3.Distance(ally.Value.position, m_Rigidbody.position) < _SlowRadius * 0.25f)
                 {
-                    movementVelocity += SteeringBehaviours.Evade(ally.Value, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation) * 0.1f;
-                }
-                else
-                {
-                    movementVelocity += SteeringBehaviours.Avoid(ally.Value.position, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation) * 0.25f;
+                    movementVelocity += SteeringBehaviours.Evade(ally.Value, m_Rigidbody.position, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
                 }
             }
         }

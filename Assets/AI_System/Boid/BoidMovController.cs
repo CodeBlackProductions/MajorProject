@@ -34,6 +34,7 @@ public class BoidMovController : MonoBehaviour
         }
 
         m_rigidbody.velocity = m_Velocity;
+     
         m_rigidbody.transform.forward = m_Facing;
     }
 

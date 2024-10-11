@@ -1,5 +1,4 @@
 using System;
-using UnityEditor;
 using UnityEngine;
 
 public class BoidGridDataManager : MonoBehaviour
@@ -22,8 +21,10 @@ public class BoidGridDataManager : MonoBehaviour
         if (GridBoidManager.Instance != null)
         {
             SendDataToGrid += GridBoidManager.Instance.OnReceiveBoidPos;
+            GridBoidManager.Instance.OnAddBoid += AddNeighbour;
+            GridBoidManager.Instance.OnRemoveBoid += RemoveNeighbour;
         }
-        else 
+        else
         {
             Destroy(this);
         }
@@ -37,13 +38,13 @@ public class BoidGridDataManager : MonoBehaviour
             m_OldPos = m_Rb.position;
             m_Timer = m_GridUpdateInterval;
         }
-        else 
+        else
         {
             m_Timer -= Time.deltaTime;
         }
     }
 
-    private BoidData PrepareData() 
+    private BoidData PrepareData()
     {
         BoidData data = new BoidData();
         data.boidGuid = m_DataManager.Guid;
@@ -55,19 +56,20 @@ public class BoidGridDataManager : MonoBehaviour
         return data;
     }
 
-    private void AddNeighbour(Guid _Guid, Guid _ToAdd, Team _TeamToAddTo) 
+    private void AddNeighbour(Guid _Guid, Guid _ToAdd, Team _TeamToAddTo)
     {
         if (_Guid == m_DataManager.Guid)
         {
-
+            Rigidbody neighbour = BoidPool.Instance.GetActiveBoid(_ToAdd).GetComponent<Rigidbody>();
+            m_DataManager.AddNeighbour(_TeamToAddTo, _ToAdd, neighbour);
         }
     }
 
-    private void RemoveNeighbour(Guid _Guid, Guid _ToRemove, Team _TeamToRemoveFrom) 
+    private void RemoveNeighbour(Guid _Guid, Guid _ToRemove, Team _TeamToRemoveFrom)
     {
-        if (_Guid == m_DataManager.Guid) 
+        if (_Guid == m_DataManager.Guid)
         {
-
+            m_DataManager.RemoveNeighbour(_TeamToRemoveFrom, _ToRemove);
         }
     }
 }

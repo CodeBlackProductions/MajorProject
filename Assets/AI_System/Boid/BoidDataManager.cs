@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum Team
@@ -54,41 +55,45 @@ public class BoidDataManager : MonoBehaviour
 
     public void AddNeighbour(Team _Team, Guid _ID, Rigidbody _RB)
     {
-        switch (_Team)
+        if (_Team == m_Team)
         {
-            case Team.Ally:
+            if (!m_NeighbouringAllies.ContainsKey(_ID))
+            {
                 m_NeighbouringAllies.Add(_ID, _RB);
-                return;
-
-            case Team.Neutral:
-                break;
-
-            case Team.Enemy:
+            }
+        }
+        else if (_Team == Team.Neutral)
+        {
+            return;
+        }
+        else
+        {
+            if (!m_NeighbouringEnemies.ContainsKey(_ID))
+            {
                 m_NeighbouringEnemies.Add(_ID, _RB);
-                return;
-
-            default:
-                break;
+            }
         }
     }
 
     public void RemoveNeighbour(Team _Team, Guid _ID)
     {
-        switch (_Team)
+        if (_Team == m_Team)
         {
-            case Team.Ally:
+            if (m_NeighbouringAllies.ContainsKey(_ID))
+            {
                 m_NeighbouringAllies.Remove(_ID);
-                return;
-
-            case Team.Neutral:
-                break;
-
-            case Team.Enemy:
+            }
+        }
+        else if (_Team == Team.Neutral)
+        {
+            return;
+        }
+        else
+        {
+            if (m_NeighbouringEnemies.ContainsKey(_ID))
+            {
                 m_NeighbouringEnemies.Remove(_ID);
-                return;
-
-            default:
-                break;
+            }
         }
     }
 
