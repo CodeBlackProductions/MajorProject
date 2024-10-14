@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public enum Team
@@ -14,7 +13,7 @@ public class BoidDataManager : MonoBehaviour
     private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringAllies = new Dictionary<Guid, Rigidbody>();
-    private List<Transform> m_NearbyObstacles = new List<Transform>();
+    private List<Vector3> m_NearbyObstacles = new List<Vector3>();
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
     private Vector3 m_FormationPosition = Vector3.zero;
@@ -162,7 +161,7 @@ public class BoidDataManager : MonoBehaviour
 
     public Vector3 QueryNextMovTarget()
     {
-        if (m_MovTargets.Count > 0 && Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.AtkRange])
+        if (m_MovTargets.Count > 0 && (Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.AtkRange] || m_CurrentMovTarget == Vector3.zero))
         {
             m_CurrentMovTarget = m_MovTargets.Dequeue();
         }
@@ -170,7 +169,18 @@ public class BoidDataManager : MonoBehaviour
         return m_CurrentMovTarget;
     }
 
-    public void AddObstacle(Transform _Obstacle)
+    public void AddMovTarget(Vector3 _Pos)
+    {
+        m_MovTargets.Enqueue(_Pos);
+    }
+
+    public void SetMovTarget(Vector3 _Pos)
+    {
+        m_MovTargets.Clear();
+        m_MovTargets.Enqueue(_Pos);
+    }
+
+    public void AddObstacle(Vector3 _Obstacle)
     {
         if (!m_NearbyObstacles.Contains(_Obstacle))
         {
@@ -178,7 +188,7 @@ public class BoidDataManager : MonoBehaviour
         }
     }
 
-    public void RemoveObstacle(Transform _Obstacle)
+    public void RemoveObstacle(Vector3 _Obstacle)
     {
         if (m_NearbyObstacles.Contains(_Obstacle))
         {
@@ -192,12 +202,13 @@ public class BoidDataManager : MonoBehaviour
 
         for (int i = 0; i < m_NearbyObstacles.Count; i++)
         {
-            positions[i] = m_NearbyObstacles[i].position;
+            positions[i] = m_NearbyObstacles[i];
         }
 
         return positions;
     }
 
+    //To DO: Determine Obstacle sizes? CHange to Grid based approach?
     public float[] QueryObstacleSizes()
     {
         float[] sizes = new float[m_NearbyObstacles.Count];

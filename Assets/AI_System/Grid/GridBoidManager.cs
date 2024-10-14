@@ -13,6 +13,8 @@ public class GridBoidManager : MonoBehaviour
 
     public Action<Guid, Guid, Team> OnRemoveBoid;
     public Action<Guid, Guid, Team> OnAddBoid;
+    public Action<Guid, Vector3> OnRemoveVision;
+    public Action<Guid, Vector3> OnAddVision;
 
     private void Awake()
     {

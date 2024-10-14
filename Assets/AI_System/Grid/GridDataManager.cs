@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,6 +38,23 @@ public class GridDataManager : MonoBehaviour
         }
 
         m_BoidGrid = new GridTile[m_GridWidth, m_GridHeight];
+        InitializeObstacles();
+    }
+
+    private void InitializeObstacles()
+    {
+        for (int x = 0; x < m_GridWidth; x++)
+        {
+            for (int y = 0; y < m_GridHeight; y++)
+            {
+                Vector3 pos = new Vector3(x * m_CellSize, 0, y * m_CellSize);
+                bool blocked = Physics.CheckBox(pos, Vector3.one * m_CellSize * 0.5f, Quaternion.identity, LayerMask.GetMask("Obstacle"));
+                if (blocked)
+                {
+                    m_BoidGrid[x, y].cellType = CellType.Obstacle;
+                }
+            }
+        }
     }
 
     public GridTile QueryGridTile(int _PosX, int _PosY)
@@ -113,11 +129,6 @@ public class GridDataManager : MonoBehaviour
         return _TilePos.x >= 0 && _TilePos.x < m_BoidGrid.GetLength(0) && _TilePos.y >= 0 && _TilePos.y < m_BoidGrid.GetLength(1);
     }
 
-
-
-
-
-
     //DEBUG VISUALS; REMOVE BEFORE FINISHING SYSTEM
     private void OnDrawGizmos()
     {
@@ -152,8 +163,6 @@ public class GridDataManager : MonoBehaviour
 
                     Gizmos.DrawWireCube(new Vector3(this.transform.position.x + x * CellSize, 0, this.transform.position.z + y * CellSize), new Vector3(CellSize - 0.1f, 1, CellSize - 0.1f));
                 }
-
-                
             }
         }
         Gizmos.color = Color.white;

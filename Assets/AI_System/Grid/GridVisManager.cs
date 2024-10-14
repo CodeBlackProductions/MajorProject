@@ -80,6 +80,12 @@ public class GridVisManager : MonoBehaviour
             tile.visionList.Remove(_BoidGuid);
         }
 
+        if (tile.cellType == CellType.Obstacle)
+        {
+            Vector3 pos = new Vector3(_GridPos.x * m_DataManager.CellSize, 0, _GridPos.y * m_DataManager.CellSize);
+            GridBoidManager.Instance.OnRemoveVision?.Invoke(_BoidGuid, pos);
+        }
+
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
     }
 
@@ -98,6 +104,12 @@ public class GridVisManager : MonoBehaviour
         }
 
         tile.visionList.Add(_BoidGuid);
+
+        if (tile.cellType == CellType.Obstacle)
+        {
+            Vector3 pos = new Vector3(_GridPos.x * m_DataManager.CellSize, 0, _GridPos.y * m_DataManager.CellSize);
+            GridBoidManager.Instance.OnAddVision?.Invoke(_BoidGuid, pos);
+        }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
     }

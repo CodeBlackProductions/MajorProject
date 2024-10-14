@@ -13,6 +13,8 @@ public class BoidSpawner : MonoBehaviour
 
     [SerializeField] private GameObject m_formationPrefab;
     [SerializeField] private Transform[] m_Obstacles;
+    [SerializeField] private Transform m_AllyTarget;
+    [SerializeField] private Transform m_EnemyTarget;
 
     private List<KeyValuePair<Guid, GameObject>> TeamA = new List<KeyValuePair<Guid, GameObject>>();
     private List<KeyValuePair<Guid, GameObject>> TeamB = new List<KeyValuePair<Guid, GameObject>>();
@@ -25,11 +27,12 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialA;
             temp.Value.transform.position = transform.position + transform.right * 10 * i;
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Ally;
+            temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_AllyTarget.position);
 
-            for (int o = 0; o < m_Obstacles.Length; o++)
-            {
-                temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o]);
-            }
+            //for (int o = 0; o < m_Obstacles.Length; o++)
+            //{
+            //    temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o].position);
+            //}
             TeamA.Add(temp);
         }
 
@@ -39,11 +42,12 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialB;
             temp.Value.transform.position = transform.position + transform.forward * 200 + transform.right * 10 * i;
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Enemy;
+            temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_EnemyTarget.position);
 
-            for (int o = 0; o < m_Obstacles.Length; o++)
-            {
-                temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o]);
-            }
+            //for (int o = 0; o < m_Obstacles.Length; o++)
+            //{
+            //    temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o].position);
+            //}
             TeamB.Add(temp);
         }
 

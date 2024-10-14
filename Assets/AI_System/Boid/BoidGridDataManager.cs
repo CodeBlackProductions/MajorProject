@@ -23,6 +23,8 @@ public class BoidGridDataManager : MonoBehaviour
             SendDataToGrid += GridBoidManager.Instance.OnReceiveBoidPos;
             GridBoidManager.Instance.OnAddBoid += AddNeighbour;
             GridBoidManager.Instance.OnRemoveBoid += RemoveNeighbour;
+            GridBoidManager.Instance.OnRemoveVision += RemoveObstacle;
+            GridBoidManager.Instance.OnAddVision += AddObstacle;
         }
         else
         {
@@ -70,6 +72,22 @@ public class BoidGridDataManager : MonoBehaviour
         if (_Guid == m_DataManager.Guid)
         {
             m_DataManager.RemoveNeighbour(_TeamToRemoveFrom, _ToRemove);
+        }
+    }
+
+    private void AddObstacle(Guid _Guid, Vector3 _Pos)
+    {
+        if (_Guid == m_DataManager.Guid)
+        {
+            m_DataManager.AddObstacle(_Pos);
+        }
+    }
+
+    private void RemoveObstacle(Guid _Guid, Vector3 _Pos)
+    {
+        if (_Guid == m_DataManager.Guid)
+        {
+            m_DataManager.RemoveObstacle(_Pos);
         }
     }
 }
