@@ -17,6 +17,7 @@ public class GridDataManager : MonoBehaviour
 
     private GridTile[,] m_BoidGrid;
     public int CellSize { get => m_CellSize; }
+    public GridTile[,] BoidGrid { get => m_BoidGrid;}
 
     private void OnValidate()
     {
@@ -130,43 +131,43 @@ public class GridDataManager : MonoBehaviour
     }
 
     //DEBUG VISUALS; REMOVE BEFORE FINISHING SYSTEM
-    private void OnDrawGizmos()
-    {
-        for (int x = 0; x < m_GridWidth; x++)
-        {
-            for (int y = 0; y < m_GridHeight; y++)
-            {
-                if (m_BoidGrid != null)
-                {
-                    switch (m_BoidGrid[x, y].cellType)
-                    {
-                        case CellType.Enemy:
-                            Gizmos.color = Color.red;
-                            break;
+    //private void OnDrawGizmos()
+    //{
+    //    for (int x = 0; x < m_GridWidth; x++)
+    //    {
+    //        for (int y = 0; y < m_GridHeight; y++)
+    //        {
+    //            if (m_BoidGrid != null)
+    //            {
+    //                switch (m_BoidGrid[x, y].cellType)
+    //                {
+    //                    case CellType.Enemy:
+    //                        Gizmos.color = Color.red;
+    //                        break;
 
-                        case CellType.Combat:
-                            Gizmos.color = Color.yellow;
-                            break;
+    //                    case CellType.Combat:
+    //                        Gizmos.color = Color.yellow;
+    //                        break;
 
-                        case CellType.Ally:
-                            Gizmos.color = Color.blue;
-                            break;
+    //                    case CellType.Ally:
+    //                        Gizmos.color = Color.blue;
+    //                        break;
 
-                        case CellType.Empty:
-                            Gizmos.color = Color.white;
-                            break;
+    //                    case CellType.Empty:
+    //                        Gizmos.color = Color.white;
+    //                        break;
 
-                        case CellType.Obstacle:
-                            Gizmos.color = Color.black;
-                            break;
-                    }
+    //                    case CellType.Obstacle:
+    //                        Gizmos.color = Color.black;
+    //                        break;
+    //                }
 
-                    Gizmos.DrawWireCube(new Vector3(this.transform.position.x + x * CellSize, 0, this.transform.position.z + y * CellSize), new Vector3(CellSize - 0.1f, 1, CellSize - 0.1f));
-                }
-            }
-        }
-        Gizmos.color = Color.white;
-    }
+    //                Gizmos.DrawWireCube(new Vector3(this.transform.position.x + x * CellSize, 0, this.transform.position.z + y * CellSize), new Vector3(CellSize - 0.1f, 1, CellSize - 0.1f));
+    //            }
+    //        }
+    //    }
+    //    Gizmos.color = Color.white;
+    //}
 }
 
 public struct GridTile

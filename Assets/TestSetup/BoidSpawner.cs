@@ -29,10 +29,6 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Ally;
             temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_AllyTarget.position);
 
-            //for (int o = 0; o < m_Obstacles.Length; o++)
-            //{
-            //    temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o].position);
-            //}
             TeamA.Add(temp);
         }
 
@@ -44,10 +40,6 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Enemy;
             temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_EnemyTarget.position);
 
-            //for (int o = 0; o < m_Obstacles.Length; o++)
-            //{
-            //    temp.Value.GetComponent<BoidDataManager>().AddObstacle(m_Obstacles[o].position);
-            //}
             TeamB.Add(temp);
         }
 
