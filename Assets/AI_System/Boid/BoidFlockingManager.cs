@@ -9,7 +9,7 @@ public class BoidFlockingManager : MonoBehaviour
     private BoidFlockingWeightManager m_WeightManager;
     private BoidDataManager m_DataManager;
 
-    private BaseFlowfield m_FlowfieldManager;
+    private FlowfieldManager m_FlowfieldManager;
 
     public Action<Vector3, Vector3> OnBehaviourUpdate;
 
@@ -24,7 +24,7 @@ public class BoidFlockingManager : MonoBehaviour
         m_DataManager = GetComponent<BoidDataManager>();
         m_Rigidbody = GetComponent<Rigidbody>();
 
-        m_FlowfieldManager = FindAnyObjectByType<BaseFlowfield>();
+        m_FlowfieldManager = FlowfieldManager.Instance;
 
         m_CurrentVelocity = m_Rigidbody.velocity;
         m_CurrentFacing = m_Rigidbody.transform.forward;
@@ -51,7 +51,14 @@ public class BoidFlockingManager : MonoBehaviour
         Vector2[,] flowfield = null;
         if (movTarget != Vector3.zero)
         {
-            flowfield = m_FlowfieldManager.GetFlowfield(GridDataManager.Instance.BoidGrid, new Vector2Int((int)(movTarget.x * 0.25f), (int)(movTarget.z * 0.25f)));
+            if (m_FlowfieldManager != null)
+            {
+                flowfield = m_FlowfieldManager.QueryFlowfield(new Vector2Int((int)(movTarget.x * 0.25f), (int)(movTarget.z * 0.25f)));
+            }
+            else
+            {
+                desiredVelocity += SteeringBehaviours.Arrive(movTarget, m_Rigidbody.position, movSpeed, slowRadius, stopRange);
+            }
         }
 
         Vector3 formationPos = m_DataManager.FormationPosition;
@@ -135,7 +142,7 @@ public class BoidFlockingManager : MonoBehaviour
         if (_Flowfield != null)
         {
             Vector2 dir = _Flowfield[(int)(transform.position.x * 0.25f), (int)(transform.position.z * 0.25f)];
-            movementVelocity += new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget) *0.5f;
+            movementVelocity += new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget) * 0.5f;
         }
 
         if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))

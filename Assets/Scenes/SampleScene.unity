@@ -6166,10 +6166,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3616344658849169189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8b51d15929e0f24bb17c6cbdb3f51a9, type: 3}
+  m_Script: {fileID: 11500000, guid: 618f3b900b7d7ca49b1992eb71d2fb87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TargetObject: {fileID: 1205831162}
+  m_Database: {fileID: 11400000, guid: a170dc7462c31704e8ddab7162587e41, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
