@@ -14,15 +14,28 @@ public static class FlowfieldPathfinding
 
     public static float[,] CalculateCostField(GridTile[,] _BoidGrid)
     {
-        float[,] costField = new float[_BoidGrid.GetLength(0), _BoidGrid.GetLength(1)];
+        int width = _BoidGrid.GetLength(0);
+        int height = _BoidGrid.GetLength(1);
 
-        for (int x = 0; x < _BoidGrid.GetLength(0); x++)
+        float[,] costField = new float[width, height];
+
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < _BoidGrid.GetLength(1); y++)
+            for (int y = 0; y < height; y++)
             {
                 if (_BoidGrid[x, y].cellType == CellType.Obstacle)
                 {
                     costField[x, y] = 255;
+                    for (int xx = -1; xx < 2; xx++)
+                    {
+                        for (int yy = -1; yy < 2; yy++)
+                        {
+                            if (IsInBounds(width, height, x + xx, y + yy))
+                            {
+                                costField[x + xx, y + yy] += 4;
+                            }
+                        }
+                    }
                 }
                 else
                 {
@@ -37,11 +50,13 @@ public static class FlowfieldPathfinding
     public static float[,] CalculateIntegrationField(float[,] _Costfield, Vector2Int _TargetPos)
     {
         List<Vector2Int> openCells = new List<Vector2Int>();
-        float[,] integrationField = new float[_Costfield.GetLength(0), _Costfield.GetLength(1)];
+        int width = _Costfield.GetLength(0);
+        int height = _Costfield.GetLength(1);
+        float[,] integrationField = new float[width, height];
 
-        for (int x = 0; x < _Costfield.GetLength(0); x++)
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < _Costfield.GetLength(1); y++)
+            for (int y = 0; y < height; y++)
             {
                 integrationField[x, y] = float.MaxValue;
             }
@@ -61,9 +76,18 @@ public static class FlowfieldPathfinding
             {
                 for (int o = -1; o < 2; o++)
                 {
-                    if (IsInBounds(_Costfield.GetLength(0), _Costfield.GetLength(1), x + i, y + o) && _Costfield[x + i, y + o] != 255)
+                    if (IsInBounds(width, height, x + i, y + o) && _Costfield[x + i, y + o] < 255)
                     {
-                        integratedCost = integrationField[x, y] + _Costfield[x + i, y + o];
+                        float cost = _Costfield[x + i, y + o];
+
+                        if (i != 0 && o != 0)
+                        {
+                            cost *= 1.25f;
+                        }
+
+                        cost = cost + CalculateDirectionCostAdjustment(new Vector2(x, y), _TargetPos, new Vector2(x + i, y + o));
+
+                        integratedCost = integrationField[x, y] + cost;
                         if (integratedCost < integrationField[x + i, y + o])
                         {
                             integrationField[x + i, y + o] = integratedCost;
@@ -86,11 +110,14 @@ public static class FlowfieldPathfinding
 
     public static Vector2[,] CalculateFlowField(float[,] _Integrationfield, Vector2 _TargetPos)
     {
-        Vector2[,] flowfield = new Vector2[_Integrationfield.GetLength(0), _Integrationfield.GetLength(1)];
+        int width = _Integrationfield.GetLength(0);
+        int height = _Integrationfield.GetLength(1);
 
-        for (int x = 0; x < _Integrationfield.GetLength(0); x++)
+        Vector2[,] flowfield = new Vector2[width, height];
+
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < _Integrationfield.GetLength(1); y++)
+            for (int y = 0; y < height; y++)
             {
                 if (_Integrationfield[x, y] == float.MaxValue)
                 {
@@ -108,12 +135,14 @@ public static class FlowfieldPathfinding
     private static Vector2Int FindCheapestNeighbour(float[,] _Integrationfield, int _X, int _Y)
     {
         Vector2Int cheapestNeighbour = new Vector2Int(_X, _Y);
+        int width = _Integrationfield.GetLength(0);
+        int height = _Integrationfield.GetLength(1);
 
         for (int x = -1; x < 2; x++)
         {
             for (int y = -1; y < 2; y++)
             {
-                if (IsInBounds(_Integrationfield.GetLength(0), _Integrationfield.GetLength(1), _X + x, _Y + y) && _Integrationfield[_X + x, _Y + y] != float.MaxValue)
+                if (IsInBounds(width, height, _X + x, _Y + y) && _Integrationfield[_X + x, _Y + y] != float.MaxValue)
                 {
                     if (_Integrationfield[cheapestNeighbour.x, cheapestNeighbour.y] > _Integrationfield[_X + x, _Y + y])
                     {
@@ -124,5 +153,16 @@ public static class FlowfieldPathfinding
         }
 
         return cheapestNeighbour;
+    }
+
+    private static float CalculateDirectionCostAdjustment(Vector2 _Pos, Vector2 _TargetPos, Vector2 _NeighborPos)
+    {
+        Vector2 directionToNeighbor = (_NeighborPos - _Pos).normalized;
+        Vector2 directionToTarget = (_TargetPos - _Pos).normalized;
+        float dot = Vector2.Dot(directionToTarget, directionToNeighbor);
+
+        float adjustment = 1 - Mathf.Clamp01(dot);
+
+        return adjustment;
     }
 }

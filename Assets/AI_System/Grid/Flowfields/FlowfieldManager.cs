@@ -52,12 +52,13 @@ public class FlowfieldManager : MonoBehaviour
     {
         if (Application.isPlaying && m_Database != null && currentDebugFlowfield != null)
         {
-            for (int x = 0; x < 80; x++)
+            int cellsize = GridDataManager.Instance.CellSize;
+            for (int x = 0; x < GridDataManager.Instance.BoidGrid.GetLength(0); x++)
             {
-                for (int y = 0; y < 80; y++)
+                for (int y = 0; y < GridDataManager.Instance.BoidGrid.GetLength(1); y++)
                 {
-                    Vector3 vec = new Vector3(this.transform.position.x + x * 4, 0, this.transform.position.z + y * 4);
-                    Vector3 vec2 = new Vector3(currentDebugFlowfield[x, y].x * 2, 0, currentDebugFlowfield[x, y].y * 2);
+                    Vector3 vec = new Vector3(this.transform.position.x + x * cellsize, 0, this.transform.position.z + y * cellsize);
+                    Vector3 vec2 = new Vector3(currentDebugFlowfield[x, y].x, 0, currentDebugFlowfield[x, y].y);
 
                     Gizmos.DrawLine(vec, vec + vec2);
                 }

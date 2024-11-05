@@ -53,7 +53,7 @@ public class BoidFlockingManager : MonoBehaviour
         {
             if (m_FlowfieldManager != null)
             {
-                flowfield = m_FlowfieldManager.QueryFlowfield(new Vector2Int((int)(movTarget.x * 0.25f), (int)(movTarget.z * 0.25f)));
+                flowfield = m_FlowfieldManager.QueryFlowfield(new Vector2Int((int)(movTarget.x / GridDataManager.Instance.CellSize), (int)(movTarget.z / GridDataManager.Instance.CellSize)));
             }
             else
             {
@@ -134,15 +134,14 @@ public class BoidFlockingManager : MonoBehaviour
             }
         }
 
-        if (_MovTarget != Vector3.zero)
-        {
-            movementVelocity += SteeringBehaviours.Arrive(_MovTarget, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget);
-        }
-
         if (_Flowfield != null)
         {
-            Vector2 dir = _Flowfield[(int)(transform.position.x * 0.25f), (int)(transform.position.z * 0.25f)];
-            movementVelocity += new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget) * 0.5f;
+            Vector2 dir = _Flowfield[(int)(transform.position.x / GridDataManager.Instance.CellSize), (int)(transform.position.z / GridDataManager.Instance.CellSize)];
+            movementVelocity += new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget);
+        }
+        else if (_MovTarget != Vector3.zero)
+        {
+            movementVelocity += SteeringBehaviours.Arrive(_MovTarget, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget);
         }
 
         if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -74,9 +75,9 @@ public class SO_FlowfieldDatabase : ScriptableObject
 
     [SerializeField] private string m_LevelName;
 
-    [SerializeField] private int width = 0;
+    [SerializeField][HideInInspector] private int width = 0;
 
-    [SerializeField] private int height = 0;
+    [SerializeField][HideInInspector] private int height = 0;
 
     [SerializeField] private List<StaticCostField> m_StaticCostKey = new List<StaticCostField>();
 
@@ -145,28 +146,33 @@ public class SO_FlowfieldDatabase : ScriptableObject
             }
         }
 
-        for (int x = 0; x < width; x++)
+        Enumerable.Range(0, width * height).AsParallel().ForAll(i =>
         {
-            for (int y = 0; y < height; y++)
+            int x = i / height;
+            int y = i % height;
+
+            Vector2Int vec = new Vector2Int(x, y);
+
+            float[,] temp = (float[,])costFieldTotal.Clone();
+            temp[x, y] = 0;
+
+            float[,] integrationField = FlowfieldPathfinding.CalculateIntegrationField(temp, vec);
+            Vector2[,] flowField = FlowfieldPathfinding.CalculateFlowField(integrationField, vec);
+
+            lock (m_StaticIntegrationKey)
             {
-                Vector2Int vec = new Vector2Int(x, y);
-                float[,] temp = (float[,])costFieldTotal.Clone();
-
-                temp[x, y] = 0;
-
                 m_StaticIntegrationKey.Add(vec);
-                m_StaticIntegrationVal.Add(new TwoDimensionalArray<float>(FlowfieldPathfinding.CalculateIntegrationField(temp, vec)));
+                m_StaticIntegrationVal.Add(new TwoDimensionalArray<float>(integrationField));
 
                 m_StaticFlowKey.Add(vec);
-                float[,] integrationfield = m_StaticIntegrationVal[m_StaticIntegrationKey.IndexOf(vec)].GetArray();
-                m_StaticFlowVal.Add(new TwoDimensionalArray<Vector2>(FlowfieldPathfinding.CalculateFlowField(integrationfield, vec)));
+                m_StaticFlowVal.Add(new TwoDimensionalArray<Vector2>(flowField));
             }
-        }
+        });
 
         m_Calculate = false;
 
 #if UNITY_EDITOR
-        EditorUtility.SetDirty(this);
+        UnityEditor.EditorUtility.SetDirty(this);
         AssetDatabase.SaveAssets();
 #endif
     }
