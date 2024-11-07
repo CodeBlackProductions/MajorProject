@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -73,23 +75,17 @@ public class SO_FlowfieldDatabase : ScriptableObject
 {
     [SerializeField] private bool m_Calculate = false;
 
-    [SerializeField] private string m_LevelName;
+    [SerializeField][HideInInspector] private string m_LevelName;
 
-    [SerializeField][HideInInspector] private int width = 0;
+    [SerializeField][HideInInspector] private int m_width = 0;
 
-    [SerializeField][HideInInspector] private int height = 0;
+    [SerializeField][HideInInspector] private int m_height = 0;
 
-    [SerializeField] private List<StaticCostField> m_StaticCostKey = new List<StaticCostField>();
+    [SerializeField][HideInInspector] private List<StaticCostField> m_StaticCostKey = new List<StaticCostField>();
 
-    [SerializeField] private List<TwoDimensionalArray<float>> m_StaticCostVal = new List<TwoDimensionalArray<float>>();
+    [SerializeField][HideInInspector] private List<TwoDimensionalArray<float>> m_StaticCostVal = new List<TwoDimensionalArray<float>>();
 
-    [SerializeField] private List<Vector2> m_StaticIntegrationKey = new List<Vector2>();
-
-    [SerializeField] private List<TwoDimensionalArray<float>> m_StaticIntegrationVal = new List<TwoDimensionalArray<float>>();
-
-    [SerializeField] private List<Vector2> m_StaticFlowKey = new List<Vector2>();
-
-    [SerializeField] private List<TwoDimensionalArray<Vector2>> m_StaticFlowVal = new List<TwoDimensionalArray<Vector2>>();
+    private Dictionary<string, Vector2[,]> m_LoadedGrids = new Dictionary<string, Vector2[,]>();
 
     public string LevelName { get => m_LevelName; }
     public bool Calculate { get => m_Calculate; }
@@ -98,16 +94,12 @@ public class SO_FlowfieldDatabase : ScriptableObject
     {
         m_StaticCostKey.Clear();
         m_StaticCostVal.Clear();
-        m_StaticIntegrationKey.Clear();
-        m_StaticIntegrationVal.Clear();
-        m_StaticFlowKey.Clear();
-        m_StaticFlowVal.Clear();
 
         m_LevelName = SceneManager.GetActiveScene().name;
 
         GridTile[,] grid = GridDataManager.Instance.BoidGrid;
-        width = grid.GetLength(0);
-        height = grid.GetLength(1);
+        m_width = grid.GetLength(0);
+        m_height = grid.GetLength(1);
         float[,] costFieldTotal;
 
         m_StaticCostKey.Add(StaticCostField.Obstacle);
@@ -130,9 +122,9 @@ public class SO_FlowfieldDatabase : ScriptableObject
 
         if (terrainCost != null || poiCost != null)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < m_width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < m_height; y++)
                 {
                     if (terrainCost != null)
                     {
@@ -146,10 +138,13 @@ public class SO_FlowfieldDatabase : ScriptableObject
             }
         }
 
-        Enumerable.Range(0, width * height).AsParallel().ForAll(i =>
+        ConcurrentDictionary<Vector2Int, Vector2[,]> rawGrids = new ConcurrentDictionary<Vector2Int, Vector2[,]>();
+        Dictionary<Vector2Int, Texture2D> grids = new Dictionary<Vector2Int, Texture2D>();
+
+        Enumerable.Range(0, m_width * m_height).AsParallel().ForAll(i =>
         {
-            int x = i / height;
-            int y = i % height;
+            int x = i / m_height;
+            int y = i % m_height;
 
             Vector2Int vec = new Vector2Int(x, y);
 
@@ -159,15 +154,19 @@ public class SO_FlowfieldDatabase : ScriptableObject
             float[,] integrationField = FlowfieldPathfinding.CalculateIntegrationField(temp, vec);
             Vector2[,] flowField = FlowfieldPathfinding.CalculateFlowField(integrationField, vec);
 
-            lock (m_StaticIntegrationKey)
-            {
-                m_StaticIntegrationKey.Add(vec);
-                m_StaticIntegrationVal.Add(new TwoDimensionalArray<float>(integrationField));
-
-                m_StaticFlowKey.Add(vec);
-                m_StaticFlowVal.Add(new TwoDimensionalArray<Vector2>(flowField));
-            }
+            rawGrids.TryAdd(vec, flowField);
         });
+
+        if (!System.IO.Directory.Exists(Application.persistentDataPath + "/" + m_LevelName))
+        {
+            System.IO.Directory.CreateDirectory(Application.persistentDataPath + "/" + m_LevelName);
+        }
+
+        foreach (KeyValuePair<Vector2Int, Vector2[,]> data in rawGrids)
+        {
+            string path = Application.persistentDataPath + "/" + m_LevelName + "/" + m_LevelName + "_" + data.Key + ".bin";
+            SaveToBinary(data.Value, path);
+        }
 
         m_Calculate = false;
 
@@ -177,34 +176,77 @@ public class SO_FlowfieldDatabase : ScriptableObject
 #endif
     }
 
-    public float[,] GetPrecomputedCostfield(StaticCostField _Costfield)
+    public Vector2[,] GetPrecomputedFlowfield(Vector2Int _TargetPos)
     {
-        if (m_StaticCostKey.Contains(_Costfield))
-        {
-            return m_StaticCostVal[m_StaticCostKey.IndexOf(_Costfield)].GetArray();
-        }
-
-        return null;
+        string path = FindGrid(_TargetPos);
+        Vector2[,] grid = LoadFromBinary(path);
+        return grid;
     }
 
-    public float[,] GetPrecomputedIntegrationField(Vector2Int _TargetPos)
+    private string FindGrid(Vector2Int _TargetPos)
     {
-        if (m_StaticIntegrationKey.Contains(_TargetPos))
-        {
-            return m_StaticIntegrationVal[m_StaticIntegrationKey.IndexOf(_TargetPos)].GetArray();
-        }
+        string path = Application.persistentDataPath + "/" + m_LevelName + "/" + m_LevelName + "_" + _TargetPos + ".bin";
 
-        return null;
+        return path;
     }
 
-    public Vector2[,] GetPrecomputedFlowField(Vector2Int _TargetPos)
+    public void SaveToBinary(Vector2[,] _Grid, string _Path)
     {
-        if (m_StaticFlowKey.Contains(_TargetPos))
+        using (BinaryWriter writer = new BinaryWriter(File.Open(_Path, FileMode.Create)))
         {
-            int idx = m_StaticFlowKey.IndexOf(_TargetPos);
-            return m_StaticFlowVal[idx].GetArray();
+            writer.Write(_Grid.GetLength(0));
+            writer.Write(_Grid.GetLength(1));
+            for (int i = 0; i < _Grid.GetLength(0); i++)
+            {
+                for (int j = 0; j < _Grid.GetLength(1); j++)
+                {
+                    writer.Write(_Grid[i, j].x);
+                    writer.Write(_Grid[i, j].y);
+                }
+            }
+        }
+    }
+
+    public Vector2[,] LoadFromBinary(string _Path)
+    {
+        if (m_LoadedGrids.ContainsKey(_Path))
+        {
+            return m_LoadedGrids[_Path];
         }
 
-        return null;
+        if (!File.Exists(_Path))
+        {
+            Debug.LogError($"File not found at {_Path}");
+            return null;
+        }
+
+        try
+        {
+            using (BinaryReader reader = new BinaryReader(File.Open(_Path, FileMode.Open)))
+            {
+                int width = reader.ReadInt32();
+                int height = reader.ReadInt32();
+                Vector2[,] grid = new Vector2[width, height];
+
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
+                        float x = reader.ReadSingle();
+                        float y = reader.ReadSingle();
+                        grid[i, j] = new Vector2(x, y);
+                    }
+                }
+
+                m_LoadedGrids.Add(_Path, grid);
+
+                return grid;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to load file at {_Path}: {e.Message}");
+            return null;
+        }
     }
 }

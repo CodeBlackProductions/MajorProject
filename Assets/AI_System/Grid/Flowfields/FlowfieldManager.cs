@@ -41,8 +41,8 @@ public class FlowfieldManager : MonoBehaviour
     {
         if (m_Database != null)
         {
-            currentDebugFlowfield = m_Database.GetPrecomputedFlowField(_TargetPos);
-            return m_Database.GetPrecomputedFlowField(_TargetPos);
+            currentDebugFlowfield = m_Database.GetPrecomputedFlowfield(_TargetPos);
+            return m_Database.GetPrecomputedFlowfield(_TargetPos);
         }
 
         return null;
@@ -58,7 +58,7 @@ public class FlowfieldManager : MonoBehaviour
                 for (int y = 0; y < GridDataManager.Instance.BoidGrid.GetLength(1); y++)
                 {
                     Vector3 vec = new Vector3(this.transform.position.x + x * cellsize, 0, this.transform.position.z + y * cellsize);
-                    Vector3 vec2 = new Vector3(currentDebugFlowfield[x, y].x, 0, currentDebugFlowfield[x, y].y);
+                    Vector3 vec2 = new Vector3(currentDebugFlowfield[x,y].x, 0, currentDebugFlowfield[x, y].y);
 
                     Gizmos.DrawLine(vec, vec + vec2);
                 }

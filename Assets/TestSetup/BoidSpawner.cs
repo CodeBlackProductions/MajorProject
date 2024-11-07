@@ -35,7 +35,7 @@ public class BoidSpawner : MonoBehaviour
         {
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialB;
-            temp.Value.transform.position = transform.position + transform.forward * 100 + transform.right * 10 * i;
+            temp.Value.transform.position = transform.position + transform.forward * 200 + transform.right * 10 * i;
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Enemy;
             temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_EnemyTarget.position);
 

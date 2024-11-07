@@ -53,11 +53,8 @@ public class BoidFlockingManager : MonoBehaviour
         {
             if (m_FlowfieldManager != null)
             {
-                flowfield = m_FlowfieldManager.QueryFlowfield(new Vector2Int((int)(movTarget.x / GridDataManager.Instance.CellSize), (int)(movTarget.z / GridDataManager.Instance.CellSize)));
-            }
-            else
-            {
-                desiredVelocity += SteeringBehaviours.Arrive(movTarget, m_Rigidbody.position, movSpeed, slowRadius, stopRange);
+                Vector2Int targetPos = new Vector2Int((int)(movTarget.x / GridDataManager.Instance.CellSize), (int)(movTarget.z / GridDataManager.Instance.CellSize));
+                flowfield = m_FlowfieldManager.QueryFlowfield(targetPos);
             }
         }
 
@@ -136,7 +133,10 @@ public class BoidFlockingManager : MonoBehaviour
 
         if (_Flowfield != null)
         {
-            Vector2 dir = _Flowfield[(int)(transform.position.x / GridDataManager.Instance.CellSize), (int)(transform.position.z / GridDataManager.Instance.CellSize)];
+
+            int x = (int)Mathf.Floor(m_Rigidbody.position.x / GridDataManager.Instance.CellSize);
+            int y = (int)Mathf.Floor(m_Rigidbody.position.z / GridDataManager.Instance.CellSize);
+            Vector2 dir = _Flowfield[x,y];
             movementVelocity += new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget);
         }
         else if (_MovTarget != Vector3.zero)
