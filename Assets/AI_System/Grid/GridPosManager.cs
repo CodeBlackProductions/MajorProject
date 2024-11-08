@@ -105,9 +105,10 @@ public class GridPosManager : MonoBehaviour
 
         if (tile.visionList != null)
         {
+            var onAddBoid = GridBoidManager.Instance.OnAddBoid;
             foreach (Guid guid in tile.visionList)
             {
-                GridBoidManager.Instance.OnAddBoid?.Invoke(guid, _Data.boidGuid, _Data.boidTeam);
+                onAddBoid?.Invoke(guid, _Data.boidGuid, _Data.boidTeam);
             }
         }
 

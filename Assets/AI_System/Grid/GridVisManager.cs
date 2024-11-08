@@ -8,6 +8,11 @@ public class GridVisManager : MonoBehaviour
 
     private GridDataManager m_DataManager;
 
+    private HashSet<Vector2Int> m_VisionGained = new HashSet<Vector2Int>();
+    private HashSet<Vector2Int> m_VisionLost = new HashSet<Vector2Int>();
+
+    private Vector3 m_TempVec = new Vector3();
+
     private void Awake()
     {
         if (Instance == null)
@@ -33,31 +38,55 @@ public class GridVisManager : MonoBehaviour
     /// </summary>
     /// <param name="_OldGridPos">Previous boid position</param>
     /// <param name="_GridPos">New boid position</param>
-    /// <param name="_Data">Boid data</param>
-    public void UpdateVision(BoidData _Data, Vector2Int _OldGridPos, Vector2Int _GridPos)
+    /// <param name="_VisionRange">Boid vision</param>
+    /// <param name="_BoidGuid">Boid ID</param>
+    public void UpdateVisionEdges(Vector2Int _OldGridPos, Vector2Int _GridPos, int _VisionRange, Guid _BoidGuid)
     {
-        int visionRange = CalculateGridVision(_Data.boidVis);
-        Guid boidGuid = _Data.boidGuid;
+        Vector2Int direction = _GridPos - _OldGridPos;
 
-        HashSet<Vector2Int> oldVision = GetTilesInVision(_OldGridPos, visionRange);
-        HashSet<Vector2Int> newVision = GetTilesInVision(_GridPos, visionRange);
-
-        HashSet<Vector2Int> visionLost = new HashSet<Vector2Int>(oldVision);
-        visionLost.ExceptWith(newVision);
-
-        HashSet<Vector2Int> visionGained = new HashSet<Vector2Int>(newVision);
-        visionGained.ExceptWith(oldVision);
-
-        // Process vision lost
-        foreach (Vector2Int vec in visionLost)
+        if (direction != Vector2Int.zero)
         {
-            RemoveVision(vec, boidGuid);
-        }
+            m_VisionGained.Clear();
+            m_VisionLost.Clear();
 
-        // Process vision gained
-        foreach (Vector2Int vec in visionGained)
-        {
-            AddVision(vec, boidGuid);
+            // Moving Right or Left
+            if (direction.x != 0)
+            {
+                int edgeX = _GridPos.x + direction.x * _VisionRange;
+                for (int y = -_VisionRange; y <= _VisionRange; y++)
+                {
+                    Vector2Int addTile = new Vector2Int(edgeX, _GridPos.y + y);
+                    Vector2Int removeTile = new Vector2Int(_OldGridPos.x - direction.x * _VisionRange, _OldGridPos.y + y);
+
+                    if (m_DataManager.IsInBounds(addTile)) m_VisionGained.Add(addTile);
+                    if (m_DataManager.IsInBounds(removeTile)) m_VisionLost.Add(removeTile);
+                }
+            }
+
+            // Moving Up or Down
+            if (direction.y != 0)
+            {
+                int edgeY = _GridPos.y + direction.y * _VisionRange;
+                for (int x = -_VisionRange; x <= _VisionRange; x++)
+                {
+                    Vector2Int addTile = new Vector2Int(_GridPos.x + x, edgeY);
+                    Vector2Int removeTile = new Vector2Int(_OldGridPos.x + x, _OldGridPos.y - direction.y * _VisionRange);
+
+                    if (m_DataManager.IsInBounds(addTile)) m_VisionGained.Add(addTile);
+                    if (m_DataManager.IsInBounds(removeTile)) m_VisionLost.Add(removeTile);
+                }
+            }
+
+            // Process vision changes
+            foreach (Vector2Int vec in m_VisionGained)
+            {
+                AddVision(vec, _BoidGuid);
+            }
+
+            foreach (Vector2Int vec in m_VisionLost)
+            {
+                RemoveVision(vec, _BoidGuid);
+            }
         }
     }
 
@@ -82,8 +111,10 @@ public class GridVisManager : MonoBehaviour
 
         if (tile.cellType == CellType.Obstacle)
         {
-            Vector3 pos = new Vector3(_GridPos.x * m_DataManager.CellSize, 0, _GridPos.y * m_DataManager.CellSize);
-            GridBoidManager.Instance.OnRemoveVision?.Invoke(_BoidGuid, pos);
+            m_TempVec.x = _GridPos.x * m_DataManager.CellSize;
+            m_TempVec.y = 0;
+            m_TempVec.z = _GridPos.y * m_DataManager.CellSize;
+            GridBoidManager.Instance.OnRemoveVision?.Invoke(_BoidGuid, m_TempVec);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
@@ -107,8 +138,10 @@ public class GridVisManager : MonoBehaviour
 
         if (tile.cellType == CellType.Obstacle)
         {
-            Vector3 pos = new Vector3(_GridPos.x * m_DataManager.CellSize, 0, _GridPos.y * m_DataManager.CellSize);
-            GridBoidManager.Instance.OnAddVision?.Invoke(_BoidGuid, pos);
+            m_TempVec.x = _GridPos.x * m_DataManager.CellSize;
+            m_TempVec.y = 0;
+            m_TempVec.z = _GridPos.y * m_DataManager.CellSize;
+            GridBoidManager.Instance.OnAddVision?.Invoke(_BoidGuid, m_TempVec);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
@@ -124,17 +157,17 @@ public class GridVisManager : MonoBehaviour
     {
         HashSet<Vector2Int> tilesInRange = new HashSet<Vector2Int>();
 
-        int startX = _BoidPos.x - _VisionRange;
-        int endX = _BoidPos.x + _VisionRange;
-        int startY = _BoidPos.y - _VisionRange;
-        int endY = _BoidPos.y + _VisionRange;
+        int sqrVisionRange = _VisionRange * _VisionRange;
 
-        for (int x = startX; x <= endX; x++)
+        for (int x = -_VisionRange; x <= _VisionRange; x++)
         {
-            for (int y = startY; y <= endY; y++)
+            for (int y = -_VisionRange; y <= _VisionRange; y++)
             {
-                Vector2Int tilePos = new Vector2Int(x, y);
-                if (CheckTileVisibility(_BoidPos, tilePos, _VisionRange) && m_DataManager.IsInBounds(tilePos))
+                Vector2Int tilePos = new Vector2Int(_BoidPos.x + x, _BoidPos.y + y);
+
+                int sqrDistance = x * x + y * y;
+
+                if (sqrDistance <= sqrVisionRange && m_DataManager.IsInBounds(tilePos))
                 {
                     tilesInRange.Add(tilePos);
                 }
@@ -166,6 +199,6 @@ public class GridVisManager : MonoBehaviour
     /// <returns>grid scale version of _Vis</returns>
     private int CalculateGridVision(float _Vis)
     {
-        return Mathf.RoundToInt(_Vis / m_DataManager.CellSize); ;
+        return Mathf.RoundToInt(_Vis / m_DataManager.CellSize);
     }
 }

@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 [RequireComponent(typeof(GridPosManager))]
@@ -10,6 +13,8 @@ public class GridBoidManager : MonoBehaviour
     public static GridBoidManager Instance;
 
     private GridDataManager m_DataManager;
+    private GridPosManager m_GridPosManager;
+    private GridVisManager m_GridVisManager;
 
     public Action<Guid, Guid, Team> OnRemoveBoid;
     public Action<Guid, Guid, Team> OnAddBoid;
@@ -34,6 +39,14 @@ public class GridBoidManager : MonoBehaviour
         {
             m_DataManager = GridDataManager.Instance;
         }
+        if (GridPosManager.Instance != null)
+        {
+            m_GridPosManager = GridPosManager.Instance;
+        }
+        if (GridVisManager.Instance != null)
+        {
+            m_GridVisManager = GridVisManager.Instance;
+        }
     }
 
     /// <summary>
@@ -44,8 +57,8 @@ public class GridBoidManager : MonoBehaviour
     /// <param name="_newPos">New grid position of the boid</param>
     private void UpdateGrid(BoidData _Data, Vector2Int _OldPos, Vector2Int _Pos)
     {
-        GridPosManager.Instance.UpdateBoidPosition(_Data, _OldPos, _Pos);
-        GridVisManager.Instance.UpdateVision(_Data, _OldPos, _Pos) ;
+        m_GridPosManager.UpdateBoidPosition(_Data, _OldPos, _Pos);
+        m_GridVisManager.UpdateVisionEdges(_OldPos, _Pos, (int)(_Data.boidVis / m_DataManager.CellSize), _Data.boidGuid);
     }
 
     /// <summary>

@@ -10,8 +10,6 @@ public class FormationDataManager : MonoBehaviour
 
     private Dictionary<int, Vector3> m_BoidOffsets = new Dictionary<int, Vector3>();
 
-    private Vector2 m_FlowfieldDir = Vector2.zero;
-
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
     private FlowfieldManager m_FlowfieldManager = FlowfieldManager.Instance;
@@ -118,5 +116,17 @@ public class FormationDataManager : MonoBehaviour
         Vector3 rotatedOffset = rotation * m_BoidOffsets[_BoidIndex];
 
         return transform.position + rotatedOffset;
+    }
+
+    public Vector2 QueryFlowfieldDir()
+    {
+        Vector2[,] flowfield;
+        Vector2 dir = Vector2.zero;
+        Vector2Int targetpos = new Vector2Int((int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize), (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize));
+        Vector2Int pos = new Vector2Int((int)(transform.position.x / GridDataManager.Instance.CellSize), (int)(transform.position.z / GridDataManager.Instance.CellSize));
+        flowfield = m_FlowfieldManager.QueryFlowfield(targetpos);
+        dir = flowfield[pos.x, pos.y];
+
+        return dir;
     }
 }

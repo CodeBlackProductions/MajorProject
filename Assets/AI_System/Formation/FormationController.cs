@@ -36,14 +36,8 @@ public class FormationController : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * 25f);
 
             Vector3 fwd = Vector3.zero;
-            for (int i = 0; i < m_BoidManager.Boids.Count; i++)
-            {
-                fwd += m_BoidManager.Boids[i].Value.transform.forward;
-            }
-            fwd = fwd / m_BoidManager.Boids.Count;
-            fwd.y = transform.forward.y;
-            fwd = Quaternion.Euler(0, 90, 0) * fwd;
-            transform.forward = Vector3.Slerp(transform.forward, fwd, Time.deltaTime * 5f);
+            fwd = GetComponent<FormationDataManager>().QueryFlowfieldDir();
+            transform.forward = Vector3.Slerp(transform.forward, fwd, Time.deltaTime * 10f);
 
             m_BoidManager.UpdateFormationPos();
 

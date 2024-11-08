@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e0e755b5bc2cde47a060522a8b96103, type: 3}
   m_Name: SO_BaseWeights
   m_EditorClassIdentifier: 
-  m_AllyCohesionWeight: 0.4
-  m_AllySeparationWeight: 0.4
+  m_AllyCohesionWeight: 0.05
+  m_AllySeparationWeight: 0.1
   m_AllyAlignmentWeight: 0.5
   m_EnemyCohesionWeight: 0.1
   m_EnemySeparationWeight: 0.1

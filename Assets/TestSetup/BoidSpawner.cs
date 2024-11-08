@@ -22,6 +22,7 @@ public class BoidSpawner : MonoBehaviour
 
     private void Start()
     {
+
         if (m_SpawnFormations)
         {
             FormationTeamA = GameObject.Instantiate(m_formationPrefab);

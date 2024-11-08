@@ -12,6 +12,8 @@ public class BoidGridDataManager : MonoBehaviour
 
     private Action<BoidData> SendDataToGrid;
 
+    private BoidData m_BoidData = new BoidData();
+
     private void Awake()
     {
         m_Rb = GetComponent<Rigidbody>();
@@ -36,7 +38,8 @@ public class BoidGridDataManager : MonoBehaviour
     {
         if (m_Timer <= 0)
         {
-            SendDataToGrid?.Invoke(PrepareData());
+            PrepareData();
+            SendDataToGrid?.Invoke(m_BoidData);
             m_OldPos = m_Rb.position;
             m_Timer = m_GridUpdateInterval;
         }
@@ -46,16 +49,13 @@ public class BoidGridDataManager : MonoBehaviour
         }
     }
 
-    private BoidData PrepareData()
+    private void PrepareData()
     {
-        BoidData data = new BoidData();
-        data.boidGuid = m_DataManager.Guid;
-        data.boidTeam = m_DataManager.Team;
-        data.boidVis = m_DataManager.QueryStat(BoidStat.VisRange);
-        data.boidPos = m_Rb.position;
-        data.oldPos = m_OldPos;
-
-        return data;
+        m_BoidData.boidGuid = m_DataManager.Guid;
+        m_BoidData.boidTeam = m_DataManager.Team;
+        m_BoidData.boidVis = m_DataManager.QueryStat(BoidStat.VisRange);
+        m_BoidData.boidPos = m_Rb.position;
+        m_BoidData.oldPos = m_OldPos;
     }
 
     private void AddNeighbour(Guid _Guid, Guid _ToAdd, Team _TeamToAddTo)

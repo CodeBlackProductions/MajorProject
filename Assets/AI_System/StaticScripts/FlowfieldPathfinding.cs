@@ -26,13 +26,20 @@ public static class FlowfieldPathfinding
                 if (_BoidGrid[x, y].cellType == CellType.Obstacle)
                 {
                     costField[x, y] = 255;
-                    for (int xx = -1; xx < 2; xx++)
+                    for (int xx = -2; xx < 3; xx++)
                     {
-                        for (int yy = -1; yy < 2; yy++)
+                        for (int yy = -2; yy < 3; yy++)
                         {
                             if (IsInBounds(width, height, x + xx, y + yy))
                             {
-                                costField[x + xx, y + yy] += 4;
+                                if (xx > -2 && xx < 2 && yy > -2 && yy < 2)
+                                {
+                                    costField[x + xx, y + yy] += 4;
+                                }
+                                else
+                                {
+                                    costField[x + xx, y + yy] += 2;
+                                }
                             }
                         }
                     }

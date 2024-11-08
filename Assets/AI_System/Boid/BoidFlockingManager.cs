@@ -71,21 +71,30 @@ public class BoidFlockingManager : MonoBehaviour
             }
         }
 
-        if (m_Incombat)
-        {
-            desiredVelocity = InCombat(nearbyAllies, nearbyEnemies, targetEnemy, formationPos, movSpeed, slowRadius, stopRange, visRange);
-        }
-        else
-        {
-            desiredVelocity = OutOfCombat(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, flowfield, flowfieldDir, formationPos, movSpeed, slowRadius, stopRange, visRange);
-        }
-
         avoidance = SteeringBehaviours.ObstacleAvoidance(nearbyObstacles, obstacleSizes, m_Rigidbody.position, m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 30) * obstacleAvoidanceWeight;
 
         if (avoidance != Vector3.zero)
         {
+            if (flowfield != null)
+            {
+                int x = (int)Mathf.Floor(m_Rigidbody.position.x / GridDataManager.Instance.CellSize);
+                int y = (int)Mathf.Floor(m_Rigidbody.position.z / GridDataManager.Instance.CellSize);
+                Vector2 dir = flowfield[x, y];
+                desiredVelocity += new Vector3(dir.x, transform.position.y, dir.y) * movSpeed * m_WeightManager.QueryWeight(Weight.MovTarget) * 2;
+            }
             desiredVelocity += avoidance;
             desiredVelocity += SteeringBehaviours.Queue(nearbyAllies, m_Rigidbody.position, m_Rigidbody.velocity, desiredVelocity - m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 0.5f) * obstacleAvoidanceWeight;
+        }
+        else 
+        {
+            if (m_Incombat)
+            {
+                desiredVelocity = InCombat(nearbyAllies, nearbyEnemies, targetEnemy, formationPos, movSpeed, slowRadius, stopRange, visRange);
+            }
+            else
+            {
+                desiredVelocity = OutOfCombat(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, flowfield, flowfieldDir, formationPos, movSpeed, slowRadius, stopRange, visRange);
+            }
         }
 
         UpdateBoid(desiredVelocity, targetEnemy);
