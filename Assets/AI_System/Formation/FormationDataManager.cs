@@ -10,8 +10,11 @@ public class FormationDataManager : MonoBehaviour
 
     private Dictionary<int, Vector3> m_BoidOffsets = new Dictionary<int, Vector3>();
 
+    private Vector2 m_FlowfieldDir = Vector2.zero;
+
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
+    private FlowfieldManager m_FlowfieldManager = FlowfieldManager.Instance;
 
     private void Awake()
     {

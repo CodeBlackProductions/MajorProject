@@ -17,9 +17,20 @@ public class BoidSpawner : MonoBehaviour
 
     private List<KeyValuePair<Guid, GameObject>> TeamA = new List<KeyValuePair<Guid, GameObject>>();
     private List<KeyValuePair<Guid, GameObject>> TeamB = new List<KeyValuePair<Guid, GameObject>>();
+    private GameObject FormationTeamA = null;
+    private GameObject FormationTeamB = null;
 
     private void Start()
     {
+        if (m_SpawnFormations)
+        {
+            FormationTeamA = GameObject.Instantiate(m_formationPrefab);
+            FormationTeamA.transform.position = new Vector3(m_EnemyTarget.transform.position.x, 1, m_EnemyTarget.transform.position.z);
+
+            FormationTeamB = GameObject.Instantiate(m_formationPrefab);
+            FormationTeamB.transform.position = new Vector3(m_AllyTarget.transform.position.x, 1, m_AllyTarget.transform.position.z);
+        }
+
         for (int i = 0; i < m_spawnAmountTeamA; i++)
         {
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
@@ -29,6 +40,11 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_AllyTarget.position);
 
             TeamA.Add(temp);
+            if (m_SpawnFormations)
+            {
+                FormationTeamA.GetComponent<FormationBoidManager>().AddBoid(TeamA[i]);
+                temp.Value.transform.position = FormationTeamA.GetComponent<FormationDataManager>().QueryBoidPosition(i);
+            }
         }
 
         for (int i = 0; i < m_spawnAmountTeamB; i++)
@@ -40,20 +56,10 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_EnemyTarget.position);
 
             TeamB.Add(temp);
-        }
-
-        if (m_SpawnFormations)
-        {
-            GameObject TestFormation = GameObject.Instantiate(m_formationPrefab);
-            for (int i = 0; i < TeamA.Count; i++)
+            if (m_SpawnFormations)
             {
-                TestFormation.GetComponent<FormationBoidManager>().AddBoid(TeamA[i]);
-            }
-
-            TestFormation = GameObject.Instantiate(m_formationPrefab);
-            for (int i = 0; i < TeamB.Count; i++)
-            {
-                TestFormation.GetComponent<FormationBoidManager>().AddBoid(TeamB[i]);
+                FormationTeamB.GetComponent<FormationBoidManager>().AddBoid(TeamB[i]);
+                temp.Value.transform.position = FormationTeamB.GetComponent<FormationDataManager>().QueryBoidPosition(i);
             }
         }
     }

@@ -41,7 +41,9 @@ public class FormationBoidManager : MonoBehaviour
     {
         for (int i = 0; i < m_Boids.Count; i++) 
         {
-            m_Boids[i].Value.GetComponent<BoidDataManager>().FormationPosition = m_DataManager.QueryBoidPosition(i);
+            BoidDataManager boid = m_Boids[i].Value.GetComponent<BoidDataManager>();
+            boid.FormationPosition = m_DataManager.QueryBoidPosition(i);
+            boid.FormationCenter = transform.position;
         }
     }
 }

@@ -17,10 +17,12 @@ public class BoidDataManager : MonoBehaviour
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
     private Vector3 m_FormationPosition = Vector3.zero;
+    private Vector3 m_FormationCenter = Vector3.zero;
     private Guid m_Guid;
     private Team m_Team;
 
     public Vector3 FormationPosition { get => m_FormationPosition; set => m_FormationPosition = value; }
+    public Vector3 FormationCenter { get => m_FormationCenter; set => m_FormationCenter = value; }
     public Guid Guid { get => m_Guid; set => m_Guid = value; }
     public Team Team { get => m_Team; set => m_Team = value; }
 
@@ -219,5 +221,11 @@ public class BoidDataManager : MonoBehaviour
         }
 
         return sizes;
+    }
+
+    public Vector2[,] QueryFlowfield()
+    {
+        Vector2Int targetPos = new Vector2Int((int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize), (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize));
+        return FlowfieldManager.Instance.QueryFlowfield(targetPos);
     }
 }
