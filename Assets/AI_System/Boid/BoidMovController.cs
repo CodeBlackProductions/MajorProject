@@ -34,7 +34,7 @@ public class BoidMovController : MonoBehaviour
         }
 
         m_rigidbody.velocity = m_Velocity;
-     
+
         m_rigidbody.transform.forward = m_Facing;
     }
 
@@ -51,6 +51,7 @@ public class BoidMovController : MonoBehaviour
         }
         steeringVelocity /= m_DataManager.QueryStat(BoidStat.Mass);
         m_Velocity += steeringVelocity;
+
         if (m_Velocity.magnitude > maxVelocity)
         {
             m_Velocity.Normalize();
@@ -59,7 +60,7 @@ public class BoidMovController : MonoBehaviour
 
         if (_DesiredFacing != Vector3.zero)
         {
-            m_Facing = _DesiredFacing;
+            m_Facing = Vector3.Slerp(m_Facing, _DesiredFacing, 0.5f);
         }
     }
 

@@ -39,6 +39,15 @@ public class GridDataManager : MonoBehaviour
         }
 
         m_BoidGrid = new GridTile[m_GridWidth, m_GridHeight];
+
+        for (int x = 0; x < m_GridWidth; x++) 
+        {
+            for (int y = 0; y < m_GridHeight; y++)
+            {
+                m_BoidGrid[x, y] = new GridTile();
+            }
+        }
+
         InitializeObstacles();
     }
 
@@ -170,7 +179,7 @@ public class GridDataManager : MonoBehaviour
     //}
 }
 
-public struct GridTile
+public class GridTile
 {
     public int numberOfAllies;
     public int numberOfEnemies;

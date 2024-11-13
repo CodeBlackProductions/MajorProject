@@ -15,6 +15,6 @@ MonoBehaviour:
   m_Health: 500
   m_MovSpeed: 12
   m_VisRange: 20
-  m_Mass: 2.5
+  m_Mass: 0.75
   m_AtkRange: 3
   m_TurnRate: 0.2

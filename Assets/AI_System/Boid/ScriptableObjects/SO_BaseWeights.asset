@@ -21,5 +21,5 @@ MonoBehaviour:
   m_MovTargetWeight: 0.7
   m_TargetEnemyPursueWeight: 0.4
   m_EnemyAvoidanceWeight: 0.1
-  m_FormationCohesion: 0.8
+  m_FormationCohesion: 1
   m_ObstacleAvoidanceWeight: 1

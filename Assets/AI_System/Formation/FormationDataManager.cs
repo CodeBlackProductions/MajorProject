@@ -10,8 +10,6 @@ public class FormationDataManager : MonoBehaviour
 
     private Dictionary<int, Vector3> m_BoidOffsets = new Dictionary<int, Vector3>();
 
-    private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
-    private Vector3 m_CurrentMovTarget = Vector3.zero;
     private FlowfieldManager m_FlowfieldManager = FlowfieldManager.Instance;
 
     private void Awake()
@@ -63,7 +61,7 @@ public class FormationDataManager : MonoBehaviour
         int numberOfRows = 0;
         int numberOfColumns = 0;
 
-        numberOfRows = (int)Mathf.Sqrt(_UnitCount / (_DepthScale / _WidthScale));
+        numberOfRows = (int)Mathf.Sqrt(_UnitCount / (_WidthScale / _DepthScale));
         numberOfColumns = _UnitCount / numberOfRows;
 
         float centerX = (numberOfColumns - 1) * 0.5f;
@@ -118,11 +116,11 @@ public class FormationDataManager : MonoBehaviour
         return transform.position + rotatedOffset;
     }
 
-    public Vector2 QueryFlowfieldDir()
+    public Vector2 QueryFlowfieldDir(Vector3 _MovTarget)
     {
         Vector2[,] flowfield;
         Vector2 dir = Vector2.zero;
-        Vector2Int targetpos = new Vector2Int((int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize), (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize));
+        Vector2Int targetpos = new Vector2Int((int)(_MovTarget.x / GridDataManager.Instance.CellSize), (int)(_MovTarget.z / GridDataManager.Instance.CellSize));
         Vector2Int pos = new Vector2Int((int)(transform.position.x / GridDataManager.Instance.CellSize), (int)(transform.position.z / GridDataManager.Instance.CellSize));
         flowfield = m_FlowfieldManager.QueryFlowfield(targetpos);
         dir = flowfield[pos.x, pos.y];

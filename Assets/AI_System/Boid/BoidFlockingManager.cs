@@ -36,7 +36,6 @@ public class BoidFlockingManager : MonoBehaviour
         float stopRange = m_DataManager.QueryStat(BoidStat.AtkRange);
         float visRange = m_DataManager.QueryStat(BoidStat.VisRange);
         float slowRadius = visRange * 0.5f;
-        float formationWeight = m_WeightManager.QueryWeight(Weight.FormationCohesion);
         float obstacleAvoidanceWeight = m_WeightManager.QueryWeight(Weight.ObstacleAvoidance);
 
         Dictionary<Guid, Rigidbody> nearbyEnemies = m_DataManager.QueryNeighbours(Team.Enemy);
@@ -50,24 +49,13 @@ public class BoidFlockingManager : MonoBehaviour
         Vector3 avoidance = Vector3.zero;
 
         Vector2[,] flowfield = null;
-        Vector2 flowfieldDir = Vector2.zero;
 
         if (movTarget != Vector3.zero)
         {
             Vector2Int targetPos = new Vector2Int((int)(movTarget.x / GridDataManager.Instance.CellSize), (int)(movTarget.z / GridDataManager.Instance.CellSize));
             if (m_FlowfieldManager != null)
             {
-                if (formationPos != Vector3.zero)
-                {
-                    flowfield = m_FlowfieldManager.QueryFlowfield(targetPos);
-                    int x = (int)(m_DataManager.FormationCenter.x / GridDataManager.Instance.CellSize);
-                    int y = (int)(m_DataManager.FormationCenter.z / GridDataManager.Instance.CellSize);
-                    flowfieldDir = flowfield[x, y];
-                }
-                else
-                {
-                    flowfield = m_DataManager.QueryFlowfield();
-                }
+                flowfield = m_DataManager.QueryFlowfield();
             }
         }
 
@@ -83,9 +71,8 @@ public class BoidFlockingManager : MonoBehaviour
                 desiredVelocity += new Vector3(dir.x, transform.position.y, dir.y) * movSpeed * m_WeightManager.QueryWeight(Weight.MovTarget) * 2;
             }
             desiredVelocity += avoidance;
-            desiredVelocity += SteeringBehaviours.Queue(nearbyAllies, m_Rigidbody.position, m_Rigidbody.velocity, desiredVelocity - m_Rigidbody.velocity, visRange, movSpeed, 0.5f, 0.5f) * obstacleAvoidanceWeight;
         }
-        else 
+        else
         {
             if (m_Incombat)
             {
@@ -93,14 +80,14 @@ public class BoidFlockingManager : MonoBehaviour
             }
             else
             {
-                desiredVelocity = OutOfCombat(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, flowfield, flowfieldDir, formationPos, movSpeed, slowRadius, stopRange, visRange);
+                desiredVelocity = OutOfCombat(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, flowfield, formationPos, movSpeed, slowRadius, stopRange, visRange);
             }
         }
 
         UpdateBoid(desiredVelocity, targetEnemy);
     }
 
-    private Vector3 OutOfCombat(Dictionary<Guid, Rigidbody> _NearbyAllies, Dictionary<Guid, Rigidbody> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, Vector3 _MovTarget, Vector2[,] _Flowfield, Vector2 _FlowfieldDir, Vector3 _FormationPos, float _MovSpeed, float _SlowRadius, float _StopRange, float _VisRange)
+    private Vector3 OutOfCombat(Dictionary<Guid, Rigidbody> _NearbyAllies, Dictionary<Guid, Rigidbody> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, Vector3 _MovTarget, Vector2[,] _Flowfield, Vector3 _FormationPos, float _MovSpeed, float _SlowRadius, float _StopRange, float _VisRange)
     {
         Vector3 movementVelocity = Vector3.zero;
 
@@ -150,20 +137,16 @@ public class BoidFlockingManager : MonoBehaviour
             }
         }
 
-        if (_FlowfieldDir != Vector2.zero && Vector3.Distance(_FormationPos, transform.position) <= _SlowRadius)
-        {
-            movementVelocity += new Vector3(_FlowfieldDir.x, transform.position.y, _FlowfieldDir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget);
-        }
-        else if (_Flowfield != null)
+        if (_Flowfield != null)
         {
             int x = (int)Mathf.Floor(m_Rigidbody.position.x / GridDataManager.Instance.CellSize);
             int y = (int)Mathf.Floor(m_Rigidbody.position.z / GridDataManager.Instance.CellSize);
             Vector2 dir = _Flowfield[x, y];
-            movementVelocity += new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget);
+            movementVelocity += new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget) * 0.5f;
         }
         else if (_MovTarget != Vector3.zero)
         {
-            movementVelocity += SteeringBehaviours.Arrive(_MovTarget, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget);
+            movementVelocity += SteeringBehaviours.Arrive(_MovTarget, m_Rigidbody.position, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget) * 0.5f;
         }
 
         if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))
@@ -244,6 +227,7 @@ public class BoidFlockingManager : MonoBehaviour
         }
 
         Vector3 smoothedVelocity = Vector3.SmoothDamp(m_Rigidbody.velocity, _DesiredVelocity, ref m_CurrentVelocity, 0.1f);
+        Vector3 smoothedFacing = Vector3.SmoothDamp(m_Rigidbody.transform.forward, desiredFacing, ref m_CurrentFacing, 0.1f);
         OnBehaviourUpdate.Invoke(smoothedVelocity, desiredFacing);
     }
 }

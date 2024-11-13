@@ -1,12 +1,11 @@
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 [RequireComponent(typeof(FormationBoidManager))]
 public class FormationController : MonoBehaviour
 {
     private FormationBoidManager m_BoidManager;
-    private float updateTime = 0.05f;
-    private float updateTimer = 0.05f;
+    private float m_UpdateTime = 0.05f;
+    private float m_UpdateTimer = 0.05f;
 
     private void Awake()
     {
@@ -25,27 +24,30 @@ public class FormationController : MonoBehaviour
 
     private void Update()
     {
-        if (updateTimer <= 0)
+        if (m_UpdateTimer <= 0)
         {
             Vector3 pos = Vector3.zero;
+            Vector3 fwd = Vector3.zero;
             for (int i = 0; i < m_BoidManager.Boids.Count; i++)
             {
-                pos += m_BoidManager.Boids[i].Value.transform.position;
+                Transform t = m_BoidManager.Boids[i].Value.transform;
+                pos += t.position;
+                fwd += t.forward;
             }
+
             pos = pos / m_BoidManager.Boids.Count;
             transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * 25f);
 
-            Vector3 fwd = Vector3.zero;
-            fwd = GetComponent<FormationDataManager>().QueryFlowfieldDir();
             transform.forward = Vector3.Slerp(transform.forward, fwd, Time.deltaTime * 10f);
+            Debug.DrawLine(transform.position, transform.position + transform.forward * 10f);
 
             m_BoidManager.UpdateFormationPos();
 
-            updateTimer = updateTime;
+            m_UpdateTimer = m_UpdateTime;
         }
         else
         {
-            updateTimer -= Time.deltaTime;
+            m_UpdateTimer -= Time.deltaTime;
         }
     }
 
