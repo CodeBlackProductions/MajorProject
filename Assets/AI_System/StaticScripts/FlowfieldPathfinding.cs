@@ -126,11 +126,6 @@ public static class FlowfieldPathfinding
         {
             for (int y = 0; y < height; y++)
             {
-                if (_Integrationfield[x, y] == float.MaxValue)
-                {
-                    flowfield[x, y] = Vector2.zero;
-                    continue;
-                }
                 Vector2 neighbour = FindCheapestNeighbour(_Integrationfield, x, y);
                 flowfield[x, y] = (neighbour - new Vector2(x, y)).normalized;
             }

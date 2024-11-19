@@ -11,7 +11,7 @@ public class GridVisManager : MonoBehaviour
     private HashSet<Vector2Int> m_VisionGained = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> m_VisionLost = new HashSet<Vector2Int>();
 
-    private Vector3 m_TempVec = new Vector3();
+    private Vector3 m_TempVec3 = new Vector3();
 
     private void Awake()
     {
@@ -46,6 +46,9 @@ public class GridVisManager : MonoBehaviour
 
         if (direction != Vector2Int.zero)
         {
+            direction.x = (int)(direction.x / direction.magnitude);
+            direction.y = (int)(direction.y / direction.magnitude);
+
             m_VisionGained.Clear();
             m_VisionLost.Clear();
 
@@ -58,8 +61,14 @@ public class GridVisManager : MonoBehaviour
                     Vector2Int addTile = new Vector2Int(edgeX, _GridPos.y + y);
                     Vector2Int removeTile = new Vector2Int(_OldGridPos.x - direction.x * _VisionRange, _OldGridPos.y + y);
 
-                    if (m_DataManager.IsInBounds(addTile)) m_VisionGained.Add(addTile);
-                    if (m_DataManager.IsInBounds(removeTile)) m_VisionLost.Add(removeTile);
+                    if (m_DataManager.IsInBounds(addTile))
+                    {
+                        m_VisionGained.Add(addTile);
+                    }
+                    if (m_DataManager.IsInBounds(removeTile))
+                    {
+                        m_VisionLost.Add(removeTile);
+                    }
                 }
             }
 
@@ -72,8 +81,14 @@ public class GridVisManager : MonoBehaviour
                     Vector2Int addTile = new Vector2Int(_GridPos.x + x, edgeY);
                     Vector2Int removeTile = new Vector2Int(_OldGridPos.x + x, _OldGridPos.y - direction.y * _VisionRange);
 
-                    if (m_DataManager.IsInBounds(addTile)) m_VisionGained.Add(addTile);
-                    if (m_DataManager.IsInBounds(removeTile)) m_VisionLost.Add(removeTile);
+                    if (m_DataManager.IsInBounds(addTile))
+                    {
+                        m_VisionGained.Add(addTile);
+                    }
+                    if (m_DataManager.IsInBounds(removeTile))
+                    {
+                        m_VisionLost.Add(removeTile);
+                    }
                 }
             }
 
@@ -109,12 +124,12 @@ public class GridVisManager : MonoBehaviour
             tile.visionList.Remove(_BoidGuid);
         }
 
-        if (tile.cellType == CellType.Obstacle)
+        if (tile.cellType != CellType.Obstacle)
         {
-            m_TempVec.x = _GridPos.x * m_DataManager.CellSize;
-            m_TempVec.y = 0;
-            m_TempVec.z = _GridPos.y * m_DataManager.CellSize;
-            GridBoidManager.Instance.OnRemoveVision?.Invoke(_BoidGuid, m_TempVec);
+            m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
+            m_TempVec3.y = 0;
+            m_TempVec3.z = _GridPos.y * m_DataManager.CellSize;
+            GridBoidManager.Instance.OnRemoveVision?.Invoke(_BoidGuid, m_TempVec3);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
@@ -136,12 +151,12 @@ public class GridVisManager : MonoBehaviour
 
         tile.visionList.Add(_BoidGuid);
 
-        if (tile.cellType == CellType.Obstacle)
+        if (tile.cellType != CellType.Obstacle)
         {
-            m_TempVec.x = _GridPos.x * m_DataManager.CellSize;
-            m_TempVec.y = 0;
-            m_TempVec.z = _GridPos.y * m_DataManager.CellSize;
-            GridBoidManager.Instance.OnAddVision?.Invoke(_BoidGuid, m_TempVec);
+            m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
+            m_TempVec3.y = 0;
+            m_TempVec3.z = _GridPos.y * m_DataManager.CellSize;
+            GridBoidManager.Instance.OnAddVision?.Invoke(_BoidGuid, m_TempVec3);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
@@ -163,13 +178,15 @@ public class GridVisManager : MonoBehaviour
         {
             for (int y = -_VisionRange; y <= _VisionRange; y++)
             {
-                Vector2Int tilePos = new Vector2Int(_BoidPos.x + x, _BoidPos.y + y);
-
                 int sqrDistance = x * x + y * y;
 
-                if (sqrDistance <= sqrVisionRange && m_DataManager.IsInBounds(tilePos))
+                if (sqrDistance <= sqrVisionRange)
                 {
-                    tilesInRange.Add(tilePos);
+                    Vector2Int tilePos = new Vector2Int(_BoidPos.x + x, _BoidPos.y + y);
+                    if (m_DataManager.IsInBounds(tilePos))
+                    {
+                        tilesInRange.Add(tilePos);
+                    }
                 }
             }
         }

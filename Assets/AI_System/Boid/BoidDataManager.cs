@@ -158,7 +158,14 @@ public class BoidDataManager : MonoBehaviour
             closestNeighbour = keyValuePairs.First();
         }
 
-        return closestNeighbour;
+        if (closestNeighbour.Value != null && closestNeighbour.Value.gameObject.activeSelf)
+        {
+            return closestNeighbour;
+        }
+        else 
+        {
+            return new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
+        }
     }
 
     public Vector3 QueryNextMovTarget()
@@ -210,7 +217,6 @@ public class BoidDataManager : MonoBehaviour
         return positions;
     }
 
-    //To DO: Determine Obstacle sizes? CHange to Grid based approach?
     public float[] QueryObstacleSizes()
     {
         float[] sizes = new float[m_NearbyObstacles.Count];
