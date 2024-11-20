@@ -61,11 +61,11 @@ public class GridVisManager : MonoBehaviour
                     Vector2Int addTile = new Vector2Int(edgeX, _GridPos.y + y);
                     Vector2Int removeTile = new Vector2Int(_OldGridPos.x - direction.x * _VisionRange, _OldGridPos.y + y);
 
-                    if (m_DataManager.IsInBounds(addTile))
+                    if (m_DataManager.IsInBounds(addTile.x, addTile.y))
                     {
                         m_VisionGained.Add(addTile);
                     }
-                    if (m_DataManager.IsInBounds(removeTile))
+                    if (m_DataManager.IsInBounds(removeTile.x, removeTile.y))
                     {
                         m_VisionLost.Add(removeTile);
                     }
@@ -81,11 +81,11 @@ public class GridVisManager : MonoBehaviour
                     Vector2Int addTile = new Vector2Int(_GridPos.x + x, edgeY);
                     Vector2Int removeTile = new Vector2Int(_OldGridPos.x + x, _OldGridPos.y - direction.y * _VisionRange);
 
-                    if (m_DataManager.IsInBounds(addTile))
+                    if (m_DataManager.IsInBounds(addTile.x, addTile.y))
                     {
                         m_VisionGained.Add(addTile);
                     }
-                    if (m_DataManager.IsInBounds(removeTile))
+                    if (m_DataManager.IsInBounds(removeTile.x, removeTile.y))
                     {
                         m_VisionLost.Add(removeTile);
                     }
@@ -129,7 +129,7 @@ public class GridVisManager : MonoBehaviour
             m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
             m_TempVec3.y = 0;
             m_TempVec3.z = _GridPos.y * m_DataManager.CellSize;
-            GridBoidManager.Instance.OnRemoveVision?.Invoke(_BoidGuid, m_TempVec3);
+            GridBoidManager.Instance.OnRemoveVision[_BoidGuid]?.Invoke(m_TempVec3);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
@@ -156,7 +156,7 @@ public class GridVisManager : MonoBehaviour
             m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
             m_TempVec3.y = 0;
             m_TempVec3.z = _GridPos.y * m_DataManager.CellSize;
-            GridBoidManager.Instance.OnAddVision?.Invoke(_BoidGuid, m_TempVec3);
+            GridBoidManager.Instance.OnAddVision[_BoidGuid]?.Invoke(m_TempVec3);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);

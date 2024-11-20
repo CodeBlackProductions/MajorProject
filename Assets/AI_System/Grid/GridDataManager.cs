@@ -85,7 +85,7 @@ public class GridDataManager : MonoBehaviour
     /// <param name="_posY">Y position in grid to update</param>
     private void UpdateCellType(int _PosX, int _PosY)
     {
-        if (!IsInBounds(new Vector2Int(_PosX, _PosY)) || m_BoidGrid[_PosX, _PosY].cellType == CellType.Obstacle)
+        if (!IsInBounds(_PosX, _PosY) || m_BoidGrid[_PosX, _PosY].cellType == CellType.Obstacle)
         {
             return;
         }
@@ -134,9 +134,9 @@ public class GridDataManager : MonoBehaviour
     /// </summary>
     /// <param name="_TilePos">Coordinate to check</param>
     /// <returns>true if in bounds</returns>
-    public bool IsInBounds(Vector2Int _TilePos)
+    public bool IsInBounds(int _X, int _Y)
     {
-        return _TilePos.x >= 0 && _TilePos.x < m_BoidGrid.GetLength(0) && _TilePos.y >= 0 && _TilePos.y < m_BoidGrid.GetLength(1);
+        return _X >= 0 && _X < m_BoidGrid.GetLength(0) && _Y >= 0 && _Y < m_BoidGrid.GetLength(1);
     }
 
     //DEBUG VISUALS; REMOVE BEFORE FINISHING SYSTEM

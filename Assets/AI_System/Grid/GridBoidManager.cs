@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using UnityEditor.Rendering;
 using UnityEngine;
 
 [RequireComponent(typeof(GridPosManager))]
@@ -16,10 +13,10 @@ public class GridBoidManager : MonoBehaviour
     private GridPosManager m_GridPosManager;
     private GridVisManager m_GridVisManager;
 
-    public Action<Guid, Guid, Team> OnRemoveBoid;
-    public Action<Guid, Guid, Team> OnAddBoid;
-    public Action<Guid, Vector3> OnRemoveVision;
-    public Action<Guid, Vector3> OnAddVision;
+    public Dictionary<Guid, Action<Guid, Team>> OnRemoveBoidCallbacks = new Dictionary<Guid, Action<Guid, Team>>();
+    public Dictionary<Guid, Action<Guid, Team>> OnAddBoidCallbacks = new Dictionary<Guid, Action<Guid, Team>>();
+    public Dictionary<Guid, Action<Vector3>> OnRemoveVision =  new Dictionary<Guid, Action<Vector3>>();
+    public Dictionary<Guid, Action<Vector3>> OnAddVision = new Dictionary<Guid, Action<Vector3>>();
 
     private void Awake()
     {

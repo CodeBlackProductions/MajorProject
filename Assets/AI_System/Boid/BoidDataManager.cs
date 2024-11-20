@@ -247,7 +247,7 @@ public class BoidDataManager : MonoBehaviour
                 m_CurrentFlowfield = FlowfieldManager.Instance.QueryFlowfield(m_CurrentFlowfieldTarget);
             }
         }
-        else 
+        else
         {
             m_CurrentFlowfieldTarget.x = (int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize);
             m_CurrentFlowfieldTarget.y = (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize);

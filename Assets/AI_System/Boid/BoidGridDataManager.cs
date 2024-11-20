@@ -19,14 +19,40 @@ public class BoidGridDataManager : MonoBehaviour
         m_Rb = GetComponent<Rigidbody>();
         m_DataManager = GetComponent<BoidDataManager>();
         m_OldPos = Vector3.zero;
+    }
 
+    private void Start()
+    {
         if (GridBoidManager.Instance != null)
         {
             SendDataToGrid += GridBoidManager.Instance.OnReceiveBoidPos;
-            GridBoidManager.Instance.OnAddBoid += AddNeighbour;
-            GridBoidManager.Instance.OnRemoveBoid += RemoveNeighbour;
-            GridBoidManager.Instance.OnRemoveVision += RemoveObstacle;
-            GridBoidManager.Instance.OnAddVision += AddObstacle;
+
+            Guid guid = m_DataManager.Guid;
+
+            if (!GridBoidManager.Instance.OnAddBoidCallbacks.ContainsKey(guid))
+            {
+                GridBoidManager.Instance.OnAddBoidCallbacks[guid] = null;
+                GridBoidManager.Instance.OnAddBoidCallbacks[guid] += AddNeighbour;
+            }
+
+            if (!GridBoidManager.Instance.OnRemoveBoidCallbacks.ContainsKey(guid))
+            {
+                GridBoidManager.Instance.OnRemoveBoidCallbacks[guid] = null;
+                GridBoidManager.Instance.OnRemoveBoidCallbacks[guid] += RemoveNeighbour;
+            }
+
+            if (!GridBoidManager.Instance.OnRemoveVision.ContainsKey(guid))
+            {
+                GridBoidManager.Instance.OnRemoveVision[guid] = null;
+                GridBoidManager.Instance.OnRemoveVision[guid] += RemoveObstacle;
+            }
+
+            if (!GridBoidManager.Instance.OnAddVision.ContainsKey(guid))
+            {
+                GridBoidManager.Instance.OnAddVision[guid] = null;
+                GridBoidManager.Instance.OnAddVision[guid] += AddObstacle;
+            }
+            
         }
         else
         {
@@ -58,37 +84,25 @@ public class BoidGridDataManager : MonoBehaviour
         m_BoidData.oldPos = m_OldPos;
     }
 
-    private void AddNeighbour(Guid _Guid, Guid _ToAdd, Team _TeamToAddTo)
+    private void AddNeighbour(Guid _ToAdd, Team _TeamToAddTo)
     {
-        if (_Guid == m_DataManager.Guid)
-        {
-            Rigidbody neighbour = BoidPool.Instance.GetActiveBoid(_ToAdd).GetComponent<Rigidbody>();
-            m_DataManager.AddNeighbour(_TeamToAddTo, _ToAdd, neighbour);
-        }
+        Rigidbody neighbour = BoidPool.Instance.GetActiveBoid(_ToAdd).GetComponent<Rigidbody>();
+        m_DataManager.AddNeighbour(_TeamToAddTo, _ToAdd, neighbour);
     }
 
-    private void RemoveNeighbour(Guid _Guid, Guid _ToRemove, Team _TeamToRemoveFrom)
+    private void RemoveNeighbour(Guid _ToRemove, Team _TeamToRemoveFrom)
     {
-        if (_Guid == m_DataManager.Guid)
-        {
-            m_DataManager.RemoveNeighbour(_TeamToRemoveFrom, _ToRemove);
-        }
+        m_DataManager.RemoveNeighbour(_TeamToRemoveFrom, _ToRemove);
     }
 
-    private void AddObstacle(Guid _Guid, Vector3 _Pos)
+    private void AddObstacle(Vector3 _Pos)
     {
-        if (_Guid == m_DataManager.Guid)
-        {
-            m_DataManager.AddObstacle(_Pos);
-        }
+        m_DataManager.AddObstacle(_Pos);
     }
 
-    private void RemoveObstacle(Guid _Guid, Vector3 _Pos)
+    private void RemoveObstacle(Vector3 _Pos)
     {
-        if (_Guid == m_DataManager.Guid)
-        {
-            m_DataManager.RemoveObstacle(_Pos);
-        }
+        m_DataManager.RemoveObstacle(_Pos);
     }
 }
 
