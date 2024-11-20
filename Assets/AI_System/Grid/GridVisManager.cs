@@ -124,7 +124,7 @@ public class GridVisManager : MonoBehaviour
             tile.visionList.Remove(_BoidGuid);
         }
 
-        if (tile.cellType != CellType.Obstacle)
+        if (tile.cellType == CellType.Obstacle)
         {
             m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
             m_TempVec3.y = 0;
@@ -151,7 +151,7 @@ public class GridVisManager : MonoBehaviour
 
         tile.visionList.Add(_BoidGuid);
 
-        if (tile.cellType != CellType.Obstacle)
+        if (tile.cellType == CellType.Obstacle)
         {
             m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
             m_TempVec3.y = 0;
@@ -160,62 +160,5 @@ public class GridVisManager : MonoBehaviour
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
-    }
-
-    /// <summary>
-    /// Gets tiles within boid vision range.
-    /// </summary>
-    /// <param name="_BoidPos">Position of the boid</param>
-    /// <param name="_VisionRange">Vision range of the boid transformed to gridspace</param>
-    /// <returns>Tiles in vision of boid</returns>
-    private HashSet<Vector2Int> GetTilesInVision(Vector2Int _BoidPos, int _VisionRange)
-    {
-        HashSet<Vector2Int> tilesInRange = new HashSet<Vector2Int>();
-
-        int sqrVisionRange = _VisionRange * _VisionRange;
-
-        for (int x = -_VisionRange; x <= _VisionRange; x++)
-        {
-            for (int y = -_VisionRange; y <= _VisionRange; y++)
-            {
-                int sqrDistance = x * x + y * y;
-
-                if (sqrDistance <= sqrVisionRange)
-                {
-                    Vector2Int tilePos = new Vector2Int(_BoidPos.x + x, _BoidPos.y + y);
-                    if (m_DataManager.IsInBounds(tilePos))
-                    {
-                        tilesInRange.Add(tilePos);
-                    }
-                }
-            }
-        }
-
-        return tilesInRange;
-    }
-
-    /// <summary>
-    /// Checks if a singular tile is actually visible to the boid
-    /// </summary>
-    /// <param name="_BoidPos">Position of the boid</param>
-    /// <param name="_TilePos">Position of the tile</param>
-    /// <param name="_VisionRange">Vision range of the boid in gridspace</param>
-    /// <returns>true if at least 50% visible to boid, false if not</returns>
-    private bool CheckTileVisibility(Vector2Int _BoidPos, Vector2Int _TilePos, int _VisionRange)
-    {
-        float sqrDistance = (_BoidPos - _TilePos).sqrMagnitude;
-        float sqrVision = _VisionRange * _VisionRange;
-
-        return sqrDistance <= sqrVision;
-    }
-
-    /// <summary>
-    /// Converts worldsize visionrange to gridsize.
-    /// </summary>
-    /// <param name="_Vis">Visionrange to convert</param>
-    /// <returns>grid scale version of _Vis</returns>
-    private int CalculateGridVision(float _Vis)
-    {
-        return Mathf.RoundToInt(_Vis / m_DataManager.CellSize);
     }
 }

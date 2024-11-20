@@ -20,6 +20,8 @@ public class BoidDataManager : MonoBehaviour
     private Vector3 m_FormationCenter = Vector3.zero;
     private Guid m_Guid;
     private Team m_Team;
+    private Vector2[,] m_CurrentFlowfield;
+    private Vector2Int m_CurrentFlowfieldTarget = Vector2Int.zero;
 
     public Vector3 FormationPosition { get => m_FormationPosition; set => m_FormationPosition = value; }
     public Vector3 FormationCenter { get => m_FormationCenter; set => m_FormationCenter = value; }
@@ -162,7 +164,7 @@ public class BoidDataManager : MonoBehaviour
         {
             return closestNeighbour;
         }
-        else 
+        else
         {
             return new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
         }
@@ -231,7 +233,27 @@ public class BoidDataManager : MonoBehaviour
 
     public Vector2[,] QueryFlowfield()
     {
-        Vector2Int targetPos = new Vector2Int((int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize), (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize));
-        return FlowfieldManager.Instance.QueryFlowfield(targetPos);
+        if (m_CurrentMovTarget == Vector3.zero)
+        {
+            return null;
+        }
+
+        if (m_CurrentFlowfield != null)
+        {
+            Vector2Int tempVec = new Vector2Int((int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize), (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize));
+            if (tempVec != m_CurrentFlowfieldTarget)
+            {
+                m_CurrentFlowfieldTarget = tempVec;
+                m_CurrentFlowfield = FlowfieldManager.Instance.QueryFlowfield(m_CurrentFlowfieldTarget);
+            }
+        }
+        else 
+        {
+            m_CurrentFlowfieldTarget.x = (int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize);
+            m_CurrentFlowfieldTarget.y = (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize);
+            m_CurrentFlowfield = FlowfieldManager.Instance.QueryFlowfield(m_CurrentFlowfieldTarget);
+        }
+
+        return m_CurrentFlowfield;
     }
 }
