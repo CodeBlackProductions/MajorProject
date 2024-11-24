@@ -9,6 +9,7 @@ public enum Team
 public class BoidDataManager : MonoBehaviour
 {
     [SerializeField] private SO_BoidStats m_BaseStats;
+    [SerializeField] private int m_MaxNeighboursToCalculate = 50;
 
     private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
@@ -100,18 +101,32 @@ public class BoidDataManager : MonoBehaviour
         }
     }
 
-    public Dictionary<Guid, Rigidbody> QueryNeighbours(Team _Team)
+    public List<KeyValuePair<Guid, Rigidbody>> QueryNeighbours(Team _Team)
     {
         switch (_Team)
         {
             case Team.Ally:
-                return m_NeighbouringAllies;
+                if (m_NeighbouringAllies.Count > m_MaxNeighboursToCalculate)
+                {
+                    List<KeyValuePair<Guid, Rigidbody>> sortedAllies = m_NeighbouringAllies.ToList();
+                    sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                    sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
+                    return sortedAllies;
+                }
+                return m_NeighbouringAllies.ToList();
 
             case Team.Neutral:
                 break;
 
             case Team.Enemy:
-                return m_NeighbouringEnemies;
+                if (m_NeighbouringEnemies.Count > m_MaxNeighboursToCalculate)
+                {
+                    List<KeyValuePair<Guid, Rigidbody>> sortedEnemies = m_NeighbouringEnemies.ToList();
+                    sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                    sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
+                    return sortedEnemies;
+                }
+                return m_NeighbouringEnemies.ToList();
 
             default:
                 break;

@@ -75,7 +75,7 @@ public static class SteeringBehaviours
         return Avoid(futurePos, _Pos, _MaxVelocity, _VisionRadius);
     }
 
-    public static Vector3 Flock(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity, float _CohesionWeight, float _SeparationWeight, float _AlignmentWeight)
+    public static Vector3 Flock(List<KeyValuePair<Guid, Rigidbody>> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity, float _CohesionWeight, float _SeparationWeight, float _AlignmentWeight)
     {
         Vector3 flocking = Vector3.zero;
         flocking += FlockCohesion(_Neighbours, _Pos, _VisRange, _MaxVelocity) * _CohesionWeight;
@@ -85,7 +85,7 @@ public static class SteeringBehaviours
         return flocking;
     }
 
-    private static Vector3 FlockCohesion(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity)
+    private static Vector3 FlockCohesion(List<KeyValuePair<Guid, Rigidbody>> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity)
     {
         Vector3 cohesion = Vector3.zero;
 
@@ -101,7 +101,7 @@ public static class SteeringBehaviours
         return cohesion;
     }
 
-    private static Vector3 FlockSeparation(Dictionary<Guid, Rigidbody> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity)
+    private static Vector3 FlockSeparation(List<KeyValuePair<Guid, Rigidbody>> _Neighbours, Vector3 _Pos, float _VisRange, float _MaxVelocity)
     {
         Vector3 separation = Vector3.zero;
 
@@ -118,7 +118,7 @@ public static class SteeringBehaviours
         return separation;
     }
 
-    private static Vector3 FlockAlignment(Dictionary<Guid, Rigidbody> _Neighbours)
+    private static Vector3 FlockAlignment(List<KeyValuePair<Guid, Rigidbody>> _Neighbours)
     {
         Vector3 alignment = Vector3.zero;
 

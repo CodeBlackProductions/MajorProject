@@ -28,11 +28,6 @@ public class BoidMovController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (float.IsNaN(m_Velocity.x) || float.IsNaN(m_Velocity.y) || float.IsNaN(m_Velocity.z))
-        {
-            throw new Exception("Velocity should not be NaN when trying to move!");
-        }
-
         m_rigidbody.velocity = m_Velocity;
 
         m_rigidbody.transform.forward = m_Facing;

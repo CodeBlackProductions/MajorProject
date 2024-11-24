@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 [RequireComponent(typeof(BoidFlockingWeightManager))]
 [RequireComponent(typeof(BoidDataManager))]
@@ -38,9 +39,9 @@ public class BoidFlockingManager : MonoBehaviour
         float slowRadius = visRange * 0.5f;
         float obstacleAvoidanceWeight = m_WeightManager.QueryWeight(Weight.ObstacleAvoidance);
 
-        Dictionary<Guid, Rigidbody> nearbyEnemies = m_DataManager.QueryNeighbours(Team.Enemy);
+        List<KeyValuePair<Guid, Rigidbody>> nearbyEnemies = m_DataManager.QueryNeighbours(Team.Enemy);
         KeyValuePair<Guid, Rigidbody> targetEnemy = m_DataManager.QueryClosestNeighbour(Team.Enemy);
-        Dictionary<Guid, Rigidbody> nearbyAllies = m_DataManager.QueryNeighbours(Team.Ally);
+        List<KeyValuePair<Guid, Rigidbody>> nearbyAllies = m_DataManager.QueryNeighbours(Team.Ally);
         Vector3[] nearbyObstacles = m_DataManager.QueryObstaclePositions();
         float[] obstacleSizes = m_DataManager.QueryObstacleSizes();
         Vector3 movTarget = m_DataManager.QueryNextMovTarget();
@@ -76,17 +77,17 @@ public class BoidFlockingManager : MonoBehaviour
 
         if (m_Incombat)
         {
-            desiredVelocity = InCombat(nearbyAllies, nearbyEnemies, targetEnemy, formationPos, movSpeed, slowRadius, stopRange, visRange);
+            desiredVelocity = InCombatBehaviour(nearbyAllies, nearbyEnemies, targetEnemy, formationPos, movSpeed, slowRadius, stopRange, visRange);
         }
         else
         {
-            desiredVelocity = OutOfCombat(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, flowfield, formationPos, movSpeed, slowRadius, stopRange, visRange);
+            desiredVelocity = OutOfCombatBehaviour(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, flowfield, formationPos, movSpeed, slowRadius, stopRange, visRange);
         }
 
         UpdateBoid(desiredVelocity, targetEnemy);
     }
 
-    private Vector3 OutOfCombat(Dictionary<Guid, Rigidbody> _NearbyAllies, Dictionary<Guid, Rigidbody> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, Vector3 _MovTarget, Vector2[,] _Flowfield, Vector3 _FormationPos, float _MovSpeed, float _SlowRadius, float _StopRange, float _VisRange)
+    private Vector3 OutOfCombatBehaviour(List<KeyValuePair<Guid, Rigidbody>> _NearbyAllies, List<KeyValuePair<Guid, Rigidbody>> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, Vector3 _MovTarget, Vector2[,] _Flowfield, Vector3 _FormationPos, float _MovSpeed, float _SlowRadius, float _StopRange, float _VisRange)
     {
         Vector3 movementVelocity = Vector3.zero;
         Vector3 pos = m_Rigidbody.position;
@@ -103,17 +104,19 @@ public class BoidFlockingManager : MonoBehaviour
         if (_NearbyEnemies != null && _NearbyEnemies.Count > 0)
         {
             Vector3 enemyAvoidance = Vector3.zero;
+
             foreach (var enemy in _NearbyEnemies)
             {
                 if (enemy.Key != _TargetEnemy.Key)
                 {
-                    if (Vector3.Distance(enemy.Value.position, pos) > _StopRange)
+                    var enemyVal = enemy.Value;
+                    if (Vector3.Distance(enemyVal.position, pos) > _StopRange)
                     {
-                        enemyAvoidance += SteeringBehaviours.Evade(enemy.Value, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.EnemyAvoidance) * 0.5f;
+                        enemyAvoidance += SteeringBehaviours.Evade(enemyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.EnemyAvoidance) * 0.5f;
                     }
                     else
                     {
-                        enemyAvoidance += SteeringBehaviours.Evade(enemy.Value, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.EnemyAvoidance);
+                        enemyAvoidance += SteeringBehaviours.Evade(enemyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.EnemyAvoidance);
                     }
                 }
             }
@@ -126,13 +129,14 @@ public class BoidFlockingManager : MonoBehaviour
         {
             foreach (var ally in _NearbyAllies)
             {
-                if (Vector3.Distance(_FormationPos, pos) > _SlowRadius && Vector3.Distance(ally.Value.position, pos) > _SlowRadius)
+                var allyVal = ally.Value;
+                if (Vector3.Distance(_FormationPos, pos) > _SlowRadius && Vector3.Distance(allyVal.position, pos) > _SlowRadius)
                 {
-                    movementVelocity += SteeringBehaviours.Evade(ally.Value, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
+                    movementVelocity += SteeringBehaviours.Evade(allyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
                 }
-                else if (Vector3.Distance(ally.Value.position, pos) < _SlowRadius * 0.25f)
+                else if (Vector3.Distance(allyVal.position, pos) < _SlowRadius * 0.25f)
                 {
-                    movementVelocity += SteeringBehaviours.Evade(ally.Value, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
+                    movementVelocity += SteeringBehaviours.Evade(allyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
                 }
             }
         }
@@ -162,7 +166,7 @@ public class BoidFlockingManager : MonoBehaviour
         return movementVelocity;
     }
 
-    private Vector3 InCombat(Dictionary<Guid, Rigidbody> _NearbyAllies, Dictionary<Guid, Rigidbody> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, Vector3 _FormationPos, float _MovSpeed, float _SlowRadius, float _StopRange, float _VisRange)
+    private Vector3 InCombatBehaviour(List<KeyValuePair<Guid, Rigidbody>> _NearbyAllies, List<KeyValuePair<Guid, Rigidbody>> _NearbyEnemies, KeyValuePair<Guid, Rigidbody> _TargetEnemy, Vector3 _FormationPos, float _MovSpeed, float _SlowRadius, float _StopRange, float _VisRange)
     {
         Vector3 combatVelocity = Vector3.zero;
         Vector3 pos = m_Rigidbody.position;
@@ -179,25 +183,25 @@ public class BoidFlockingManager : MonoBehaviour
         if (_NearbyAllies != null && _NearbyAllies.Count > 0)
         {
             combatVelocity += SteeringBehaviours.Flock(
-                _NearbyAllies,
-                pos,
-                _VisRange,
-                _MovSpeed,
-                m_WeightManager.QueryWeight(Weight.FAllyCohesion),
-                m_WeightManager.QueryWeight(Weight.FAllySeparation),
-                m_WeightManager.QueryWeight(Weight.FAllyAlignment));
+            _NearbyAllies,
+            pos,
+            _VisRange,
+            _MovSpeed,
+            m_WeightManager.QueryWeight(Weight.FAllyCohesion),
+            m_WeightManager.QueryWeight(Weight.FAllySeparation),
+            m_WeightManager.QueryWeight(Weight.FAllyAlignment));
         }
 
         if (_NearbyEnemies != null && _NearbyEnemies.Count > 0)
         {
             combatVelocity += SteeringBehaviours.Flock(
-                _NearbyAllies,
-                pos,
-                _VisRange,
-                _MovSpeed,
-                m_WeightManager.QueryWeight(Weight.FEnemyCohesion),
-                m_WeightManager.QueryWeight(Weight.FEnemySeparation),
-                m_WeightManager.QueryWeight(Weight.FEnemyAlignment));
+            _NearbyEnemies,
+            pos,
+            _VisRange,
+            _MovSpeed,
+            m_WeightManager.QueryWeight(Weight.FEnemyCohesion),
+            m_WeightManager.QueryWeight(Weight.FEnemySeparation),
+            m_WeightManager.QueryWeight(Weight.FEnemyAlignment));
         }
 
         if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))
