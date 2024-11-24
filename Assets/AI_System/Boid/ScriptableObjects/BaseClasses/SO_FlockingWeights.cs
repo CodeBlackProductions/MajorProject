@@ -22,7 +22,6 @@ public class SO_FlockingWeights : ScriptableObject
     [SerializeField][Range(0.0f, 1.0f)] private float m_TargetEnemyPursueWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_EnemyAvoidanceWeight = 0;
     [SerializeField][Range(0.0f, 1.0f)] private float m_FormationCohesion = 0;
-    [SerializeField][Range(0.0f, 1.0f)] private float m_ObstacleAvoidanceWeight = 0;
 
 
     private Dictionary<Weight, float> m_Weights = new Dictionary<Weight, float>();
@@ -44,7 +43,6 @@ public class SO_FlockingWeights : ScriptableObject
         m_Weights.Add(Weight.FormationCohesion, m_FormationCohesion);
         m_Weights.Add(Weight.EnemyPursue, m_TargetEnemyPursueWeight);
         m_Weights.Add(Weight.EnemyAvoidance, m_EnemyAvoidanceWeight);
-        m_Weights.Add(Weight.ObstacleAvoidance, m_ObstacleAvoidanceWeight);
     }
 
     private void OnValidate()
@@ -61,6 +59,5 @@ public class SO_FlockingWeights : ScriptableObject
         m_Weights[Weight.FormationCohesion] = m_FormationCohesion;
         m_Weights[Weight.EnemyPursue] = m_TargetEnemyPursueWeight;
         m_Weights[Weight.EnemyAvoidance] = m_EnemyAvoidanceWeight;
-        m_Weights[Weight.ObstacleAvoidance] = m_ObstacleAvoidanceWeight;
     }
 }

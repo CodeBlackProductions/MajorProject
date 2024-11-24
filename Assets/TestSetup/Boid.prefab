@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 5938410760143057783}
   - component: {fileID: 8405673673184748662}
   - component: {fileID: -4397359178174101354}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Boid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -167,6 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BaseStats: {fileID: 11400000, guid: f5af0e14a0d00a645a6a3a36a162baf0, type: 2}
+  m_MaxNeighboursToCalculate: 25
 --- !u!114 &5938410760143057783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,7 +218,7 @@ GameObject:
   - component: {fileID: 4077769034090773961}
   - component: {fileID: 3813552578883318702}
   - component: {fileID: 946137370270663092}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}

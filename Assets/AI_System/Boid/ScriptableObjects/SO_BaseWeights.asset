@@ -12,14 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e0e755b5bc2cde47a060522a8b96103, type: 3}
   m_Name: SO_BaseWeights
   m_EditorClassIdentifier: 
-  m_AllyCohesionWeight: 0.05
+  m_AllyCohesionWeight: 0.1
   m_AllySeparationWeight: 0.15
-  m_AllyAlignmentWeight: 0.5
+  m_AllyAlignmentWeight: 0.3
   m_EnemyCohesionWeight: 0.1
-  m_EnemySeparationWeight: 0.2
+  m_EnemySeparationWeight: 0.3
   m_EnemyAlignmentWeight: 0
   m_MovTargetWeight: 0.7
   m_TargetEnemyPursueWeight: 0.4
   m_EnemyAvoidanceWeight: 0.2
-  m_FormationCohesion: 0.5
-  m_ObstacleAvoidanceWeight: 1
+  m_FormationCohesion: 0.8

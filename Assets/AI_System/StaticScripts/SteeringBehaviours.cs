@@ -132,7 +132,7 @@ public static class SteeringBehaviours
         return alignment;
     }
 
-    public static Vector3 ObstacleAvoidance(Vector3[] _Obstacles, float[] _ObstacleSizes, Vector3 _Pos, Vector3 _Velocity, float _VisionRange, float _MaxVelocity, float _AvoidanceRangeFactor, float _AvoidanceForce)
+    public static bool CheckForObstacleAvoidance(Vector3[] _Obstacles, float[] _ObstacleSizes, Vector3 _Pos, Vector3 _Velocity, float _VisionRange, float _MaxVelocity, float _AvoidanceRangeFactor, float _AvoidanceForce)
     {
         float speedFactor = _Velocity.magnitude / _MaxVelocity;
         Vector3 vision = _Pos + _Velocity.normalized * (_VisionRange * _AvoidanceRangeFactor * speedFactor);
@@ -150,15 +150,10 @@ public static class SteeringBehaviours
 
         if (collidingObstacles.Count == 0)
         {
-            return Vector3.zero;
+            return false;
         }
 
-        KeyValuePair<Vector3, float> closest = FindClosestObstacle(collidingObstacles, _Pos);
-
-        Vector3 avoidance = _Pos - closest.Key;
-        avoidance = avoidance.normalized * _AvoidanceForce;
-
-        return avoidance;
+        return true;
     }
 
     private static bool Collides(Vector3 _ObstaclePos, float _ObstacleRadius, Vector3 _CollidingPos)
@@ -170,28 +165,6 @@ public static class SteeringBehaviours
             return true;
         }
         return false;
-    }
-
-    private static KeyValuePair<Vector3, float> FindClosestObstacle(List<KeyValuePair<Vector3, float>> _Obstacles, Vector3 _Pos)
-    {
-        float dist = float.MaxValue;
-        int index = -1;
-        for (int i = 0; i < _Obstacles.Count; i++)
-        {
-            float temp = Vector3.Distance(_Obstacles[i].Key, _Pos);
-            if (temp < dist)
-            {
-                dist = temp;
-                index = i;
-            }
-        }
-
-        if (index == -1)
-        {
-            return new KeyValuePair<Vector3, float>();
-        }
-
-        return _Obstacles[index];
     }
 
     private static float CalculateDistanceFactor(float _dist, float _RefDist)

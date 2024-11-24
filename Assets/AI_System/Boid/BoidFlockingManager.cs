@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
+using UnityEngine.EventSystems;
+using static UnityEditor.PlayerSettings;
 
 [RequireComponent(typeof(BoidFlockingWeightManager))]
 [RequireComponent(typeof(BoidDataManager))]
@@ -14,8 +15,11 @@ public class BoidFlockingManager : MonoBehaviour
 
     private Rigidbody m_Rigidbody;
     private bool m_Incombat = false;
+    private bool m_AvoidingObstacle = false;
     private Vector3 m_CurrentVelocity;
     private Vector3 m_CurrentFacing;
+
+    private Color m_DebugBaseColor;
 
     private void Awake()
     {
@@ -29,6 +33,11 @@ public class BoidFlockingManager : MonoBehaviour
         m_CurrentFacing = m_Rigidbody.transform.forward;
     }
 
+    private void Start()
+    {
+        m_DebugBaseColor = GetComponent<MeshRenderer>().material.color;
+    }
+
     private void Update()
     {
         Vector3 desiredVelocity = Vector3.zero;
@@ -37,7 +46,6 @@ public class BoidFlockingManager : MonoBehaviour
         float stopRange = m_DataManager.QueryStat(BoidStat.AtkRange);
         float visRange = m_DataManager.QueryStat(BoidStat.VisRange);
         float slowRadius = visRange * 0.5f;
-        float obstacleAvoidanceWeight = m_WeightManager.QueryWeight(Weight.ObstacleAvoidance);
 
         List<KeyValuePair<Guid, Rigidbody>> nearbyEnemies = m_DataManager.QueryNeighbours(Team.Enemy);
         KeyValuePair<Guid, Rigidbody> targetEnemy = m_DataManager.QueryClosestNeighbour(Team.Enemy);
@@ -47,7 +55,6 @@ public class BoidFlockingManager : MonoBehaviour
         Vector3 movTarget = m_DataManager.QueryNextMovTarget();
 
         Vector3 formationPos = m_DataManager.FormationPosition;
-        Vector3 avoidance = Vector3.zero;
 
         Vector2[,] flowfield = null;
 
@@ -60,20 +67,7 @@ public class BoidFlockingManager : MonoBehaviour
             }
         }
 
-        avoidance = SteeringBehaviours.ObstacleAvoidance(nearbyObstacles, obstacleSizes, m_Rigidbody.position, m_Rigidbody.velocity, visRange, movSpeed, 1, 30) * obstacleAvoidanceWeight;
-
-        if (avoidance != Vector3.zero)
-        {
-            desiredVelocity += avoidance;
-
-            if (flowfield != null)
-            {
-                int x = (int)Mathf.Floor(m_Rigidbody.position.x / GridDataManager.Instance.CellSize);
-                int y = (int)Mathf.Floor(m_Rigidbody.position.z / GridDataManager.Instance.CellSize);
-                Vector2 dir = flowfield[x, y];
-                desiredVelocity += new Vector3(dir.x, transform.position.y, dir.y) * movSpeed * m_WeightManager.QueryWeight(Weight.MovTarget) * 2;
-            }
-        }
+        m_AvoidingObstacle = SteeringBehaviours.CheckForObstacleAvoidance(nearbyObstacles, obstacleSizes, m_Rigidbody.position, m_Rigidbody.velocity, visRange, movSpeed, 1, 30);
 
         if (m_Incombat)
         {
@@ -153,7 +147,7 @@ public class BoidFlockingManager : MonoBehaviour
             movementVelocity += SteeringBehaviours.Arrive(_MovTarget, pos, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget) * 0.5f;
         }
 
-        if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))
+        if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z) && !m_AvoidingObstacle)
         {
             movementVelocity += SteeringBehaviours.FormationCohesion(_FormationPos, pos, _VisRange, _MovSpeed) * m_WeightManager.QueryWeight(Weight.FormationCohesion);
         }
@@ -204,7 +198,7 @@ public class BoidFlockingManager : MonoBehaviour
             m_WeightManager.QueryWeight(Weight.FEnemyAlignment));
         }
 
-        if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))
+        if (_FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z) && !m_AvoidingObstacle)
         {
             combatVelocity += SteeringBehaviours.FormationCohesion(_FormationPos, pos, _VisRange, _MovSpeed) * m_WeightManager.QueryWeight(Weight.FormationCohesion) * 0.5f;
         }
