@@ -13,11 +13,6 @@ public class GridBoidManager : MonoBehaviour
     private GridPosManager m_GridPosManager;
     private GridVisManager m_GridVisManager;
 
-    public Dictionary<Guid, Action<Guid, Team>> OnRemoveBoidCallbacks = new Dictionary<Guid, Action<Guid, Team>>();
-    public Dictionary<Guid, Action<Guid, Team>> OnAddBoidCallbacks = new Dictionary<Guid, Action<Guid, Team>>();
-    public Dictionary<Guid, Action<Vector3>> OnRemoveVision =  new Dictionary<Guid, Action<Vector3>>();
-    public Dictionary<Guid, Action<Vector3>> OnAddVision = new Dictionary<Guid, Action<Vector3>>();
-
     private void Awake()
     {
         if (Instance == null)
@@ -43,6 +38,11 @@ public class GridBoidManager : MonoBehaviour
         if (GridVisManager.Instance != null)
         {
             m_GridVisManager = GridVisManager.Instance;
+        }
+
+        if (EventManager.Instance) 
+        {
+            EventManager.Instance.SendBoidDataToGrid += OnReceiveBoidPos;
         }
     }
 

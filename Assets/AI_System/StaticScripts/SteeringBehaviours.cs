@@ -132,41 +132,6 @@ public static class SteeringBehaviours
         return alignment;
     }
 
-    public static bool CheckForObstacleAvoidance(Vector3[] _Obstacles, float[] _ObstacleSizes, Vector3 _Pos, Vector3 _Velocity, float _VisionRange, float _MaxVelocity, float _AvoidanceRangeFactor, float _AvoidanceForce)
-    {
-        float speedFactor = _Velocity.magnitude / _MaxVelocity;
-        Vector3 vision = _Pos + _Velocity.normalized * (_VisionRange * _AvoidanceRangeFactor * speedFactor);
-        Vector3 halfVision = vision * 0.5f;
-
-        List<KeyValuePair<Vector3, float>> collidingObstacles = new List<KeyValuePair<Vector3, float>>();
-        for (int i = 0; i < _Obstacles.Length; i++)
-        {
-            if (Collides(_Obstacles[i], _ObstacleSizes[i], vision) || Collides(_Obstacles[i], _ObstacleSizes[i], halfVision) || Collides(_Obstacles[i], _ObstacleSizes[i], _Pos))
-            {
-                KeyValuePair<Vector3, float> kvp = new KeyValuePair<Vector3, float>(_Obstacles[i], _ObstacleSizes[i]);
-                collidingObstacles.Add(kvp);
-            }
-        }
-
-        if (collidingObstacles.Count == 0)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static bool Collides(Vector3 _ObstaclePos, float _ObstacleRadius, Vector3 _CollidingPos)
-    {
-        float dist = Vector3.Distance(_ObstaclePos, _CollidingPos);
-
-        if (dist < _ObstacleRadius)
-        {
-            return true;
-        }
-        return false;
-    }
-
     private static float CalculateDistanceFactor(float _dist, float _RefDist)
     {
         float result = Mathf.InverseLerp(0, _RefDist, _dist);

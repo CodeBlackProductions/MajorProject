@@ -18,9 +18,9 @@ public class FormationBoidManager : MonoBehaviour
 
     private void Start()
     {
-        if (BasicEventManager.Instance) 
+        if (EventManager.Instance) 
         {
-            BasicEventManager.Instance.BoidDeath += RemoveBoid;
+            EventManager.Instance.BoidDeath += RemoveBoid;
         }
     }
 

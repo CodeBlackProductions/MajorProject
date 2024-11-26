@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum Weight
 {
-    FAllyCohesion, FAllySeparation, FAllyAlignment, FEnemyCohesion, FEnemySeparation, FEnemyAlignment, MovTarget, FormationCohesion, EnemyPursue, EnemyAvoidance, ObstacleAvoidance
+    FAllyCohesion, FAllySeparation, FAllyAlignment, FEnemyCohesion, FEnemySeparation, FEnemyAlignment, MovTarget, FormationCohesion, EnemyPursue, EnemyAvoidance
 }
 
 [CreateAssetMenu(fileName = "SO_NewFlockingWeights", menuName = "Boids/SO_FlockingWeights")]

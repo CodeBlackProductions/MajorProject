@@ -77,7 +77,7 @@ public class GridPosManager : MonoBehaviour
         {
             foreach (Guid guid in tile.visionList)
             {
-                var onRemoveBoid = GridBoidManager.Instance.OnRemoveBoidCallbacks[guid];
+                var onRemoveBoid = EventManager.Instance.OnRemoveBoidFromGridCallbacks[guid];
 
                 if (guid != _Data.boidGuid)
                 {
@@ -119,7 +119,7 @@ public class GridPosManager : MonoBehaviour
         {
             foreach (Guid guid in tile.visionList)
             {
-                var onAddBoid = GridBoidManager.Instance.OnAddBoidCallbacks[guid];
+                var onAddBoid = EventManager.Instance.OnAddBoidToGridCallbacks[guid];
                 if (guid != _Data.boidGuid)
                 {
                     onAddBoid?.Invoke(_Data.boidGuid, _Data.boidTeam);

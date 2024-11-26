@@ -29,7 +29,7 @@ public class BoidDataManager : MonoBehaviour
     public Guid Guid { get => m_Guid; set => m_Guid = value; }
     public Team Team { get => m_Team; set => m_Team = value; }
 
-    private List<KeyValuePair<Team,Guid>> removeBuffer = new List<KeyValuePair<Team, Guid>>();
+    private List<KeyValuePair<Team,Guid>> m_RemoveBuffer = new List<KeyValuePair<Team, Guid>>();
 
     private void Awake()
     {
@@ -177,7 +177,7 @@ public class BoidDataManager : MonoBehaviour
             {
                 if (!neighbour.Value.gameObject.activeSelf)
                 {
-                    removeBuffer.Add(new KeyValuePair<Team, Guid>(neighbour.Value.GetComponent<BoidDataManager>().Team, neighbour.Key));
+                    m_RemoveBuffer.Add(new KeyValuePair<Team, Guid>(neighbour.Value.GetComponent<BoidDataManager>().Team, neighbour.Key));
                     continue;
                 }
 
@@ -194,11 +194,11 @@ public class BoidDataManager : MonoBehaviour
             closestNeighbour = keyValuePairs.First();
         }
 
-        if (removeBuffer.Count > 0)
+        if (m_RemoveBuffer.Count > 0)
         {
-            for (int i = 0; i < removeBuffer.Count; i++)
+            for (int i = 0; i < m_RemoveBuffer.Count; i++)
             {
-                RemoveNeighbour(removeBuffer[i].Key, removeBuffer[i].Value);
+                RemoveNeighbour(m_RemoveBuffer[i].Key, m_RemoveBuffer[i].Value);
             }
         }
 
@@ -252,26 +252,7 @@ public class BoidDataManager : MonoBehaviour
 
     public Vector3[] QueryObstaclePositions()
     {
-        Vector3[] positions = new Vector3[m_NearbyObstacles.Count];
-
-        for (int i = 0; i < m_NearbyObstacles.Count; i++)
-        {
-            positions[i] = m_NearbyObstacles[i];
-        }
-
-        return positions;
-    }
-
-    public float[] QueryObstacleSizes()
-    {
-        float[] sizes = new float[m_NearbyObstacles.Count];
-
-        for (int i = 0; i < m_NearbyObstacles.Count; i++)
-        {
-            sizes[i] = 4;
-        }
-
-        return sizes;
+        return m_NearbyObstacles.ToArray();
     }
 
     public Vector2[,] QueryFlowfield()

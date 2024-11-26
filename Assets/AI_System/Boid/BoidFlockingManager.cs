@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(BoidFlockingWeightManager))]
@@ -49,7 +50,6 @@ public class BoidFlockingManager : MonoBehaviour
         KeyValuePair<Guid, Rigidbody> targetEnemy = m_DataManager.QueryClosestNeighbour(Team.Enemy);
         List<KeyValuePair<Guid, Rigidbody>> nearbyAllies = m_DataManager.QueryNeighbours(Team.Ally);
         Vector3[] nearbyObstacles = m_DataManager.QueryObstaclePositions();
-        float[] obstacleSizes = m_DataManager.QueryObstacleSizes();
         Vector3 movTarget = m_DataManager.QueryNextMovTarget();
 
         Vector3 formationPos = m_DataManager.FormationPosition;
@@ -65,7 +65,24 @@ public class BoidFlockingManager : MonoBehaviour
             }
         }
 
-        m_AvoidingObstacle = SteeringBehaviours.CheckForObstacleAvoidance(nearbyObstacles, obstacleSizes, m_Rigidbody.position, m_Rigidbody.velocity, visRange, movSpeed, 1, 30);
+        m_AvoidingObstacle = false;
+        for (int i = 0; i < nearbyObstacles.Length; i++)
+        {
+            if (Vector3.Distance(nearbyObstacles[i], m_Rigidbody.position) <= slowRadius)
+            {
+                m_AvoidingObstacle = true;
+                break;
+            }
+        }
+
+        if (m_AvoidingObstacle)
+        {
+            GetComponent<MeshRenderer>().material.color = Color.yellow;
+        }
+        else 
+        {
+            GetComponent<MeshRenderer>().material.color = m_DebugBaseColor;
+        }
 
         if (m_Incombat)
         {

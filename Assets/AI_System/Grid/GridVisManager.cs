@@ -142,7 +142,7 @@ public class GridVisManager : MonoBehaviour
             m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
             m_TempVec3.y = 0;
             m_TempVec3.z = _GridPos.y * m_DataManager.CellSize;
-            GridBoidManager.Instance.OnRemoveVision[_BoidGuid]?.Invoke(m_TempVec3);
+            EventManager.Instance.OnRemoveBoidVisionFromGridCallbacks[_BoidGuid]?.Invoke(m_TempVec3);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
@@ -169,7 +169,7 @@ public class GridVisManager : MonoBehaviour
             m_TempVec3.x = _GridPos.x * m_DataManager.CellSize;
             m_TempVec3.y = 0;
             m_TempVec3.z = _GridPos.y * m_DataManager.CellSize;
-            GridBoidManager.Instance.OnAddVision[_BoidGuid]?.Invoke(m_TempVec3);
+            EventManager.Instance.OnAddBoidVisionToGridCallbacks[_BoidGuid]?.Invoke(m_TempVec3);
         }
 
         m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);

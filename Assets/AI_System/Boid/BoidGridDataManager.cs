@@ -11,9 +11,8 @@ public class BoidGridDataManager : MonoBehaviour
     private Vector3 m_OldPos;
     private float m_Timer;
 
-    private Action<BoidData> SendDataToGrid;
-
     private BoidData m_BoidData = new BoidData();
+    private EventManager m_Eventmanager = null;
 
     private void Awake()
     {
@@ -24,39 +23,36 @@ public class BoidGridDataManager : MonoBehaviour
 
     private void Start()
     {
-        if (BasicEventManager.Instance)
+        if (EventManager.Instance)
         {
-            BasicEventManager.Instance.BoidDeath += OnBoidDeath;
-        }
-
-        if (GridBoidManager.Instance)
-        {
-            SendDataToGrid += GridBoidManager.Instance.OnReceiveBoidPos;
 
             Guid guid = m_DataManager.Guid;
+            m_Eventmanager = EventManager.Instance;
 
-            if (!GridBoidManager.Instance.OnAddBoidCallbacks.ContainsKey(guid))
+            m_Eventmanager.BoidDeath += OnBoidDeath;
+
+            if (!m_Eventmanager.OnAddBoidToGridCallbacks.ContainsKey(guid))
             {
-                GridBoidManager.Instance.OnAddBoidCallbacks[guid] = null;
-                GridBoidManager.Instance.OnAddBoidCallbacks[guid] += AddNeighbour;
+                m_Eventmanager.OnAddBoidToGridCallbacks[guid] = null;
+                m_Eventmanager.OnAddBoidToGridCallbacks[guid] += AddNeighbour;
             }
 
-            if (!GridBoidManager.Instance.OnRemoveBoidCallbacks.ContainsKey(guid))
+            if (!m_Eventmanager.OnRemoveBoidFromGridCallbacks.ContainsKey(guid))
             {
-                GridBoidManager.Instance.OnRemoveBoidCallbacks[guid] = null;
-                GridBoidManager.Instance.OnRemoveBoidCallbacks[guid] += RemoveNeighbour;
+                m_Eventmanager.OnRemoveBoidFromGridCallbacks[guid] = null;
+                m_Eventmanager.OnRemoveBoidFromGridCallbacks[guid] += RemoveNeighbour;
             }
 
-            if (!GridBoidManager.Instance.OnRemoveVision.ContainsKey(guid))
+            if (!m_Eventmanager.OnRemoveBoidVisionFromGridCallbacks.ContainsKey(guid))
             {
-                GridBoidManager.Instance.OnRemoveVision[guid] = null;
-                GridBoidManager.Instance.OnRemoveVision[guid] += RemoveObstacle;
+                m_Eventmanager.OnRemoveBoidVisionFromGridCallbacks[guid] = null;
+                m_Eventmanager.OnRemoveBoidVisionFromGridCallbacks[guid] += RemoveObstacle;
             }
 
-            if (!GridBoidManager.Instance.OnAddVision.ContainsKey(guid))
+            if (!m_Eventmanager.OnAddBoidVisionToGridCallbacks.ContainsKey(guid))
             {
-                GridBoidManager.Instance.OnAddVision[guid] = null;
-                GridBoidManager.Instance.OnAddVision[guid] += AddObstacle;
+                m_Eventmanager.OnAddBoidVisionToGridCallbacks[guid] = null;
+                m_Eventmanager.OnAddBoidVisionToGridCallbacks[guid] += AddObstacle;
             }
         }
         else
@@ -70,7 +66,7 @@ public class BoidGridDataManager : MonoBehaviour
         if (m_Timer <= 0)
         {
             PrepareData();
-            SendDataToGrid?.Invoke(m_BoidData);
+            m_Eventmanager.SendBoidDataToGrid?.Invoke(m_BoidData);
             m_OldPos = m_Rb.position;
             m_Timer = m_GridUpdateInterval;
         }
@@ -116,7 +112,7 @@ public class BoidGridDataManager : MonoBehaviour
         {
             PrepareData();
             m_BoidData.boidPos = Vector3.zero;
-            SendDataToGrid?.Invoke(m_BoidData);
+            m_Eventmanager.SendBoidDataToGrid?.Invoke(m_BoidData);
         }
     }
 }
