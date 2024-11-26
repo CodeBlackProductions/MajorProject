@@ -16,6 +16,14 @@ public class FormationBoidManager : MonoBehaviour
         m_DataManager = GetComponent<FormationDataManager>();
     }
 
+    private void Start()
+    {
+        if (BasicEventManager.Instance) 
+        {
+            BasicEventManager.Instance.BoidDeath += RemoveBoid;
+        }
+    }
+
     public void AddBoid(KeyValuePair<Guid, GameObject> _Boid)
     {
         if (m_Boids.Count < m_DataManager.QueryStat(FormationStat.MaxUnitCount) && !m_Boids.Contains(_Boid))
@@ -33,7 +41,7 @@ public class FormationBoidManager : MonoBehaviour
 
         if (m_Boids.Count <= 0)
         {
-            Destroy(this.gameObject);
+            this.gameObject.SetActive(false);
         }
     }
 
@@ -46,4 +54,5 @@ public class FormationBoidManager : MonoBehaviour
             boid.FormationCenter = transform.position;
         }
     }
+
 }

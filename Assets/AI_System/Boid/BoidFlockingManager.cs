@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using static UnityEditor.PlayerSettings;
 
 [RequireComponent(typeof(BoidFlockingWeightManager))]
 [RequireComponent(typeof(BoidDataManager))]
@@ -172,6 +170,10 @@ public class BoidFlockingManager : MonoBehaviour
                 m_Incombat = false;
             }
             combatVelocity += SteeringBehaviours.Arrive(_TargetEnemy.Value.position, pos, _MovSpeed, _SlowRadius, _StopRange);
+        }
+        else
+        {
+            m_Incombat = false;
         }
 
         if (_NearbyAllies != null && _NearbyAllies.Count > 0)

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 public class BoidPool : MonoBehaviour
@@ -11,7 +10,7 @@ public class BoidPool : MonoBehaviour
     [SerializeField] private GameObject m_BoidPrefab;
 
     private Dictionary<Guid, GameObject> m_InUsePool;
-    private Dictionary<Guid, GameObject> m_InActivePool;
+    private Dictionary<Guid, GameObject> m_NonActivePool;
 
     private void Awake()
     {
@@ -25,12 +24,12 @@ public class BoidPool : MonoBehaviour
         }
 
         m_InUsePool = new Dictionary<Guid, GameObject>();
-        m_InActivePool = new Dictionary<Guid, GameObject>();
+        m_NonActivePool = new Dictionary<Guid, GameObject>();
     }
 
     private bool IsPoolEmpty()
     {
-        return m_InActivePool.Count == 0;
+        return m_NonActivePool.Count == 0;
     }
 
     public KeyValuePair<Guid, GameObject> GetNewBoid()
@@ -38,7 +37,7 @@ public class BoidPool : MonoBehaviour
         if (IsPoolEmpty())
         {
             GameObject temp = GameObject.Instantiate(m_BoidPrefab);
-            Guid tempGUID =  Guid.NewGuid();
+            Guid tempGUID = Guid.NewGuid();
             temp.GetComponent<BoidDataManager>().Guid = tempGUID;
 
             m_InUsePool.Add(tempGUID, temp);
@@ -47,11 +46,11 @@ public class BoidPool : MonoBehaviour
         }
         else
         {
-            GameObject temp = m_InActivePool.First().Value;
-            Guid tempGUID = m_InActivePool.First().Key;
+            GameObject temp = m_NonActivePool.First().Value;
+            Guid tempGUID = m_NonActivePool.First().Key;
 
             m_InUsePool.Add(tempGUID, temp);
-            m_InActivePool.Remove(tempGUID);
+            m_NonActivePool.Remove(tempGUID);
 
             temp.SetActive(true);
 
@@ -65,10 +64,11 @@ public class BoidPool : MonoBehaviour
         {
             return null;
         }
+
         return m_InUsePool[_GUID];
     }
 
-    public void ReturnActiveBoid(Guid _GUID) 
+    public void ReturnActiveBoid(Guid _GUID)
     {
         if (_GUID == null || !m_InUsePool.ContainsKey(_GUID))
         {
@@ -79,6 +79,6 @@ public class BoidPool : MonoBehaviour
         temp.SetActive(false);
 
         m_InUsePool.Remove(_GUID);
-        m_InActivePool.Add(_GUID,temp);
+        m_NonActivePool.Add(_GUID, temp);
     }
 }

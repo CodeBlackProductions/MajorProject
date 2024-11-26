@@ -29,6 +29,8 @@ public class BoidDataManager : MonoBehaviour
     public Guid Guid { get => m_Guid; set => m_Guid = value; }
     public Team Team { get => m_Team; set => m_Team = value; }
 
+    private List<KeyValuePair<Team,Guid>> removeBuffer = new List<KeyValuePair<Team, Guid>>();
+
     private void Awake()
     {
         Initialize();
@@ -109,8 +111,14 @@ public class BoidDataManager : MonoBehaviour
                 if (m_NeighbouringAllies.Count > m_MaxNeighboursToCalculate)
                 {
                     List<KeyValuePair<Guid, Rigidbody>> sortedAllies = m_NeighbouringAllies.ToList();
-                    sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                    sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
+                    sortedAllies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
+                    
+                    if (sortedAllies.Count > m_MaxNeighboursToCalculate) 
+                    {
+                        sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                        sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
+                    }
+
                     return sortedAllies;
                 }
                 return m_NeighbouringAllies.ToList();
@@ -122,8 +130,14 @@ public class BoidDataManager : MonoBehaviour
                 if (m_NeighbouringEnemies.Count > m_MaxNeighboursToCalculate)
                 {
                     List<KeyValuePair<Guid, Rigidbody>> sortedEnemies = m_NeighbouringEnemies.ToList();
-                    sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                    sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
+                    sortedEnemies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
+
+                    if (sortedEnemies.Count > m_MaxNeighboursToCalculate)
+                    {
+                        sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                        sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
+                    }
+
                     return sortedEnemies;
                 }
                 return m_NeighbouringEnemies.ToList();
@@ -161,8 +175,13 @@ public class BoidDataManager : MonoBehaviour
         {
             foreach (var neighbour in keyValuePairs)
             {
-                float currentDist = Vector3.Distance(transform.position, neighbour.Value.position);
+                if (!neighbour.Value.gameObject.activeSelf)
+                {
+                    removeBuffer.Add(new KeyValuePair<Team, Guid>(neighbour.Value.GetComponent<BoidDataManager>().Team, neighbour.Key));
+                    continue;
+                }
 
+                float currentDist = Vector3.Distance(transform.position, neighbour.Value.position);
                 if (dist > currentDist)
                 {
                     dist = currentDist;
@@ -175,8 +194,17 @@ public class BoidDataManager : MonoBehaviour
             closestNeighbour = keyValuePairs.First();
         }
 
+        if (removeBuffer.Count > 0)
+        {
+            for (int i = 0; i < removeBuffer.Count; i++)
+            {
+                RemoveNeighbour(removeBuffer[i].Key, removeBuffer[i].Value);
+            }
+        }
+
         if (closestNeighbour.Value != null && closestNeighbour.Value.gameObject.activeSelf)
         {
+           
             return closestNeighbour;
         }
         else

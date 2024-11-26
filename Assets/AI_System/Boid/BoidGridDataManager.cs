@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoidGridDataManager : MonoBehaviour
@@ -23,7 +24,12 @@ public class BoidGridDataManager : MonoBehaviour
 
     private void Start()
     {
-        if (GridBoidManager.Instance != null)
+        if (BasicEventManager.Instance)
+        {
+            BasicEventManager.Instance.BoidDeath += OnBoidDeath;
+        }
+
+        if (GridBoidManager.Instance)
         {
             SendDataToGrid += GridBoidManager.Instance.OnReceiveBoidPos;
 
@@ -52,7 +58,6 @@ public class BoidGridDataManager : MonoBehaviour
                 GridBoidManager.Instance.OnAddVision[guid] = null;
                 GridBoidManager.Instance.OnAddVision[guid] += AddObstacle;
             }
-            
         }
         else
         {
@@ -103,6 +108,16 @@ public class BoidGridDataManager : MonoBehaviour
     private void RemoveObstacle(Vector3 _Pos)
     {
         m_DataManager.RemoveObstacle(_Pos);
+    }
+
+    public void OnBoidDeath(KeyValuePair<Guid, GameObject> _Boid)
+    {
+        if (m_DataManager.Guid == _Boid.Key)
+        {
+            PrepareData();
+            m_BoidData.boidPos = Vector3.zero;
+            SendDataToGrid?.Invoke(m_BoidData);
+        }
     }
 }
 

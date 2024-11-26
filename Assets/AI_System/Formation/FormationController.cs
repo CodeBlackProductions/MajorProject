@@ -39,7 +39,6 @@ public class FormationController : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * 25f);
 
             transform.forward = Vector3.Slerp(transform.forward, fwd, Time.deltaTime * 10f);
-            //Debug.DrawLine(transform.position, transform.position + transform.forward * 10f);
 
             m_BoidManager.UpdateFormationPos();
 

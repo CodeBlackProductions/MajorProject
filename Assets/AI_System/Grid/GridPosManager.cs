@@ -36,8 +36,15 @@ public class GridPosManager : MonoBehaviour
     /// <param name="_GridPos">New boid position</param>
     public void UpdateBoidPosition(BoidData _BoidData, Vector2Int _OldGridPos, Vector2Int _GridPos)
     {
-        RemoveBoid(_OldGridPos.x, _OldGridPos.y, _BoidData);
-        AddBoid(_GridPos.x, _GridPos.y, _BoidData);
+        if (_GridPos == Vector2.zero)
+        {
+            RemoveBoid(_OldGridPos.x, _OldGridPos.y, _BoidData);
+        }
+        else
+        {
+            RemoveBoid(_OldGridPos.x, _OldGridPos.y, _BoidData);
+            AddBoid(_GridPos.x, _GridPos.y, _BoidData);
+        }
     }
 
     /// <summary>

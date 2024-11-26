@@ -57,6 +57,7 @@ public class BoidMovController : MonoBehaviour
         if (_DesiredFacing != Vector3.zero)
         {
             m_Facing = Vector3.Slerp(m_Facing, _DesiredFacing, 0.5f);
+            m_Facing.y = Vector3.forward.y; ;
         }
     }
 

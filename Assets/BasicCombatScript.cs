@@ -10,35 +10,37 @@ public class BasicCombatScript : MonoBehaviour
     private float m_AtkTime = 0;
     private float m_AtkTimer = 0;
 
-    private BoidDataManager m_Datamanager;
-    private Action<float, Guid> Attack;
+    private BoidDataManager m_DataManager;
 
-    private void Awake()
+    private void Start()
     {
-        m_Datamanager = GetComponent<BoidDataManager>();
-        m_AtkDamage = m_Datamanager.QueryStat(BoidStat.AtkDamage);
-        m_AtkSpeed = m_Datamanager.QueryStat(BoidStat.AtkSpeed);
+        m_DataManager = GetComponent<BoidDataManager>();
+
+        m_AtkDamage = m_DataManager.QueryStat(BoidStat.AtkDamage);
+        m_AtkSpeed = m_DataManager.QueryStat(BoidStat.AtkSpeed);
 
         m_AtkTime = 1 / m_AtkSpeed;
         m_AtkTimer = m_AtkTime;
 
         if (BasicEventManager.Instance)
         {
-            Attack += BasicEventManager.Instance.Attack;
             BasicEventManager.Instance.Attack += OnAttacked;
         }
     }
 
     private void Update()
     {
-        if (m_Datamanager != null)
+        if (m_DataManager != null)
         {
             if (m_AtkTimer <= 0)
             {
-                KeyValuePair<Guid, Rigidbody> targetEnemy = m_Datamanager.QueryClosestNeighbour(Team.Enemy);
-                if (targetEnemy.Value != null && Vector3.Distance(targetEnemy.Value.position, transform.position) <= m_Datamanager.QueryStat(BoidStat.AtkRange))
+                KeyValuePair<Guid, Rigidbody> targetEnemy = m_DataManager.QueryClosestNeighbour(Team.Enemy);
+                if (targetEnemy.Value != null && Vector3.Distance(targetEnemy.Value.position, transform.position) <= m_DataManager.QueryStat(BoidStat.AtkRange))
                 {
-                    Attack?.Invoke(m_AtkDamage, targetEnemy.Key);
+                    Debug.DrawLine(transform.position, targetEnemy.Value.position);
+                    Debug.Log("Dealt " + m_AtkDamage + " to " + targetEnemy.Key);
+
+                    BasicEventManager.Instance.Attack?.Invoke(m_AtkDamage, targetEnemy.Key);
                     m_AtkTimer = m_AtkTime;
                 }
             }
@@ -51,18 +53,29 @@ public class BasicCombatScript : MonoBehaviour
 
     private void OnAttacked(float _Damage, Guid _Target)
     {
-        if (_Target == m_Datamanager.Guid)
+        if (_Target == m_DataManager.Guid)
         {
-            float newHealth = m_Datamanager.QueryStat(BoidStat.Health) - m_AtkDamage;
+            Debug.Log(m_DataManager.Guid + " received " + _Damage + " damage.");
+
+            float newHealth = m_DataManager.QueryStat(BoidStat.Health) - m_AtkDamage;
 
             if (newHealth <= 0)
             {
-                this.gameObject.SetActive(false);
+                Death();
             }
             else
             {
-                m_Datamanager.SetStat(BoidStat.Health, newHealth);
+                m_DataManager.SetStat(BoidStat.Health, newHealth);
             }
         }
+    }
+
+    private void Death()
+    {
+        if (BasicEventManager.Instance)
+        {
+            BasicEventManager.Instance.BoidDeath.Invoke(new KeyValuePair<Guid, GameObject>(m_DataManager.Guid, this.gameObject));
+        }
+        BoidPool.Instance.ReturnActiveBoid(m_DataManager.Guid);
     }
 }
