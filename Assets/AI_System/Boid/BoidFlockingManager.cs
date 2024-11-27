@@ -136,18 +136,23 @@ public class BoidFlockingManager : MonoBehaviour
 
         if (_NearbyAllies != null && _NearbyAllies.Count > 0)
         {
+            Vector3 allyAvoidance = Vector3.zero;
+
             foreach (var ally in _NearbyAllies)
             {
                 var allyVal = ally.Value;
                 if (Vector3.Distance(_FormationPos, pos) > _SlowRadius && Vector3.Distance(allyVal.position, pos) > _SlowRadius)
                 {
-                    movementVelocity += SteeringBehaviours.Evade(allyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
+                    allyAvoidance += SteeringBehaviours.Evade(allyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
                 }
                 else if (Vector3.Distance(allyVal.position, pos) < _SlowRadius * 0.25f)
                 {
-                    movementVelocity += SteeringBehaviours.Evade(allyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
+                    allyAvoidance += SteeringBehaviours.Evade(allyVal, pos, _MovSpeed, _VisRange) * m_WeightManager.QueryWeight(Weight.FAllySeparation);
                 }
             }
+
+            allyAvoidance /= _NearbyAllies.Count - 1;
+            movementVelocity += allyAvoidance;
         }
 
         if (_Flowfield != null)
