@@ -47,6 +47,18 @@ public class FormationDataManager : MonoBehaviour
         return m_Stats[_Stat];
     }
 
+    public void UpdateBoidOffsets(int _NewBoidCount)
+    {
+        m_Stats[FormationStat.MaxUnitCount] = _NewBoidCount;
+
+        CalculateBoidOffsets(
+           _NewBoidCount,
+            m_Stats[FormationStat.WidthScale],
+            m_Stats[FormationStat.DepthScale],
+            m_Stats[FormationStat.UnitSize],
+            m_Stats[FormationStat.UnitSpacing]);
+    }
+
     private void CalculateBoidOffsets(int _UnitCount, float _WidthScale, float _DepthScale, float _UnitSize, float _UnitSpacing)
     {
         Vector3[] gridOffsets = new Vector3[_UnitCount];

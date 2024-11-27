@@ -63,5 +63,16 @@ public class BoidSpawner : MonoBehaviour
                 temp.Value.transform.position = FormationTeamB.GetComponent<FormationDataManager>().QueryBoidPosition(i);
             }
         }
+
+        if (m_SpawnFormations) 
+        {
+            FormationDataManager dataManager = FormationTeamA.GetComponent<FormationDataManager>();
+            FormationBoidManager boidManager = FormationTeamA.GetComponent <FormationBoidManager>();
+            dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
+
+            dataManager = FormationTeamB.GetComponent<FormationDataManager>();
+            boidManager = FormationTeamB.GetComponent<FormationBoidManager>();
+            dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
+        }  
     }
 }

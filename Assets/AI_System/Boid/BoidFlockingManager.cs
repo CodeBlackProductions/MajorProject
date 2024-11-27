@@ -32,10 +32,10 @@ public class BoidFlockingManager : MonoBehaviour
         m_CurrentFacing = m_Rigidbody.transform.forward;
     }
 
-    private void Start()
-    {
-        m_DebugBaseColor = GetComponent<MeshRenderer>().material.color;
-    }
+    //private void Start()
+    //{
+    //    m_DebugBaseColor = GetComponent<MeshRenderer>().material.color;
+    //}
 
     private void Update()
     {
@@ -75,14 +75,14 @@ public class BoidFlockingManager : MonoBehaviour
             }
         }
 
-        if (m_AvoidingObstacle)
-        {
-            GetComponent<MeshRenderer>().material.color = Color.yellow;
-        }
-        else 
-        {
-            GetComponent<MeshRenderer>().material.color = m_DebugBaseColor;
-        }
+        //if (m_AvoidingObstacle)
+        //{
+        //    GetComponent<MeshRenderer>().material.color = Color.yellow;
+        //}
+        //else 
+        //{
+        //    GetComponent<MeshRenderer>().material.color = m_DebugBaseColor;
+        //}
 
         if (m_Incombat)
         {
