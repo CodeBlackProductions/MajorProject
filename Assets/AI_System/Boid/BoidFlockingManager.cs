@@ -93,6 +93,8 @@ public class BoidFlockingManager : MonoBehaviour
             desiredVelocity = OutOfCombatBehaviour(nearbyAllies, nearbyEnemies, targetEnemy, movTarget, flowfield, formationPos, movSpeed, slowRadius, stopRange, visRange);
         }
 
+        desiredVelocity.y = Vector3.forward.y;
+
         UpdateBoid(desiredVelocity, targetEnemy);
     }
 

@@ -17,7 +17,7 @@ public class GridDataManager : MonoBehaviour
 
     private GridTile[,] m_BoidGrid;
     public int CellSize { get => m_CellSize; }
-    public GridTile[,] BoidGrid { get => m_BoidGrid;}
+    public GridTile[,] BoidGrid { get => m_BoidGrid; }
 
     private void OnValidate()
     {
@@ -40,7 +40,7 @@ public class GridDataManager : MonoBehaviour
 
         m_BoidGrid = new GridTile[m_GridWidth, m_GridHeight];
 
-        for (int x = 0; x < m_GridWidth; x++) 
+        for (int x = 0; x < m_GridWidth; x++)
         {
             for (int y = 0; y < m_GridHeight; y++)
             {
@@ -137,6 +137,126 @@ public class GridDataManager : MonoBehaviour
     public bool IsInBounds(int _X, int _Y)
     {
         return _X >= 0 && _X < m_BoidGrid.GetLength(0) && _Y >= 0 && _Y < m_BoidGrid.GetLength(1);
+    }
+
+    public bool HasLoS(Vector2Int _From, Vector2Int _To)
+    {
+        if (Mathf.Abs(_To.x - _From.x) > Mathf.Abs(_To.y - _From.y))
+        {
+            return CheckLoSHorizontal(_From, _To);
+        }
+        else
+        {
+            return CheckLoSVertical(_From, _To);
+        }
+    }
+
+    private bool CheckLoSHorizontal(Vector2Int _From, Vector2Int _To)
+    {
+        int x0;
+        int x1;
+        int y0;
+        int y1;
+
+        if (_From.x > _To.x)
+        {
+            x0 = _To.x;
+            x1 = _From.x;
+            y0 = _To.y;
+            y1 = _From.y;
+        }
+        else
+        {
+            x0 = _From.x;
+            x1 = _To.x;
+            y0 = _From.y;
+            y1 = _To.y;
+        }
+
+        int dX = x1 - x0;
+        int dY = y1 - y0;
+
+        int dir = dY < 0 ? -1 : 1;
+        dY *= dir;
+
+        if (dX == 0)
+        {
+            return false;
+        }
+
+        int y = y0;
+        int step = 2 * dY - dX;
+
+        for (int i = 0; i < dX + 1; i++)
+        {
+            if (QueryGridTile(x0 + i, y).cellType == CellType.Obstacle)
+            {
+                return false;
+            }
+
+            if (step >= 0)
+            {
+                y += dir;
+                step = step - 2 * dX;
+                step = step + 2 * dY;
+            }
+        }
+
+        return true;
+    }
+
+    private bool CheckLoSVertical(Vector2Int _From, Vector2Int _To)
+    {
+        int x0;
+        int x1;
+        int y0;
+        int y1;
+
+        if (_From.y > _To.y)
+        {
+            x0 = _To.x;
+            x1 = _From.x;
+            y0 = _To.y;
+            y1 = _From.y;
+        }
+        else
+        {
+            x0 = _From.x;
+            x1 = _To.x;
+            y0 = _From.y;
+            y1 = _To.y;
+        }
+
+        int dX = x1 - x0;
+        int dY = y1 - y0;
+
+        int dir = dX < 0 ? -1 : 1;
+        dX *= dir;
+
+        if (dY == 0)
+        {
+            return false;
+        }
+
+        int x = x0;
+        int step = 2 * dX - dY;
+
+        for (int i = 0; i < dY + 1; i++)
+        {
+            if (QueryGridTile(x, y0 + i).cellType == CellType.Obstacle)
+            {
+                return false;
+            }
+
+            if (step >= 0)
+            {
+                x += dir;
+                step = step - 2 * dY;
+                step = step + 2 * dX;
+            }
+        }
+
+        return true;
     }
 
     //DEBUG VISUALS; REMOVE BEFORE FINISHING SYSTEM

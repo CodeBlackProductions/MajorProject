@@ -46,9 +46,9 @@ public class GridVisManager : MonoBehaviour
         {
             for (int x = -_VisionRange; x < _VisionRange; x++)
             {
-                for(int y = -_VisionRange; y < _VisionRange; y++) 
+                for (int y = -_VisionRange; y < _VisionRange; y++)
                 {
-                    RemoveVision(new Vector2Int(_OldGridPos.x + x, _OldGridPos.y + y),_BoidGuid);
+                    RemoveVision(new Vector2Int(_OldGridPos.x + x, _OldGridPos.y + y), _BoidGuid);
                 }
             }
         }
@@ -104,10 +104,16 @@ public class GridVisManager : MonoBehaviour
                     }
                 }
 
-                // Process vision changes
                 foreach (Vector2Int vec in m_VisionGained)
                 {
-                    AddVision(vec, _BoidGuid);
+                    if (m_DataManager.HasLoS(_GridPos, vec))
+                    {
+                        AddVision(vec, _BoidGuid, true);
+                    }
+                    else
+                    {
+                        AddVision(vec, _BoidGuid, false);
+                    }
                 }
 
                 foreach (Vector2Int vec in m_VisionLost)
@@ -153,16 +159,9 @@ public class GridVisManager : MonoBehaviour
     /// </summary>
     /// <param name="_GridPos">Tile position</param>
     /// <param name="_boidIndex">Index of the boid to add</param>
-    private void AddVision(Vector2Int _GridPos, Guid _BoidGuid)
+    private void AddVision(Vector2Int _GridPos, Guid _BoidGuid, bool _HasLoS)
     {
         GridTile tile = m_DataManager.QueryGridTile(_GridPos.x, _GridPos.y);
-
-        if (tile.visionList == null)
-        {
-            tile.visionList = new HashSet<Guid>();
-        }
-
-        tile.visionList.Add(_BoidGuid);
 
         if (tile.cellType == CellType.Obstacle)
         {
@@ -171,7 +170,16 @@ public class GridVisManager : MonoBehaviour
             m_TempVec3.z = _GridPos.y * m_DataManager.CellSize;
             EventManager.Instance.OnAddBoidVisionToGridCallbacks[_BoidGuid]?.Invoke(m_TempVec3);
         }
+        if (_HasLoS)
+        {
+            if (tile.visionList == null)
+            {
+                tile.visionList = new HashSet<Guid>();
+            }
 
-        m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
+            tile.visionList.Add(_BoidGuid);
+
+            m_DataManager.UpdateGridTile(tile, _GridPos.x, _GridPos.y);
+        }
     }
 }
