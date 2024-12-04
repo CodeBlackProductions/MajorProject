@@ -42,13 +42,16 @@ public class GridVisManager : MonoBehaviour
     /// <param name="_BoidGuid">Boid ID</param>
     public void UpdateVisionEdges(Vector2Int _OldGridPos, Vector2Int _GridPos, int _VisionRange, Guid _BoidGuid)
     {
-        if (_GridPos == Vector2.zero)
+        if (_GridPos == Vector2Int.zero)
         {
             for (int x = -_VisionRange; x < _VisionRange; x++)
             {
                 for (int y = -_VisionRange; y < _VisionRange; y++)
                 {
-                    RemoveVision(new Vector2Int(_OldGridPos.x + x, _OldGridPos.y + y), _BoidGuid);
+                    if (m_DataManager.IsInBounds(_OldGridPos.x + x, _OldGridPos.y + y))
+                    {
+                        RemoveVision(new Vector2Int(_OldGridPos.x + x, _OldGridPos.y + y), _BoidGuid);
+                    }
                 }
             }
         }

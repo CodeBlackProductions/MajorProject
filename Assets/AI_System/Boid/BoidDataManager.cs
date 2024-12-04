@@ -10,6 +10,7 @@ public class BoidDataManager : MonoBehaviour
 {
     [SerializeField] private SO_BoidStats m_BaseStats;
     [SerializeField] private int m_MaxNeighboursToCalculate = 50;
+    [SerializeField] private GameObject m_SelectionIndicator;
 
     private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
@@ -17,19 +18,36 @@ public class BoidDataManager : MonoBehaviour
     private List<Vector3> m_NearbyObstacles = new List<Vector3>();
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
+    private FormationBoidManager m_FormationBoidManager;
     private Vector3 m_FormationPosition = Vector3.zero;
     private Vector3 m_FormationCenter = Vector3.zero;
     private Guid m_Guid;
     private Team m_Team;
     private Vector2[,] m_CurrentFlowfield;
     private Vector2Int m_CurrentFlowfieldTarget = Vector2Int.zero;
+    private bool m_IsSelectedByPlayer = false;
 
+    public FormationBoidManager FormationBoidManager { get => m_FormationBoidManager; set => m_FormationBoidManager = value; }
     public Vector3 FormationPosition { get => m_FormationPosition; set => m_FormationPosition = value; }
     public Vector3 FormationCenter { get => m_FormationCenter; set => m_FormationCenter = value; }
     public Guid Guid { get => m_Guid; set => m_Guid = value; }
     public Team Team { get => m_Team; set => m_Team = value; }
 
-    private List<KeyValuePair<Team,Guid>> m_RemoveBuffer = new List<KeyValuePair<Team, Guid>>();
+    public bool IsSelectedByPlayer
+    {
+        get => m_IsSelectedByPlayer;
+        set
+        {
+            m_IsSelectedByPlayer = value;
+            if (m_SelectionIndicator != null)
+            {
+                m_SelectionIndicator.SetActive(m_IsSelectedByPlayer);
+            }
+        }
+    }
+
+
+    private List<KeyValuePair<Team, Guid>> m_RemoveBuffer = new List<KeyValuePair<Team, Guid>>();
 
     private void Awake()
     {
@@ -42,6 +60,8 @@ public class BoidDataManager : MonoBehaviour
         {
             m_Stats.Add(stat.Key, stat.Value);
         }
+
+        m_SelectionIndicator.SetActive(false);
     }
 
     public void SetStat(BoidStat _Stat, float _Value)
@@ -112,8 +132,8 @@ public class BoidDataManager : MonoBehaviour
                 {
                     List<KeyValuePair<Guid, Rigidbody>> sortedAllies = m_NeighbouringAllies.ToList();
                     sortedAllies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
-                    
-                    if (sortedAllies.Count > m_MaxNeighboursToCalculate) 
+
+                    if (sortedAllies.Count > m_MaxNeighboursToCalculate)
                     {
                         sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
                         sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
@@ -204,7 +224,6 @@ public class BoidDataManager : MonoBehaviour
 
         if (closestNeighbour.Value != null && closestNeighbour.Value.gameObject.activeSelf)
         {
-           
             return closestNeighbour;
         }
         else

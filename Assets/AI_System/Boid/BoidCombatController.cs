@@ -71,7 +71,7 @@ public class BoidCombatController : MonoBehaviour
     {
         if (EventManager.Instance)
         {
-            EventManager.Instance.BoidDeath.Invoke(new KeyValuePair<Guid, GameObject>(m_DataManager.Guid, this.gameObject));
+            EventManager.Instance.BoidDeath.Invoke(new KeyValuePair<Guid, BoidDataManager>(m_DataManager.Guid, m_DataManager));
         }
         BoidPool.Instance.ReturnActiveBoid(m_DataManager.Guid);
     }

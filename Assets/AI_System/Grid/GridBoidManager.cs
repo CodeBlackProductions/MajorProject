@@ -40,7 +40,7 @@ public class GridBoidManager : MonoBehaviour
             m_GridVisManager = GridVisManager.Instance;
         }
 
-        if (EventManager.Instance) 
+        if (EventManager.Instance)
         {
             EventManager.Instance.SendBoidDataToGrid += OnReceiveBoidPos;
         }
@@ -66,8 +66,26 @@ public class GridBoidManager : MonoBehaviour
     /// <param name="_newPos">New grid position of the boid</param>
     public void OnReceiveBoidPos(BoidData _Data)
     {
-        Vector2Int oldGridPos = CalculateGridPos(_Data.oldPos);
-        Vector2Int gridPos = CalculateGridPos(_Data.boidPos);
+        Vector2Int oldGridPos;
+        Vector2Int gridPos;
+
+        if (_Data.oldPos == Vector3.zero)
+        {
+            oldGridPos = Vector2Int.zero;
+        }
+        else
+        {
+            oldGridPos = CalculateGridPos(_Data.oldPos);
+        }
+
+        if (_Data.boidPos == Vector3.zero)
+        {
+            gridPos = Vector2Int.zero;
+        }
+        else
+        {
+            gridPos = CalculateGridPos(_Data.boidPos);
+        }
 
         UpdateGrid(_Data, oldGridPos, gridPos);
     }

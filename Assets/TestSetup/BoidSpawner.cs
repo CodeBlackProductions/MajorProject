@@ -15,14 +15,13 @@ public class BoidSpawner : MonoBehaviour
     [SerializeField] private Transform m_AllyTarget;
     [SerializeField] private Transform m_EnemyTarget;
 
-    private List<KeyValuePair<Guid, GameObject>> TeamA = new List<KeyValuePair<Guid, GameObject>>();
-    private List<KeyValuePair<Guid, GameObject>> TeamB = new List<KeyValuePair<Guid, GameObject>>();
+    private List<KeyValuePair<Guid, BoidDataManager>> TeamA = new List<KeyValuePair<Guid, BoidDataManager>>();
+    private List<KeyValuePair<Guid, BoidDataManager>> TeamB = new List<KeyValuePair<Guid, BoidDataManager>>();
     private GameObject FormationTeamA = null;
     private GameObject FormationTeamB = null;
 
     private void Start()
     {
-
         if (m_SpawnFormations)
         {
             FormationTeamA = GameObject.Instantiate(m_formationPrefab);
@@ -40,7 +39,7 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Ally;
             temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_AllyTarget.position);
 
-            TeamA.Add(temp);
+            TeamA.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
             if (m_SpawnFormations)
             {
                 FormationTeamA.GetComponent<FormationBoidManager>().AddBoid(TeamA[i]);
@@ -56,7 +55,7 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Enemy;
             temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_EnemyTarget.position);
 
-            TeamB.Add(temp);
+            TeamB.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
             if (m_SpawnFormations)
             {
                 FormationTeamB.GetComponent<FormationBoidManager>().AddBoid(TeamB[i]);
@@ -64,15 +63,15 @@ public class BoidSpawner : MonoBehaviour
             }
         }
 
-        if (m_SpawnFormations) 
+        if (m_SpawnFormations)
         {
             FormationDataManager dataManager = FormationTeamA.GetComponent<FormationDataManager>();
-            FormationBoidManager boidManager = FormationTeamA.GetComponent <FormationBoidManager>();
+            FormationBoidManager boidManager = FormationTeamA.GetComponent<FormationBoidManager>();
             dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
 
             dataManager = FormationTeamB.GetComponent<FormationDataManager>();
             boidManager = FormationTeamB.GetComponent<FormationBoidManager>();
             dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
-        }  
+        }
     }
 }

@@ -106,7 +106,7 @@ public class BoidGridDataManager : MonoBehaviour
         m_DataManager.RemoveObstacle(_Pos);
     }
 
-    public void OnBoidDeath(KeyValuePair<Guid, GameObject> _Boid)
+    public void OnBoidDeath(KeyValuePair<Guid, BoidDataManager> _Boid)
     {
         if (m_DataManager.Guid == _Boid.Key)
         {
