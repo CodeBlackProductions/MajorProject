@@ -55,74 +55,46 @@ public class GridVisManager : MonoBehaviour
                 }
             }
         }
-        else
+        else if (_GridPos != _OldGridPos)
         {
-            Vector2Int direction = _GridPos - _OldGridPos;
+            m_VisionGained.Clear();
+            m_VisionLost.Clear();
 
-            if (direction != Vector2Int.zero)
+            for (int x = -_VisionRange; x < _VisionRange; x++)
             {
-                direction.x = (int)(direction.x / direction.magnitude);
-                direction.y = (int)(direction.y / direction.magnitude);
-
-                m_VisionGained.Clear();
-                m_VisionLost.Clear();
-
-                // Moving Right or Left
-                if (direction.x != 0)
+                for (int y = -_VisionRange; y < _VisionRange; y++)
                 {
-                    int edgeX = _GridPos.x + direction.x * _VisionRange;
-                    for (int y = -_VisionRange; y <= _VisionRange; y++)
+                    if (m_DataManager.IsInBounds(_GridPos.x + x, _GridPos.y + y))
                     {
-                        Vector2Int addTile = new Vector2Int(edgeX, _GridPos.y + y);
-                        Vector2Int removeTile = new Vector2Int(_OldGridPos.x - direction.x * _VisionRange, _OldGridPos.y + y);
-
-                        if (m_DataManager.IsInBounds(addTile.x, addTile.y))
-                        {
-                            m_VisionGained.Add(addTile);
-                        }
-                        if (m_DataManager.IsInBounds(removeTile.x, removeTile.y))
-                        {
-                            m_VisionLost.Add(removeTile);
-                        }
+                        m_VisionGained.Add(new Vector2Int(_GridPos.x + x, _GridPos.y + y));
+                    }
+                    if (m_DataManager.IsInBounds(_OldGridPos.x + x, _OldGridPos.y + y))
+                    {
+                        m_VisionLost.Add(new Vector2Int(_OldGridPos.x + x, _OldGridPos.y + y));
                     }
                 }
+            }
 
-                // Moving Up or Down
-                if (direction.y != 0)
+            Vector2Int[] temp = new Vector2Int[m_VisionGained.Count];
+            m_VisionGained.CopyTo(temp);
+            m_VisionGained.ExceptWith(m_VisionLost);
+            m_VisionLost.ExceptWith(temp);
+
+            foreach (Vector2Int vec in m_VisionGained)
+            {
+                if (m_DataManager.HasLoS(_GridPos, vec))
                 {
-                    int edgeY = _GridPos.y + direction.y * _VisionRange;
-                    for (int x = -_VisionRange; x <= _VisionRange; x++)
-                    {
-                        Vector2Int addTile = new Vector2Int(_GridPos.x + x, edgeY);
-                        Vector2Int removeTile = new Vector2Int(_OldGridPos.x + x, _OldGridPos.y - direction.y * _VisionRange);
-
-                        if (m_DataManager.IsInBounds(addTile.x, addTile.y))
-                        {
-                            m_VisionGained.Add(addTile);
-                        }
-                        if (m_DataManager.IsInBounds(removeTile.x, removeTile.y))
-                        {
-                            m_VisionLost.Add(removeTile);
-                        }
-                    }
+                    AddVision(vec, _BoidGuid, true);
                 }
-
-                foreach (Vector2Int vec in m_VisionGained)
+                else
                 {
-                    if (m_DataManager.HasLoS(_GridPos, vec))
-                    {
-                        AddVision(vec, _BoidGuid, true);
-                    }
-                    else
-                    {
-                        AddVision(vec, _BoidGuid, false);
-                    }
+                    AddVision(vec, _BoidGuid, false);
                 }
+            }
 
-                foreach (Vector2Int vec in m_VisionLost)
-                {
-                    RemoveVision(vec, _BoidGuid);
-                }
+            foreach (Vector2Int vec in m_VisionLost)
+            {
+                RemoveVision(vec, _BoidGuid);
             }
         }
     }
