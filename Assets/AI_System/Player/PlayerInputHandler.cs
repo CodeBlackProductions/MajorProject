@@ -39,6 +39,7 @@ public class PlayerInputHandler : MonoBehaviour
             .With("Left", "<Keyboard>/A")
             .With("Right", "<Keyboard>/D");
         m_MoveAction.performed += OnMoveAction;
+        m_MoveAction.canceled += OnMoveAction;
         m_MoveAction.Enable();
 
         m_ScrollAction = new InputAction("ScrollWheel", InputActionType.Value, "<Mouse>/scroll");

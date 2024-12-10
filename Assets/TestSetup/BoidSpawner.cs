@@ -37,7 +37,6 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialA;
             temp.Value.transform.position = transform.position + transform.right * 10 * i;
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Ally;
-            temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_AllyTarget.position);
 
             TeamA.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
             if (m_SpawnFormations)
@@ -53,7 +52,6 @@ public class BoidSpawner : MonoBehaviour
             temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialB;
             temp.Value.transform.position = transform.position + transform.forward * 200 + transform.right * 10 * i;
             temp.Value.GetComponent<BoidDataManager>().Team = Team.Enemy;
-            temp.Value.GetComponent<BoidDataManager>().SetMovTarget(m_EnemyTarget.position);
 
             TeamB.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
             if (m_SpawnFormations)

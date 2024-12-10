@@ -234,7 +234,7 @@ public class BoidDataManager : MonoBehaviour
 
     public Vector3 QueryNextMovTarget()
     {
-        if (m_MovTargets.Count > 0 && (Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.AtkRange] || m_CurrentMovTarget == Vector3.zero))
+        if (m_MovTargets.Count > 0 && (Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.VisRange] * 0.5f || m_CurrentMovTarget == Vector3.zero))
         {
             m_CurrentMovTarget = m_MovTargets.Dequeue();
         }
@@ -251,6 +251,7 @@ public class BoidDataManager : MonoBehaviour
     {
         m_MovTargets.Clear();
         m_MovTargets.Enqueue(_Pos);
+        m_CurrentMovTarget = Vector3.zero;
     }
 
     public void AddObstacle(Vector3 _Obstacle)

@@ -25,9 +25,9 @@ public class UnitSelectionHandler : MonoBehaviour
         AddToSelection(_Additive, _Guids);
     }
 
-    public void OnUnitDeselect(bool _Targeted, Guid[] _Guids)
+    public void OnUnitDeselect(Guid[] _Guids)
     {
-        RemoveFromSelection(_Targeted, _Guids);
+        RemoveFromSelection(_Guids);
     }
 
     private void AddToSelection(bool _Additive, Guid[] _Guids)
@@ -50,11 +50,7 @@ public class UnitSelectionHandler : MonoBehaviour
         }
         else
         {
-            for (int i = 0; i < m_CurrentSelection.Count; i++)
-            {
-                UpdateBoidStatus(m_CurrentSelection[i], false);
-                m_CurrentSelection.RemoveAt(i);
-            }
+            ClearSelection();
 
             for (int i = 0; i < _Guids.Length; i++)
             {
@@ -81,42 +77,40 @@ public class UnitSelectionHandler : MonoBehaviour
         }
     }
 
-    private void RemoveFromSelection(bool _Targeted, Guid[] _Guids)
+    private void RemoveFromSelection(Guid[] _Guids)
     {
         BoidDataManager temp;
 
-        if (_Targeted)
+        List<BoidDataManager> formationBoids = new List<BoidDataManager>();
+
+        for (int i = 0; i < _Guids.Length; i++)
         {
-            List<BoidDataManager> formationBoids = new List<BoidDataManager>();
+            temp = BoidPool.Instance.GetActiveBoid(_Guids[i]).GetComponent<BoidDataManager>();
+            CheckForFormation(temp, ref formationBoids);
+            UpdateBoidStatus(temp, false);
+            m_CurrentSelection.Remove(temp);
+        }
 
-            for (int i = 0; i < _Guids.Length; i++)
+        if (formationBoids.Count > 0)
+        {
+            for (int i = 0; i < formationBoids.Count; i++)
             {
-                temp = BoidPool.Instance.GetActiveBoid(_Guids[i]).GetComponent<BoidDataManager>();
-                CheckForFormation(temp, ref formationBoids);
-                UpdateBoidStatus(temp, false);
-                m_CurrentSelection.Remove(temp);
-            }
-
-            if (formationBoids.Count > 0)
-            {
-                for (int i = 0; i < formationBoids.Count; i++)
+                if (formationBoids[i] != null && m_CurrentSelection.Contains(formationBoids[i]))
                 {
-                    if (formationBoids[i] != null && !m_CurrentSelection.Contains(formationBoids[i]))
-                    {
-                        UpdateBoidStatus(formationBoids[i], false);
-                        m_CurrentSelection.Remove(formationBoids[i]);
-                    }
+                    UpdateBoidStatus(formationBoids[i], false);
+                    m_CurrentSelection.Remove(formationBoids[i]);
                 }
             }
         }
-        else
+    }
+
+    public void ClearSelection()
+    {
+        for (int i = 0; i < m_CurrentSelection.Count; i++)
         {
-            for (int i = 0; i < m_CurrentSelection.Count; i++)
-            {
-                UpdateBoidStatus(m_CurrentSelection[i], false);
-                m_CurrentSelection.RemoveAt(i);
-            }
+            UpdateBoidStatus(m_CurrentSelection[i], false);
         }
+        m_CurrentSelection.Clear();
     }
 
     private void UpdateBoidStatus(BoidDataManager _Boid, bool _Status)
@@ -135,6 +129,24 @@ public class UnitSelectionHandler : MonoBehaviour
                 {
                     _FormationBoids.Add(temp);
                 }
+            }
+        }
+    }
+
+    public void OnGiveMoveOrder(bool _Additive, Vector3 _TargetPos) 
+    {
+        if (_Additive)
+        {
+            for (int i = 0; i < m_CurrentSelection.Count; i++)
+            {
+                m_CurrentSelection[i].AddMovTarget(_TargetPos);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < m_CurrentSelection.Count; i++)
+            {
+                m_CurrentSelection[i].SetMovTarget(_TargetPos);
             }
         }
     }
