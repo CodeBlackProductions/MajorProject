@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public enum Team
 { Ally = 1, Neutral = 0, Enemy = -1 }
@@ -46,7 +47,6 @@ public class BoidDataManager : MonoBehaviour
         }
     }
 
-
     private List<KeyValuePair<Team, Guid>> m_RemoveBuffer = new List<KeyValuePair<Team, Guid>>();
 
     private void Awake()
@@ -79,24 +79,28 @@ public class BoidDataManager : MonoBehaviour
         return m_Stats[_Stat];
     }
 
-    public void AddNeighbour(Team _Team, Guid _ID, Rigidbody _RB)
+    public void SetNeighbours(Team _Team, Dictionary<Guid, Rigidbody> _Boids)
     {
-        if (_Team == m_Team)
+        if (_Team == Team.Ally)
         {
-            if (!m_NeighbouringAllies.ContainsKey(_ID))
+            m_NeighbouringAllies = _Boids;
+
+            foreach (var item in m_NeighbouringAllies)
             {
-                m_NeighbouringAllies.Add(_ID, _RB);
+                Debug.DrawLine(transform.position, item.Value.position, Color.green);
             }
         }
         else if (_Team == Team.Neutral)
         {
             return;
         }
-        else
+        else if (_Team == Team.Enemy)
         {
-            if (!m_NeighbouringEnemies.ContainsKey(_ID))
+            m_NeighbouringEnemies = _Boids;
+
+            foreach (var item in m_NeighbouringEnemies)
             {
-                m_NeighbouringEnemies.Add(_ID, _RB);
+                Debug.DrawLine(transform.position, item.Value.position, Color.red);
             }
         }
     }
@@ -254,19 +258,13 @@ public class BoidDataManager : MonoBehaviour
         m_CurrentMovTarget = Vector3.zero;
     }
 
-    public void AddObstacle(Vector3 _Obstacle)
+    public void SetObstacles(List<Vector3> _Obstacles)
     {
-        if (!m_NearbyObstacles.Contains(_Obstacle))
-        {
-            m_NearbyObstacles.Add(_Obstacle);
-        }
-    }
+        m_NearbyObstacles = _Obstacles;
 
-    public void RemoveObstacle(Vector3 _Obstacle)
-    {
-        if (m_NearbyObstacles.Contains(_Obstacle))
+        foreach (var item in m_NearbyObstacles)
         {
-            m_NearbyObstacles.Remove(_Obstacle);
+            Debug.DrawLine(transform.position, item, Color.black);
         }
     }
 
