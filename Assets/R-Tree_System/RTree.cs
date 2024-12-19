@@ -63,6 +63,63 @@ public class RTree
     }
 
     /// <summary>
+    /// Inserts a LeafData Packet into the R-Tree.
+    /// </summary>
+    /// <param name="_Obj">The LeafData Packet to insert into R-Tree</param>
+    public void Insert(LeafData _Obj)
+    {
+        if (m_Root.Entry == null)
+        {
+            Vector3 lowerLeft = new Vector3(_Obj.PosX - 10, _Obj.PosY, _Obj.PosZ - 10);
+            Vector3 upperRight = new Vector3(_Obj.PosX + 10, _Obj.PosY, _Obj.PosZ + 10);
+
+            Rect rect = new Rect(lowerLeft, upperRight);
+            LeafData[] leafData = new LeafData[] { _Obj };
+            m_Root.Entry = new Leaf(m_Root, rect, leafData, m_NodeCapacity, m_MinNodeCapacity);
+            return;
+        }
+
+        Inserter.InsertData(m_Root, _Obj);
+
+        m_IndexCounter++;
+    }
+
+    public void BulkInsert(UnityEngine.GameObject[] _ObjBulk)
+    {
+        int[] objIndices = new int[_ObjBulk.Length];
+        float[] xPositions = new float[_ObjBulk.Length];
+        float[] yPositions = new float[_ObjBulk.Length];
+        float[] zPositions = new float[_ObjBulk.Length];
+
+        for (int i = 0; i < _ObjBulk.Length; i++)
+        {
+            m_GameObjects.Add(m_IndexCounter, _ObjBulk[i]);
+            m_Indices.Add(_ObjBulk[i], m_IndexCounter);
+
+            Vector3 pos = new Vector3(_ObjBulk[i].transform.position.x, _ObjBulk[i].transform.position.y, _ObjBulk[i].transform.position.z);
+            m_TreePositions.Add(_ObjBulk[i], pos);
+
+            objIndices[i] = m_IndexCounter;
+            xPositions[i] = pos.X;
+            yPositions[i] = pos.Y;
+            zPositions[i] = pos.Z;
+
+            m_IndexCounter++;
+        }
+
+        if (m_Root.Entry == null)
+        {
+            Vector3 lowerLeft = Vector3.Zero;
+            Vector3 upperRight = new Vector3(10, 0, 10);
+
+            Rect rect = new Rect(lowerLeft, upperRight);
+            m_Root.Entry = new Branch(m_Root, rect, new Node[0], m_NodeCapacity, m_MinNodeCapacity);
+        }
+
+        BulkInserter.InsertData(m_Root, objIndices, xPositions, yPositions, zPositions);
+    }
+
+    /// <summary>
     /// Removes a unity gameobject from the R-Tree.
     /// </summary>
     /// <param name="_Obj">The unity gameobject to remove from R-Tree</param>

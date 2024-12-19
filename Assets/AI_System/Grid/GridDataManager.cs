@@ -60,6 +60,7 @@ public class GridDataManager : MonoBehaviour
 
     private void InitializeObstacles()
     {
+        GameObject obstacleParent = new GameObject("ObstacleParent");
         for (int x = 0; x < m_GridWidth; x++)
         {
             for (int y = 0; y < m_GridHeight; y++)
@@ -74,6 +75,7 @@ public class GridDataManager : MonoBehaviour
                     tempObj.transform.position = pos;
                     tempObj.layer = LayerMask.NameToLayer("Obstacle");
                     RTree_BoidManager.Instance?.RegisterObject(tempObj);
+                    tempObj.transform.parent = obstacleParent.transform;
                 }
             }
         }

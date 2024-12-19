@@ -220,7 +220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 676409d53d9a2be43aff03aa48085de7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_GridUpdateInterval: 1
+  m_TreeUpdateInterval: 0.5
 --- !u!1 &7847931062509332511
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ public class RTree_BoidManager : MonoBehaviour
     private RTree_DataManager m_DataManager;
 
     private Queue<GameObject> m_UpdateQueue = new Queue<GameObject>();
+    private List<GameObject> m_UpdateList = new List<GameObject>();
     private bool m_UpdateRunning = false;
 
     private float timer = 0;

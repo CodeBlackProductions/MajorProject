@@ -38,6 +38,35 @@ public class Inserter
     }
 
     /// <summary>
+    /// Inserts data into the tree.
+    /// </summary>
+    /// <param name="_Root">Root of the tree</param>
+    /// <param name="_ObjIDX">Index of object to insert</param>
+    /// <param name="_PosX">X position of object to insert</param>
+    /// <param name="_PosY">Y position of object to insert</param>
+    /// <param name="_PosZ">Z position of object to insert</param>
+    /// <exception cref="Exception"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static void InsertData(Node _Root, LeafData _Data)
+    {
+        Node targetNode = ChooseTargetNode(_Root, new Vector3(_Data.PosX, _Data.PosY, _Data.PosZ));
+
+        if (targetNode == null)
+        {
+            throw new Exception("targetNode should not be Null when Inserting!");
+        }
+
+        if (targetNode.Entry is Leaf leaf)
+        {
+            InsertIntoLeaf(targetNode, leaf, _Data);
+        }
+        else
+        {
+            throw new InvalidOperationException("Invalid node while inserting into tree: " + targetNode);
+        }
+    }
+
+    /// <summary>
     /// Handles data insertion inside the actual leaf node.
     /// </summary>
     /// <param name="_LeafNode">The leaf node that either encapsulates the position of object or is closest by.</param>

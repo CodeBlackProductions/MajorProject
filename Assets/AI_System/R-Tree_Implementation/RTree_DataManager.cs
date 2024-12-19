@@ -63,6 +63,26 @@ public class RTree_DataManager : MonoBehaviour
         }
     }
 
+    public void BulkUpdateObjects(GameObject[] _Objects) 
+    {
+        if (_Objects[0].layer == LayerMask.NameToLayer("Boid"))
+        {
+            for (int i = 0; i < _Objects.Length; i++)
+            {
+                m_BoidTree.Remove(_Objects[i]);
+            }
+            m_BoidTree.BulkInsert(_Objects);
+        }
+        else if (_Objects[0].layer == LayerMask.NameToLayer("Obstacle"))
+        {
+            for (int i = 0; i < _Objects.Length; i++)
+            {
+                m_ObstacleTree.Remove(_Objects[i]);
+            }
+            m_ObstacleTree.BulkInsert(_Objects);
+        }
+    }
+
     public Dictionary<GameObject, Team> QueryNeighboursInRange(Vector3 _Pos, float _Radius)
     {
         GameObject[] foundObjects = m_BoidTree.FindRange(CreateRect(_Pos, _Radius));
