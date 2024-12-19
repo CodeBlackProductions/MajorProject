@@ -84,11 +84,6 @@ public class BoidDataManager : MonoBehaviour
         if (_Team == Team.Ally)
         {
             m_NeighbouringAllies = _Boids;
-
-            foreach (var item in m_NeighbouringAllies)
-            {
-                Debug.DrawLine(transform.position, item.Value.position, Color.green);
-            }
         }
         else if (_Team == Team.Neutral)
         {
@@ -97,11 +92,6 @@ public class BoidDataManager : MonoBehaviour
         else if (_Team == Team.Enemy)
         {
             m_NeighbouringEnemies = _Boids;
-
-            foreach (var item in m_NeighbouringEnemies)
-            {
-                Debug.DrawLine(transform.position, item.Value.position, Color.red);
-            }
         }
     }
 
@@ -261,11 +251,6 @@ public class BoidDataManager : MonoBehaviour
     public void SetObstacles(List<Vector3> _Obstacles)
     {
         m_NearbyObstacles = _Obstacles;
-
-        foreach (var item in m_NearbyObstacles)
-        {
-            Debug.DrawLine(transform.position, item, Color.black);
-        }
     }
 
     public Vector3[] QueryObstaclePositions()

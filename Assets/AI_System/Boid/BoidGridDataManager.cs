@@ -45,16 +45,21 @@ public class BoidGridDataManager : MonoBehaviour
 
             if (RTree_DataManager.Instance)
             {
-                Dictionary<GameObject, Team> neighbours = RTree_DataManager.Instance.QueryNeighboursInRange(m_Rb.position, m_DataManager.QueryStat(BoidStat.VisRange));
+                float visRange = m_DataManager.QueryStat(BoidStat.VisRange);
+
+                Dictionary<GameObject, Team> neighbours = RTree_DataManager.Instance.QueryNeighboursInRange(m_Rb.position, visRange);
                 if (neighbours != null)
                 {
                     SetNeighbours(neighbours);
                 }
 
-                List<GameObject> obstacles = RTree_DataManager.Instance.QueryObstaclesInRange(m_Rb.position, m_DataManager.QueryStat(BoidStat.VisRange));
-                if (obstacles != null)
+                if (Vector3.Distance(m_Rb.position, m_OldPos) > GridDataManager.Instance.CellSize)
                 {
-                    SetObstacles(obstacles);
+                    List<GameObject> obstacles = RTree_DataManager.Instance.QueryObstaclesInRange(m_Rb.position, visRange);
+                    if (obstacles != null)
+                    {
+                        SetObstacles(obstacles);
+                    }
                 }
             }
 

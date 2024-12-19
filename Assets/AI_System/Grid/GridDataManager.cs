@@ -50,6 +50,11 @@ public class GridDataManager : MonoBehaviour
             }
         }
 
+    }
+
+    private void Start()
+    {
+
         InitializeObstacles();
     }
 
@@ -64,6 +69,11 @@ public class GridDataManager : MonoBehaviour
                 if (blocked)
                 {
                     m_BoidGrid[x, y].cellType = CellType.Obstacle;
+                    GameObject tempObj = new GameObject("Obstacle_" + x + "_" + y);
+                    tempObj.transform.localScale = new Vector3(m_CellSize,m_CellSize,m_CellSize);
+                    tempObj.transform.position = pos;
+                    tempObj.layer = LayerMask.NameToLayer("Obstacle");
+                    RTree_BoidManager.Instance?.RegisterObject(tempObj);
                 }
             }
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RTree_DataManager : MonoBehaviour
@@ -8,7 +9,8 @@ public class RTree_DataManager : MonoBehaviour
     [SerializeField] private int m_NodeCapacity = 10;
     [SerializeField] private int m_NodeMinCapacity = 5;
 
-    private RTree m_Tree;
+    private RTree m_BoidTree;
+    private RTree m_ObstacleTree;
 
     private void Awake()
     {
@@ -21,27 +23,49 @@ public class RTree_DataManager : MonoBehaviour
             Destroy(this.gameObject);
         }
 
-        m_Tree = new RTree(m_NodeCapacity, m_NodeMinCapacity);
+        m_BoidTree = new RTree(m_NodeCapacity, m_NodeMinCapacity);
+        m_ObstacleTree = new RTree(m_NodeCapacity, m_NodeMinCapacity);
     }
 
     public void AddObjectToTree(GameObject _Obj)
     {
-        m_Tree.Insert(_Obj);
+        if (_Obj.layer == LayerMask.NameToLayer("Boid"))
+        {
+            m_BoidTree.Insert(_Obj);
+        }
+        else if (_Obj.layer == LayerMask.NameToLayer("Obstacle"))
+        {
+            m_ObstacleTree.Insert(_Obj);
+        }
     }
 
     public void RemoveObjectFromTree(GameObject _Obj)
     {
-        m_Tree.Remove(_Obj);
+        if (_Obj.layer == LayerMask.NameToLayer("Boid"))
+        {
+            m_BoidTree.Remove(_Obj);
+        }
+        else if (_Obj.layer == LayerMask.NameToLayer("Obstacle"))
+        {
+            m_ObstacleTree.Remove(_Obj);
+        }
     }
 
     public void UpdateObjectInTree(GameObject _Obj)
     {
-        m_Tree.UpdateObjectPosition(_Obj);
+        if (_Obj.layer == LayerMask.NameToLayer("Boid"))
+        {
+            m_BoidTree.UpdateObjectPosition(_Obj);
+        }
+        else if (_Obj.layer == LayerMask.NameToLayer("Obstacle"))
+        {
+            m_ObstacleTree.UpdateObjectPosition(_Obj);
+        }
     }
 
     public Dictionary<GameObject, Team> QueryNeighboursInRange(Vector3 _Pos, float _Radius)
     {
-        GameObject[] foundObjects = m_Tree.FindRange(CreateRect(_Pos, _Radius));
+        GameObject[] foundObjects = m_BoidTree.FindRange(CreateRect(_Pos, _Radius));
 
         if (foundObjects != null)
         {
@@ -49,10 +73,7 @@ public class RTree_DataManager : MonoBehaviour
 
             for (int i = 0; i < foundObjects.Length; i++)
             {
-                if (foundObjects[i].layer == LayerMask.NameToLayer("Boid"))
-                {
-                    neighbours.Add(foundObjects[i], foundObjects[i].GetComponent<BoidDataManager>().Team);
-                }
+                neighbours.Add(foundObjects[i], foundObjects[i].GetComponent<BoidDataManager>().Team);
             }
 
             return neighbours;
@@ -63,19 +84,13 @@ public class RTree_DataManager : MonoBehaviour
 
     public List<GameObject> QueryObstaclesInRange(Vector3 _Pos, float _Radius)
     {
-        GameObject[] foundObjects = m_Tree.FindRange(CreateRect(_Pos, _Radius));
+        GameObject[] foundObjects = m_ObstacleTree.FindRange(CreateRect(_Pos, _Radius));
 
         if (foundObjects != null)
         {
             List<GameObject> obstacles = new List<GameObject>();
 
-            for (int i = 0; i < foundObjects.Length; i++)
-            {
-                if (foundObjects[i].layer == LayerMask.NameToLayer("Obstacle"))
-                {
-                    obstacles.Add(foundObjects[i]);
-                }
-            }
+            obstacles = foundObjects.ToList();
 
             return obstacles;
         }
@@ -95,7 +110,8 @@ public class RTree_DataManager : MonoBehaviour
     {
         if (Application.isPlaying)
         {
-            TreeDebugger.Instance?.DrawDebug(m_Tree.Root);
+            TreeDebugger.Instance?.DrawDebug(m_BoidTree.Root);
+            TreeDebugger.Instance?.DrawDebug(m_ObstacleTree.Root);
         }
     }
 }
