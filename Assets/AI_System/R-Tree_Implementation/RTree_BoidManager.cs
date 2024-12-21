@@ -11,7 +11,7 @@ public class RTree_BoidManager : MonoBehaviour
 
     private RTree_DataManager m_DataManager;
 
-    private Queue<GameObject> m_UpdateQueue = new Queue<GameObject>();
+    private Queue<Tuple<GameObject, RTree_Object>> m_UpdateQueue = new Queue<Tuple<GameObject, RTree_Object>>();
     private List<GameObject> m_UpdateList = new List<GameObject>();
     private bool m_UpdateRunning = false;
 
@@ -69,19 +69,19 @@ public class RTree_BoidManager : MonoBehaviour
     /// <param name="_Data">Data received</param>
     /// <param name="_oldPos">Previous grid position of the boid</param>
     /// <param name="_newPos">New grid position of the boid</param>
-    public void UpdateTree(GameObject _Obj)
+    public void UpdateTree(GameObject _Obj, RTree_Object _RObj)
     {
-        m_UpdateQueue.Enqueue(_Obj);
+        m_UpdateQueue.Enqueue(new Tuple<GameObject, RTree_Object>(_Obj, _RObj));
     }
 
-    public void RegisterObject(GameObject _Obj)
+    public void RegisterObject(GameObject _Obj, RTree_Object _RObj)
     {
-        m_DataManager.AddObjectToTree(_Obj);
+        m_DataManager.AddObjectToTree(_Obj, _RObj);
     }
 
-    public void RemoveObject(GameObject _Obj)
+    public void RemoveObject(GameObject _Obj, RTree_Object _RObj)
     {
-        m_DataManager.RemoveObjectFromTree(_Obj);
+        m_DataManager.RemoveObjectFromTree(_Obj, _RObj);
     }
 
     private IEnumerator UpdateCall()
@@ -92,7 +92,8 @@ public class RTree_BoidManager : MonoBehaviour
             callsThisFrame = Mathf.Min(callsThisFrame, m_UpdateQueue.Count);
             for (int i = 0; i < callsThisFrame; i++)
             {
-                m_DataManager.UpdateObjectInTree(m_UpdateQueue.Dequeue());
+                Tuple<GameObject, RTree_Object> item = m_UpdateQueue.Dequeue();
+                m_DataManager.UpdateObjectInTree(item.Item1, item.Item2);
             }
 
             yield return null;

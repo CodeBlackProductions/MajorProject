@@ -1,8 +1,5 @@
-//using System;
-//using System.Collections.Generic;
-//using UnityEngine;
-
 using UnityEngine;
+using RBush;
 
 public enum CellType
 {
@@ -74,7 +71,7 @@ public class GridDataManager : MonoBehaviour
                     tempObj.transform.localScale = new Vector3(m_CellSize,m_CellSize,m_CellSize);
                     tempObj.transform.position = pos;
                     tempObj.layer = LayerMask.NameToLayer("Obstacle");
-                    RTree_BoidManager.Instance?.RegisterObject(tempObj);
+                    RTree_BoidManager.Instance?.RegisterObject(tempObj, CreateTreeEntry());
                     tempObj.transform.parent = obstacleParent.transform;
                 }
             }
@@ -99,6 +96,15 @@ public class GridDataManager : MonoBehaviour
         {
             m_GridWidth--;
         };
+    }
+
+    private RTree_Object CreateTreeEntry()
+    {
+        RTree_Object obj = new RTree_Object(new Envelope(transform.position.x, transform.position.z, transform.position.x, transform.position.z));
+
+        obj.Object = gameObject;
+
+        return obj;
     }
 
     ///// <summary>

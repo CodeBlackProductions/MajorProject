@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using RBush;
 
 public class BoidGridDataManager : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class BoidGridDataManager : MonoBehaviour
 
             m_Eventmanager.BoidDeath += OnBoidDeath;
 
-            m_Eventmanager.SendTreeBoidRegister?.Invoke(gameObject);
+            m_Eventmanager.SendTreeBoidRegister?.Invoke(gameObject, CreateTreeEntry(transform.position));
         }
         else
         {
@@ -41,7 +42,7 @@ public class BoidGridDataManager : MonoBehaviour
     {
         if (m_Timer <= 0)
         {
-            m_Eventmanager.SendTreeBoidUpdate?.Invoke(gameObject);
+            m_Eventmanager.SendTreeBoidUpdate?.Invoke(gameObject, CreateTreeEntry(transform.position));
 
             if (RTree_DataManager.Instance)
             {
@@ -108,7 +109,16 @@ public class BoidGridDataManager : MonoBehaviour
     {
         if (m_DataManager.Guid == _Boid.Key)
         {
-            m_Eventmanager.SendTreeBoidRemove?.Invoke(gameObject);
+            m_Eventmanager.SendTreeBoidRemove?.Invoke(gameObject, CreateTreeEntry(m_OldPos));
         }
+    }
+
+    private RTree_Object CreateTreeEntry(Vector3 _Pos)
+    {
+        RTree_Object obj = new RTree_Object(new Envelope(_Pos.x, _Pos.z, _Pos.x, _Pos.z));
+
+        obj.Object = gameObject;
+
+        return obj;
     }
 }
