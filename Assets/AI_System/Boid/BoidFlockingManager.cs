@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 [RequireComponent(typeof(BoidFlockingWeightManager))]
@@ -140,14 +141,17 @@ public class BoidFlockingManager : MonoBehaviour
 
         if (_NearbyAllies != null && _NearbyAllies.Count > 0)
         {
-            movementVelocity += SteeringBehaviours.Flock(
-            _NearbyAllies,
-            pos,
-            _VisRange,
-            _MovSpeed,
-            m_WeightManager.QueryWeight(Weight.FAllyCohesion),
-            m_WeightManager.QueryWeight(Weight.FAllySeparation),
-            m_WeightManager.QueryWeight(Weight.FAllyAlignment));
+            Task.Run(() =>
+            {
+                movementVelocity += SteeringBehaviours.Flock(
+                _NearbyAllies,
+                pos,
+                _VisRange,
+                _MovSpeed,
+                m_WeightManager.QueryWeight(Weight.FAllyCohesion),
+                m_WeightManager.QueryWeight(Weight.FAllySeparation),
+                m_WeightManager.QueryWeight(Weight.FAllyAlignment));
+            });
         }
 
         if (!m_AvoidingObstacle && _FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))
@@ -160,20 +164,31 @@ public class BoidFlockingManager : MonoBehaviour
             movementVelocity = Vector3.zero;
         }
 
-        List<KeyValuePair<Guid, Rigidbody>> otherFormationAllies = _NearbyAllies.FindAll(ally => ally.Value.GetComponent<BoidDataManager>().FormationBoidManager != m_DataManager.FormationBoidManager);
-        List<KeyValuePair<Guid, Rigidbody>> ownFormationAllies = _NearbyAllies.FindAll(ally => !otherFormationAllies.Contains(ally));
+        if (_NearbyAllies.Count > 0)
+        {
+            Task.Run(() =>
+            {
+                movementVelocity += SteeringBehaviours.Queue(_NearbyAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
+            });
+        }
 
-        if (ownFormationAllies.Count > 0 && _NearbyEnemies.Count > 0)
-        {
-            movementVelocity += SteeringBehaviours.Queue(ownFormationAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
-        }
-        if (otherFormationAllies.Count > 0)
-        {
-            movementVelocity += SteeringBehaviours.Queue(otherFormationAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
-        }
+        //List<KeyValuePair<Guid, Rigidbody>> otherFormationAllies = _NearbyAllies.FindAll(ally => ally.Value.GetComponent<BoidDataManager>().FormationBoidManager != m_DataManager.FormationBoidManager);
+        //List<KeyValuePair<Guid, Rigidbody>> ownFormationAllies = _NearbyAllies.FindAll(ally => !otherFormationAllies.Contains(ally));
+
+        //if (ownFormationAllies.Count > 0 && _NearbyEnemies.Count > 0)
+        //{
+        //    movementVelocity += SteeringBehaviours.Queue(ownFormationAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
+        //}
+        //if (otherFormationAllies.Count > 0)
+        //{
+        //    movementVelocity += SteeringBehaviours.Queue(otherFormationAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
+        //}
         if (_NearbyEnemies.Count > 0)
         {
-            movementVelocity += SteeringBehaviours.Queue(_NearbyEnemies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
+            Task.Run(() =>
+            {
+                movementVelocity += SteeringBehaviours.Queue(_NearbyEnemies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
+            });
         }
 
         //DebugMethod(_NearbyEnemies);

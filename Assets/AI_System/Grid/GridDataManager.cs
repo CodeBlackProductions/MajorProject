@@ -71,7 +71,7 @@ public class GridDataManager : MonoBehaviour
                     tempObj.transform.localScale = new Vector3(m_CellSize,m_CellSize,m_CellSize);
                     tempObj.transform.position = pos;
                     tempObj.layer = LayerMask.NameToLayer("Obstacle");
-                    RTree_BoidManager.Instance?.RegisterObject(tempObj, CreateTreeEntry());
+                    RTree_BoidManager.Instance?.RegisterObject(tempObj, CreateTreeEntry(tempObj));
                     tempObj.transform.parent = obstacleParent.transform;
                 }
             }
@@ -98,11 +98,11 @@ public class GridDataManager : MonoBehaviour
         };
     }
 
-    private RTree_Object CreateTreeEntry()
+    private RTree_Object CreateTreeEntry(GameObject _Obj)
     {
-        RTree_Object obj = new RTree_Object(new Envelope(transform.position.x, transform.position.z, transform.position.x, transform.position.z));
+        RTree_Object obj = new RTree_Object(new Envelope(_Obj.transform.position.x, _Obj.transform.position.z, _Obj.transform.position.x, _Obj.transform.position.z));
 
-        obj.Object = gameObject;
+        obj.Object = _Obj;
 
         return obj;
     }

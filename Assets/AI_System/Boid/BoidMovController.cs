@@ -13,6 +13,10 @@ public class BoidMovController : MonoBehaviour
     private Rigidbody m_rigidbody;
     private BoidDataManager m_DataManager;
 
+    private float m_maxSteering = 0;
+    private float m_MaxVelocity = 0;
+    private float m_Mass = 0;
+
     public Vector3 Velocity { get => m_Velocity; set => m_Velocity = value; }
 
     private void Awake()
@@ -20,6 +24,13 @@ public class BoidMovController : MonoBehaviour
         m_rigidbody = GetComponent<Rigidbody>();
         m_DataManager = GetComponent<BoidDataManager>();
         GetComponent<BoidFlockingManager>().OnBehaviourUpdate += UpdateVelocity;
+    }
+
+    private void Start()
+    {
+        m_maxSteering = m_DataManager.QueryStat(BoidStat.TurnRate);
+        m_MaxVelocity = m_DataManager.QueryStat(BoidStat.MovSpeed);
+        m_Mass = m_DataManager.QueryStat(BoidStat.Mass);
     }
 
     private void OnDisable()
@@ -37,21 +48,19 @@ public class BoidMovController : MonoBehaviour
     private void UpdateVelocity(Vector3 _DesiredVelocity, Vector3 _DesiredFacing)
     {
         Vector3 steeringVelocity = _DesiredVelocity - m_Velocity;
-        float maxSteering = m_DataManager.QueryStat(BoidStat.TurnRate);
-        float maxVelocity = m_DataManager.QueryStat(BoidStat.MovSpeed);
 
-        if (steeringVelocity.magnitude > maxSteering)
+        if (steeringVelocity.magnitude > m_maxSteering)
         {
             steeringVelocity.Normalize();
-            steeringVelocity *= maxSteering;
+            steeringVelocity *= m_maxSteering;
         }
-        steeringVelocity /= m_DataManager.QueryStat(BoidStat.Mass);
+        steeringVelocity /= m_Mass;
         m_Velocity += steeringVelocity;
 
-        if (m_Velocity.magnitude > maxVelocity)
+        if (m_Velocity.magnitude > m_MaxVelocity)
         {
             m_Velocity.Normalize();
-            m_Velocity *= maxVelocity;
+            m_Velocity *= m_MaxVelocity;
         }
 
         if (_DesiredFacing != Vector3.zero)

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public enum Team
 { Ally = 1, Neutral = 0, Enemy = -1 }
@@ -16,6 +15,10 @@ public class BoidDataManager : MonoBehaviour
     private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringAllies = new Dictionary<Guid, Rigidbody>();
+
+    private List<KeyValuePair<Guid,Rigidbody>> m_NeighbourAllyList = new List<KeyValuePair<Guid, Rigidbody>>();
+    private List<KeyValuePair<Guid,Rigidbody>> m_NeighbourEnemyList = new List<KeyValuePair<Guid, Rigidbody>>();
+
     private List<Vector3> m_NearbyObstacles = new List<Vector3>();
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
@@ -83,7 +86,25 @@ public class BoidDataManager : MonoBehaviour
     {
         if (_Team == Team.Ally)
         {
-            m_NeighbouringAllies = _Boids;
+            List<KeyValuePair<Guid, Rigidbody>> sortedAllies = _Boids.ToList();
+            sortedAllies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
+            if (sortedAllies.Count > m_MaxNeighboursToCalculate)
+            {
+                if (sortedAllies.Count > m_MaxNeighboursToCalculate)
+                {
+                    sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                    sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
+                }
+            }
+
+            m_NeighbouringAllies.Clear();
+
+            for (int i = 0; i < sortedAllies.Count; i++)
+            {
+                m_NeighbouringAllies.Add(sortedAllies[i].Key, sortedAllies[i].Value);
+            }
+
+            m_NeighbourAllyList = sortedAllies;
         }
         else if (_Team == Team.Neutral)
         {
@@ -91,7 +112,25 @@ public class BoidDataManager : MonoBehaviour
         }
         else if (_Team == Team.Enemy)
         {
-            m_NeighbouringEnemies = _Boids;
+            List<KeyValuePair<Guid, Rigidbody>> sortedEnemies = _Boids.ToList();
+            sortedEnemies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
+            if (sortedEnemies.Count > m_MaxNeighboursToCalculate)
+            {
+                if (sortedEnemies.Count > m_MaxNeighboursToCalculate)
+                {
+                    sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                    sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
+                }
+            }
+
+            m_NeighbouringEnemies.Clear();
+
+            for (int i = 0; i < sortedEnemies.Count; i++)
+            {
+                m_NeighbouringEnemies.Add(sortedEnemies[i].Key, sortedEnemies[i].Value);
+            }
+
+            m_NeighbourEnemyList = sortedEnemies;
         }
     }
 
@@ -122,39 +161,15 @@ public class BoidDataManager : MonoBehaviour
         switch (_Team)
         {
             case Team.Ally:
-                if (m_NeighbouringAllies.Count > m_MaxNeighboursToCalculate)
-                {
-                    List<KeyValuePair<Guid, Rigidbody>> sortedAllies = m_NeighbouringAllies.ToList();
-                    sortedAllies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
 
-                    if (sortedAllies.Count > m_MaxNeighboursToCalculate)
-                    {
-                        sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                        sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
-                    }
-
-                    return sortedAllies;
-                }
-                return m_NeighbouringAllies.ToList();
+                return m_NeighbourAllyList;
 
             case Team.Neutral:
                 break;
 
             case Team.Enemy:
-                if (m_NeighbouringEnemies.Count > m_MaxNeighboursToCalculate)
-                {
-                    List<KeyValuePair<Guid, Rigidbody>> sortedEnemies = m_NeighbouringEnemies.ToList();
-                    sortedEnemies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
 
-                    if (sortedEnemies.Count > m_MaxNeighboursToCalculate)
-                    {
-                        sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                        sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
-                    }
-
-                    return sortedEnemies;
-                }
-                return m_NeighbouringEnemies.ToList();
+                return m_NeighbourEnemyList;
 
             default:
                 break;

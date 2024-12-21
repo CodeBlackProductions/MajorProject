@@ -93,7 +93,7 @@ public class RTree_DataManager : MonoBehaviour
 
     public List<GameObject> QueryObstaclesInRange(Vector3 _Pos, float _Radius)
     {
-        IEnumerable<RTree_Object> foundObjects = m_BoidTree.Search(new Envelope(_Pos.x - _Radius, _Pos.z - _Radius, _Pos.x + _Radius, _Pos.z + _Radius));
+        IEnumerable<RTree_Object> foundObjects = m_ObstacleTree.Search(new Envelope(_Pos.x - _Radius, _Pos.z - _Radius, _Pos.x + _Radius, _Pos.z + _Radius));
 
         if (foundObjects != null)
         {
@@ -109,5 +109,4 @@ public class RTree_DataManager : MonoBehaviour
 
         return null;
     }
-
 }
