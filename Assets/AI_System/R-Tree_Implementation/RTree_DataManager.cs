@@ -1,6 +1,7 @@
 using RBush;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 public class RTree_DataManager : MonoBehaviour
@@ -38,7 +39,7 @@ public class RTree_DataManager : MonoBehaviour
         }
     }
 
-    public void RemoveObjectFromTree(GameObject _Obj, RTree_Object _RObj)
+    public void RemoveObjectFromTree(GameObject _Obj)
     {
         if (_Obj.layer == LayerMask.NameToLayer("Boid"))
         {
@@ -106,7 +107,15 @@ public class RTree_DataManager : MonoBehaviour
 
             return obstacles;
         }
-
         return null;
+    }
+
+    public void BulkAddToTree(List<GameObject> _Objects, List<RTree_Object> _RObjects)
+    {
+        for (int i = 0; i < _Objects.Count; i++)
+        {
+            PresentValues.Add(_Objects[i], _RObjects[i]);
+        }
+        m_BoidTree.BulkLoad(_RObjects);
     }
 }

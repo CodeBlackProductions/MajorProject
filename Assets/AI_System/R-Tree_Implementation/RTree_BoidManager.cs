@@ -12,7 +12,8 @@ public class RTree_BoidManager : MonoBehaviour
     private RTree_DataManager m_DataManager;
 
     private Queue<Tuple<GameObject, RTree_Object>> m_UpdateQueue = new Queue<Tuple<GameObject, RTree_Object>>();
-    private List<GameObject> m_UpdateList = new List<GameObject>();
+    private List<GameObject> m_UpdateListObj = new List<GameObject>();
+    private List<RTree_Object> m_UpdateListRObj = new List<RTree_Object>();
     private bool m_UpdateRunning = false;
 
     private float timer = 0;
@@ -55,6 +56,25 @@ public class RTree_BoidManager : MonoBehaviour
                 StartCoroutine(UpdateCall());
             }
 
+            //if (m_UpdateListObj.Count > 5)
+            //{
+            //    for (int i = 0; i < m_UpdateListObj.Count; i++) 
+            //    {
+            //        m_DataManager.RemoveObjectFromTree(m_UpdateListObj[i]);
+            //    }
+            //    m_DataManager.BulkAddToTree(m_UpdateListObj, m_UpdateListRObj);
+            //}
+            //else if (m_UpdateListObj.Count > 0) 
+            //{
+            //    for(int i = 0;i < m_UpdateListObj.Count; i++) 
+            //    {
+            //        m_DataManager.UpdateObjectInTree(m_UpdateListObj[i], m_UpdateListRObj[i]);
+            //    }
+            //}
+
+            //m_UpdateListObj.Clear();
+            //m_UpdateListRObj.Clear();
+
             timer = time;
         }
         else
@@ -72,6 +92,9 @@ public class RTree_BoidManager : MonoBehaviour
     public void UpdateTree(GameObject _Obj, RTree_Object _RObj)
     {
         m_UpdateQueue.Enqueue(new Tuple<GameObject, RTree_Object>(_Obj, _RObj));
+        //m_UpdateListObj.Add(_Obj);
+        //m_UpdateListRObj.Add(_RObj);
+
     }
 
     public void RegisterObject(GameObject _Obj, RTree_Object _RObj)
@@ -79,9 +102,9 @@ public class RTree_BoidManager : MonoBehaviour
         m_DataManager.AddObjectToTree(_Obj, _RObj);
     }
 
-    public void RemoveObject(GameObject _Obj, RTree_Object _RObj)
+    public void RemoveObject(GameObject _Obj)
     {
-        m_DataManager.RemoveObjectFromTree(_Obj, _RObj);
+        m_DataManager.RemoveObjectFromTree(_Obj);
     }
 
     private IEnumerator UpdateCall()

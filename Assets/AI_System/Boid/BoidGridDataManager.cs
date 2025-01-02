@@ -110,7 +110,7 @@ public class BoidGridDataManager : MonoBehaviour
     {
         if (m_DataManager.Guid == _Boid.Key)
         {
-            m_Eventmanager.SendTreeBoidRemove?.Invoke(gameObject, CreateTreeEntry(m_OldPos));
+            m_Eventmanager.SendTreeBoidRemove?.Invoke(gameObject);
         }
     }
 

@@ -1717,9 +1717,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f22d993a1159c7e418b1424faa0943d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_spawnAmountTeamA: 50
+  m_spawnAmountTeamA: 13
   m_spawnMaterialA: {fileID: 2100000, guid: b689aa46f1e28414b91c5093f18d9b82, type: 2}
-  m_spawnAmountTeamB: 50
+  m_spawnAmountTeamB: 13
   m_spawnMaterialB: {fileID: 2100000, guid: 6b47ecd32675a344b8ce04e693e2b4f9, type: 2}
   m_SpawnFormations: 1
   m_formationPrefab: {fileID: 1113447224013948974, guid: d5891ce3f0f259d48995fd18fd0809c3,
@@ -2576,7 +2576,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 4ef2cc3ea963ab944914750bd05943c1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3041,9 +3041,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f22d993a1159c7e418b1424faa0943d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_spawnAmountTeamA: 50
+  m_spawnAmountTeamA: 13
   m_spawnMaterialA: {fileID: 2100000, guid: b689aa46f1e28414b91c5093f18d9b82, type: 2}
-  m_spawnAmountTeamB: 50
+  m_spawnAmountTeamB: 13
   m_spawnMaterialB: {fileID: 2100000, guid: 6b47ecd32675a344b8ce04e693e2b4f9, type: 2}
   m_SpawnFormations: 1
   m_formationPrefab: {fileID: 1113447224013948974, guid: d5891ce3f0f259d48995fd18fd0809c3,
@@ -3520,9 +3520,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f22d993a1159c7e418b1424faa0943d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_spawnAmountTeamA: 50
+  m_spawnAmountTeamA: 13
   m_spawnMaterialA: {fileID: 2100000, guid: b689aa46f1e28414b91c5093f18d9b82, type: 2}
-  m_spawnAmountTeamB: 50
+  m_spawnAmountTeamB: 13
   m_spawnMaterialB: {fileID: 2100000, guid: 6b47ecd32675a344b8ce04e693e2b4f9, type: 2}
   m_SpawnFormations: 1
   m_formationPrefab: {fileID: 1113447224013948974, guid: d5891ce3f0f259d48995fd18fd0809c3,
@@ -5404,9 +5404,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f22d993a1159c7e418b1424faa0943d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_spawnAmountTeamA: 50
+  m_spawnAmountTeamA: 13
   m_spawnMaterialA: {fileID: 2100000, guid: b689aa46f1e28414b91c5093f18d9b82, type: 2}
-  m_spawnAmountTeamB: 50
+  m_spawnAmountTeamB: 13
   m_spawnMaterialB: {fileID: 2100000, guid: 6b47ecd32675a344b8ce04e693e2b4f9, type: 2}
   m_SpawnFormations: 1
   m_formationPrefab: {fileID: 1113447224013948974, guid: d5891ce3f0f259d48995fd18fd0809c3,
