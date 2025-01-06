@@ -78,10 +78,10 @@ public class GridDataManager : MonoBehaviour
         }
     }
 
-    //public GridTile QueryGridTile(int _PosX, int _PosY)
-    //{
-    //    return m_BoidGrid[_PosX, _PosY];
-    //}
+    public GridTile QueryGridTile(int _PosX, int _PosY)
+    {
+        return m_BoidGrid[_PosX, _PosY];
+    }
 
     /// <summary>
     /// Sets gridsize to the next smaller multiple of 10, if not already a multiple.
@@ -117,125 +117,125 @@ public class GridDataManager : MonoBehaviour
         return _X >= 0 && _X < m_BoidGrid.GetLength(0) && _Y >= 0 && _Y < m_BoidGrid.GetLength(1);
     }
 
-    //public bool HasLoS(Vector2Int _From, Vector2Int _To)
-    //{
-    //    if (Mathf.Abs(_To.x - _From.x) > Mathf.Abs(_To.y - _From.y))
-    //    {
-    //        return CheckLoSHorizontal(_From, _To);
-    //    }
-    //    else
-    //    {
-    //        return CheckLoSVertical(_From, _To);
-    //    }
-    //}
+    public bool HasLoS(Vector2Int _From, Vector2Int _To)
+    {
+        if (Mathf.Abs(_To.x - _From.x) > Mathf.Abs(_To.y - _From.y))
+        {
+            return CheckLoSHorizontal(_From, _To);
+        }
+        else
+        {
+            return CheckLoSVertical(_From, _To);
+        }
+    }
 
-    //private bool CheckLoSHorizontal(Vector2Int _From, Vector2Int _To)
-    //{
-    //    int x0;
-    //    int x1;
-    //    int y0;
-    //    int y1;
+    private bool CheckLoSHorizontal(Vector2Int _From, Vector2Int _To)
+    {
+        int x0;
+        int x1;
+        int y0;
+        int y1;
 
-    //    if (_From.x > _To.x)
-    //    {
-    //        x0 = _To.x;
-    //        x1 = _From.x;
-    //        y0 = _To.y;
-    //        y1 = _From.y;
-    //    }
-    //    else
-    //    {
-    //        x0 = _From.x;
-    //        x1 = _To.x;
-    //        y0 = _From.y;
-    //        y1 = _To.y;
-    //    }
+        if (_From.x > _To.x)
+        {
+            x0 = _To.x;
+            x1 = _From.x;
+            y0 = _To.y;
+            y1 = _From.y;
+        }
+        else
+        {
+            x0 = _From.x;
+            x1 = _To.x;
+            y0 = _From.y;
+            y1 = _To.y;
+        }
 
-    //    int dX = x1 - x0;
-    //    int dY = y1 - y0;
+        int dX = x1 - x0;
+        int dY = y1 - y0;
 
-    //    int dir = dY < 0 ? -1 : 1;
-    //    dY *= dir;
+        int dir = dY < 0 ? -1 : 1;
+        dY *= dir;
 
-    //    if (dX == 0)
-    //    {
-    //        return false;
-    //    }
+        if (dX == 0)
+        {
+            return false;
+        }
 
-    //    int y = y0;
-    //    int step = 2 * dY - dX;
+        int y = y0;
+        int step = 2 * dY - dX;
 
-    //    for (int i = 0; i < dX + 1; i++)
-    //    {
-    //        if (QueryGridTile(x0 + i, y).cellType == CellType.Obstacle)
-    //        {
-    //            return false;
-    //        }
+        for (int i = 0; i < dX + 1; i++)
+        {
+            if (QueryGridTile(x0 + i, y).cellType == CellType.Obstacle)
+            {
+                return false;
+            }
 
-    //        if (step >= 0)
-    //        {
-    //            y += dir;
-    //            step = step - 2 * dX;
-    //            step = step + 2 * dY;
-    //        }
-    //    }
+            if (step >= 0)
+            {
+                y += dir;
+                step = step - 2 * dX;
+                step = step + 2 * dY;
+            }
+        }
 
-    //    return true;
-    //}
+        return true;
+    }
 
-    //private bool CheckLoSVertical(Vector2Int _From, Vector2Int _To)
-    //{
-    //    int x0;
-    //    int x1;
-    //    int y0;
-    //    int y1;
+    private bool CheckLoSVertical(Vector2Int _From, Vector2Int _To)
+    {
+        int x0;
+        int x1;
+        int y0;
+        int y1;
 
-    //    if (_From.y > _To.y)
-    //    {
-    //        x0 = _To.x;
-    //        x1 = _From.x;
-    //        y0 = _To.y;
-    //        y1 = _From.y;
-    //    }
-    //    else
-    //    {
-    //        x0 = _From.x;
-    //        x1 = _To.x;
-    //        y0 = _From.y;
-    //        y1 = _To.y;
-    //    }
+        if (_From.y > _To.y)
+        {
+            x0 = _To.x;
+            x1 = _From.x;
+            y0 = _To.y;
+            y1 = _From.y;
+        }
+        else
+        {
+            x0 = _From.x;
+            x1 = _To.x;
+            y0 = _From.y;
+            y1 = _To.y;
+        }
 
-    //    int dX = x1 - x0;
-    //    int dY = y1 - y0;
+        int dX = x1 - x0;
+        int dY = y1 - y0;
 
-    //    int dir = dX < 0 ? -1 : 1;
-    //    dX *= dir;
+        int dir = dX < 0 ? -1 : 1;
+        dX *= dir;
 
-    //    if (dY == 0)
-    //    {
-    //        return false;
-    //    }
+        if (dY == 0)
+        {
+            return false;
+        }
 
-    //    int x = x0;
-    //    int step = 2 * dX - dY;
+        int x = x0;
+        int step = 2 * dX - dY;
 
-    //    for (int i = 0; i < dY + 1; i++)
-    //    {
-    //        if (QueryGridTile(x, y0 + i).cellType == CellType.Obstacle)
-    //        {
-    //            return false;
-    //        }
+        for (int i = 0; i < dY + 1; i++)
+        {
+            if (QueryGridTile(x, y0 + i).cellType == CellType.Obstacle)
+            {
+                return false;
+            }
 
-    //        if (step >= 0)
-    //        {
-    //            x += dir;
-    //            step = step - 2 * dY;
-    //            step = step + 2 * dX;
-    //        }
-    //    }
+            if (step >= 0)
+            {
+                x += dir;
+                step = step - 2 * dY;
+                step = step + 2 * dX;
+            }
+        }
 
-    //    return true;
-    //}
+        return true;
+    }
 }
 
 public class GridTile

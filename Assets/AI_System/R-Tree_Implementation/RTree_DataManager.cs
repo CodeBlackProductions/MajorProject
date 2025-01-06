@@ -80,10 +80,17 @@ public class RTree_DataManager : MonoBehaviour
         if (foundObjects != null)
         {
             Dictionary<GameObject, Team> neighbours = new Dictionary<GameObject, Team>();
+            GridDataManager gridDataManager = GridDataManager.Instance;
+            int cellsize = gridDataManager.CellSize;
 
             foreach (RTree_Object obj in foundObjects)
             {
-                neighbours.Add(obj.Object, obj.Object.GetComponent<BoidDataManager>().Team);
+                Vector2Int fromVec = new Vector2Int((int) (_Pos.x / cellsize),(int)(_Pos.z / cellsize));
+                Vector2Int toVec = new Vector2Int((int) (obj.Object.transform.position.x / cellsize),(int)(obj.Object.transform.position.z / cellsize));
+                if (gridDataManager.HasLoS(fromVec, toVec))
+                {
+                    neighbours.Add(obj.Object, obj.Object.GetComponent<BoidDataManager>().Team);
+                }
             }
 
             return neighbours;

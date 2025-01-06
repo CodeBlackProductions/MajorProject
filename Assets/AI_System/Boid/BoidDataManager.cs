@@ -9,13 +9,10 @@ public enum Team
 public class BoidDataManager : MonoBehaviour
 {
     [SerializeField] private SO_BoidStats m_BaseStats;
-    [SerializeField] private int m_MaxNeighboursToCalculate = 50;
+    [SerializeField] private int m_MaxNeighboursToCalculate = 25;
     [SerializeField] private GameObject m_SelectionIndicator;
 
     private Dictionary<BoidStat, float> m_Stats = new Dictionary<BoidStat, float>();
-    private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
-    private Dictionary<Guid, Rigidbody> m_NeighbouringAllies = new Dictionary<Guid, Rigidbody>();
-
     private List<KeyValuePair<Guid, Rigidbody>> m_NeighbourAllyList = new List<KeyValuePair<Guid, Rigidbody>>();
     private List<KeyValuePair<Guid, Rigidbody>> m_NeighbourEnemyList = new List<KeyValuePair<Guid, Rigidbody>>();
 
@@ -59,6 +56,19 @@ public class BoidDataManager : MonoBehaviour
         Initialize();
     }
 
+    private void Update()
+    {
+        for (int i = 0; i < m_NeighbourAllyList.Count; i++)
+        {
+            Debug.DrawLine(m_NeighbourAllyList[i].Value.transform.position, transform.position, Color.green);
+        }
+
+        for (int i = 0; i < m_NeighbourEnemyList.Count; i++)
+        {
+            Debug.DrawLine(m_NeighbourEnemyList[i].Value.transform.position, transform.position, Color.red);
+        }
+    }
+
     private void Initialize()
     {
         foreach (var stat in m_BaseStats.Stats)
@@ -92,18 +102,12 @@ public class BoidDataManager : MonoBehaviour
             sortedAllies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
             if (sortedAllies.Count > m_MaxNeighboursToCalculate)
             {
-                if (sortedAllies.Count > m_MaxNeighboursToCalculate)
-                {
-                    sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                    sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
-                }
+                sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
             }
-
-            m_NeighbouringAllies.Clear();
-
-            for (int i = 0; i < sortedAllies.Count; i++)
+            else
             {
-                m_NeighbouringAllies.Add(sortedAllies[i].Key, sortedAllies[i].Value);
+                sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
             }
 
             m_NeighbourAllyList = sortedAllies;
@@ -118,18 +122,12 @@ public class BoidDataManager : MonoBehaviour
             sortedEnemies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
             if (sortedEnemies.Count > m_MaxNeighboursToCalculate)
             {
-                if (sortedEnemies.Count > m_MaxNeighboursToCalculate)
-                {
-                    sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                    sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
-                }
+                sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+                sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
             }
-
-            m_NeighbouringEnemies.Clear();
-
-            for (int i = 0; i < sortedEnemies.Count; i++)
+            else 
             {
-                m_NeighbouringEnemies.Add(sortedEnemies[i].Key, sortedEnemies[i].Value);
+                sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
             }
 
             m_NeighbourEnemyList = sortedEnemies;
@@ -140,9 +138,11 @@ public class BoidDataManager : MonoBehaviour
     {
         if (_Team == m_Team)
         {
-            if (m_NeighbouringAllies.ContainsKey(_ID))
+           KeyValuePair<Guid,Rigidbody> toRemove = m_NeighbourAllyList.Find(c => c.Key == _ID);
+
+            if (toRemove.Value != null)
             {
-                m_NeighbouringAllies.Remove(_ID);
+                m_NeighbourAllyList.Remove(toRemove);
             }
         }
         else if (_Team == Team.Neutral)
@@ -151,9 +151,11 @@ public class BoidDataManager : MonoBehaviour
         }
         else
         {
-            if (m_NeighbouringEnemies.ContainsKey(_ID))
+            KeyValuePair<Guid, Rigidbody> toRemove = m_NeighbourEnemyList.Find(c => c.Key == _ID);
+
+            if (toRemove.Value != null)
             {
-                m_NeighbouringEnemies.Remove(_ID);
+                m_NeighbourEnemyList.Remove(toRemove);
             }
         }
     }
@@ -185,26 +187,26 @@ public class BoidDataManager : MonoBehaviour
         switch (_Team)
         {
             case Team.Ally:
-                return FindClosestNeighbour(m_NeighbouringAllies);
+                return FindClosestNeighbour(m_NeighbourAllyList);
 
             case Team.Neutral:
                 return new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
 
             case Team.Enemy:
-                return FindClosestNeighbour(m_NeighbouringEnemies);
+                return FindClosestNeighbour(m_NeighbourEnemyList);
 
             default:
                 return new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
         }
     }
 
-    private KeyValuePair<Guid, Rigidbody> FindClosestNeighbour(Dictionary<Guid, Rigidbody> keyValuePairs)
+    private KeyValuePair<Guid, Rigidbody> FindClosestNeighbour(List<KeyValuePair<Guid, Rigidbody>> _Neighbours)
     {
         float dist = float.MaxValue;
         KeyValuePair<Guid, Rigidbody> closestNeighbour = new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
-        if (keyValuePairs.Count > 1)
+        if (_Neighbours.Count > 1)
         {
-            foreach (var neighbour in keyValuePairs)
+            foreach (var neighbour in _Neighbours)
             {
                 if (!neighbour.Value.gameObject.activeSelf)
                 {
@@ -220,9 +222,9 @@ public class BoidDataManager : MonoBehaviour
                 }
             }
         }
-        else if (keyValuePairs.Count > 0)
+        else if (_Neighbours.Count > 0)
         {
-            closestNeighbour = keyValuePairs.First();
+            closestNeighbour = _Neighbours.First();
         }
 
         if (m_RemoveBuffer.Count > 0)
