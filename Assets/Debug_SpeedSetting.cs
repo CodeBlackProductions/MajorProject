@@ -10,4 +10,12 @@ public class Debug_SpeedSetting : MonoBehaviour
     {
          Time.timeScale = m_Speed;
     }
+
+    private void OnValidate()
+    {
+        if (Application.isPlaying)
+        {
+            Time.timeScale = m_Speed;
+        }
+    }
 }

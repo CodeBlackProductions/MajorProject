@@ -133,20 +133,23 @@ public class UnitSelectionHandler : MonoBehaviour
         }
     }
 
-    public void OnGiveMoveOrder(bool _Additive, Vector3 _TargetPos) 
+    public void OnGiveMoveOrder(bool _Additive, Vector3 _TargetPos)
     {
-        if (_Additive)
+        if (GridDataManager.Instance.IsInBounds((int)(_TargetPos.x / GridDataManager.Instance.CellSize), (int)(_TargetPos.z / GridDataManager.Instance.CellSize)))
         {
-            for (int i = 0; i < m_CurrentSelection.Count; i++)
+            if (_Additive)
             {
-                m_CurrentSelection[i].AddMovTarget(_TargetPos);
+                for (int i = 0; i < m_CurrentSelection.Count; i++)
+                {
+                    m_CurrentSelection[i].AddMovTarget(_TargetPos);
+                }
             }
-        }
-        else
-        {
-            for (int i = 0; i < m_CurrentSelection.Count; i++)
+            else
             {
-                m_CurrentSelection[i].SetMovTarget(_TargetPos);
+                for (int i = 0; i < m_CurrentSelection.Count; i++)
+                {
+                    m_CurrentSelection[i].SetMovTarget(_TargetPos);
+                }
             }
         }
     }

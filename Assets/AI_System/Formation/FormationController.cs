@@ -32,13 +32,18 @@ public class FormationController : MonoBehaviour
             {
                 Transform t = m_BoidManager.Boids[i].Value.transform;
                 pos += t.position;
+
                 fwd += t.forward;
             }
 
             pos = pos / m_BoidManager.Boids.Count;
-            transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * 25f);
+           
+            if (fwd != Vector3.zero && Vector3.Distance(pos,transform.position) > 0.25f)
+            {
+                transform.forward = Vector3.Slerp(transform.forward, fwd, Time.deltaTime * 10f);
+            }
 
-            transform.forward = Vector3.Slerp(transform.forward, fwd, Time.deltaTime * 10f);
+            transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime * 25f);
 
             m_BoidManager.UpdateFormationPos();
 

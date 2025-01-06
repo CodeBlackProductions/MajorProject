@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 [RequireComponent(typeof(BoidFlockingWeightManager))]
@@ -25,6 +24,7 @@ public class BoidFlockingManager : MonoBehaviour
     private Vector3 DebugHalfVision = Vector3.zero;
     private float DebugVisionRadius = 0;
     private float DebugCombatRange = 0;
+    private Vector3 DebugMovTarget = Vector3.zero;
 
     private void Awake()
     {
@@ -64,15 +64,20 @@ public class BoidFlockingManager : MonoBehaviour
         Vector3 movTarget = m_DataManager.QueryNextMovTarget();
 
         Vector3 formationPos = m_DataManager.FormationPosition;
-
         Vector2[,] flowfield = null;
+
+        if (movTarget != Vector3.zero && formationPos != Vector3.zero)
+        {
+            movTarget += m_DataManager.FormationOffset;
+            DebugMovTarget = movTarget;
+        }
 
         if (movTarget != Vector3.zero)
         {
             Vector2Int targetPos = new Vector2Int((int)(movTarget.x / GridDataManager.Instance.CellSize), (int)(movTarget.z / GridDataManager.Instance.CellSize));
             if (m_FlowfieldManager != null)
             {
-                flowfield = m_DataManager.QueryFlowfield();
+                flowfield = m_DataManager.QueryFlowfield(movTarget);
             }
         }
 
@@ -85,15 +90,6 @@ public class BoidFlockingManager : MonoBehaviour
                 break;
             }
         }
-
-        //if (m_Incombat)
-        //{
-        //    GetComponent<MeshRenderer>().material.color = Color.yellow;
-        //}
-        //else
-        //{
-        //    GetComponent<MeshRenderer>().material.color = m_DebugBaseColor;
-        //}
 
         if (m_Incombat)
         {
@@ -139,19 +135,16 @@ public class BoidFlockingManager : MonoBehaviour
             movementVelocity += SteeringBehaviours.Arrive(_MovTarget, pos, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget) * 0.5f;
         }
 
-        if (_NearbyAllies != null && _NearbyAllies.Count > 0)
+        if (!m_AvoidingObstacle && _NearbyAllies != null && _NearbyAllies.Count > 0)
         {
-            Task.Run(() =>
-            {
-                movementVelocity += SteeringBehaviours.Flock(
-                _NearbyAllies,
-                pos,
-                _VisRange,
-                _MovSpeed,
-                m_WeightManager.QueryWeight(Weight.FAllyCohesion),
-                m_WeightManager.QueryWeight(Weight.FAllySeparation),
-                m_WeightManager.QueryWeight(Weight.FAllyAlignment));
-            });
+            movementVelocity += SteeringBehaviours.Flock(
+            _NearbyAllies,
+            pos,
+            _VisRange,
+            _MovSpeed,
+            m_WeightManager.QueryWeight(Weight.FAllyCohesion),
+            m_WeightManager.QueryWeight(Weight.FAllySeparation),
+            m_WeightManager.QueryWeight(Weight.FAllyAlignment));
         }
 
         if (!m_AvoidingObstacle && _FormationPos != Vector3.zero && !float.IsNaN(_FormationPos.x) && !float.IsNaN(_FormationPos.y) && !float.IsNaN(_FormationPos.z))
@@ -166,29 +159,12 @@ public class BoidFlockingManager : MonoBehaviour
 
         if (_NearbyAllies.Count > 0)
         {
-            Task.Run(() =>
-            {
-                movementVelocity += SteeringBehaviours.Queue(_NearbyAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
-            });
+            movementVelocity += SteeringBehaviours.Queue(_NearbyAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
         }
 
-        //List<KeyValuePair<Guid, Rigidbody>> otherFormationAllies = _NearbyAllies.FindAll(ally => ally.Value.GetComponent<BoidDataManager>().FormationBoidManager != m_DataManager.FormationBoidManager);
-        //List<KeyValuePair<Guid, Rigidbody>> ownFormationAllies = _NearbyAllies.FindAll(ally => !otherFormationAllies.Contains(ally));
-
-        //if (ownFormationAllies.Count > 0 && _NearbyEnemies.Count > 0)
-        //{
-        //    movementVelocity += SteeringBehaviours.Queue(ownFormationAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
-        //}
-        //if (otherFormationAllies.Count > 0)
-        //{
-        //    movementVelocity += SteeringBehaviours.Queue(otherFormationAllies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
-        //}
         if (_NearbyEnemies.Count > 0)
         {
-            Task.Run(() =>
-            {
-                movementVelocity += SteeringBehaviours.Queue(_NearbyEnemies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
-            });
+            movementVelocity += SteeringBehaviours.Queue(_NearbyEnemies, pos, m_Rigidbody.velocity, movementVelocity - m_Rigidbody.velocity, _VisRange, _MovSpeed, 0.75f, 0.25f);
         }
 
         //DebugMethod(_NearbyEnemies);
@@ -308,6 +284,10 @@ public class BoidFlockingManager : MonoBehaviour
         Gizmos.DrawWireSphere(m_Rigidbody.position, DebugVisionRadius);
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(m_Rigidbody.position, DebugCombatRange);
+        Gizmos.color = Color.white;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(DebugMovTarget, 0.5f);
         Gizmos.color = Color.white;
     }
 }

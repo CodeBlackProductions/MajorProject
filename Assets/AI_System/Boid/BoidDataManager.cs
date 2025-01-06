@@ -16,14 +16,15 @@ public class BoidDataManager : MonoBehaviour
     private Dictionary<Guid, Rigidbody> m_NeighbouringEnemies = new Dictionary<Guid, Rigidbody>();
     private Dictionary<Guid, Rigidbody> m_NeighbouringAllies = new Dictionary<Guid, Rigidbody>();
 
-    private List<KeyValuePair<Guid,Rigidbody>> m_NeighbourAllyList = new List<KeyValuePair<Guid, Rigidbody>>();
-    private List<KeyValuePair<Guid,Rigidbody>> m_NeighbourEnemyList = new List<KeyValuePair<Guid, Rigidbody>>();
+    private List<KeyValuePair<Guid, Rigidbody>> m_NeighbourAllyList = new List<KeyValuePair<Guid, Rigidbody>>();
+    private List<KeyValuePair<Guid, Rigidbody>> m_NeighbourEnemyList = new List<KeyValuePair<Guid, Rigidbody>>();
 
     private List<Vector3> m_NearbyObstacles = new List<Vector3>();
     private Queue<Vector3> m_MovTargets = new Queue<Vector3>();
     private Vector3 m_CurrentMovTarget = Vector3.zero;
     private FormationBoidManager m_FormationBoidManager;
     private Vector3 m_FormationPosition = Vector3.zero;
+    private Vector3 m_FormationOffset = Vector3.zero;
     private Vector3 m_FormationCenter = Vector3.zero;
     private Guid m_Guid;
     private Team m_Team;
@@ -33,6 +34,7 @@ public class BoidDataManager : MonoBehaviour
 
     public FormationBoidManager FormationBoidManager { get => m_FormationBoidManager; set => m_FormationBoidManager = value; }
     public Vector3 FormationPosition { get => m_FormationPosition; set => m_FormationPosition = value; }
+    public Vector3 FormationOffset { get => m_FormationOffset; set => m_FormationOffset = value; }
     public Vector3 FormationCenter { get => m_FormationCenter; set => m_FormationCenter = value; }
     public Guid Guid { get => m_Guid; set => m_Guid = value; }
     public Team Team { get => m_Team; set => m_Team = value; }
@@ -273,7 +275,7 @@ public class BoidDataManager : MonoBehaviour
         return m_NearbyObstacles.ToArray();
     }
 
-    public Vector2[,] QueryFlowfield()
+    public Vector2[,] QueryFlowfield(Vector3 _TargetPos)
     {
         if (m_CurrentMovTarget == Vector3.zero)
         {
@@ -282,7 +284,7 @@ public class BoidDataManager : MonoBehaviour
 
         if (m_CurrentFlowfield != null)
         {
-            Vector2Int tempVec = new Vector2Int((int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize), (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize));
+            Vector2Int tempVec = new Vector2Int((int)(_TargetPos.x / GridDataManager.Instance.CellSize), (int)(_TargetPos.z / GridDataManager.Instance.CellSize));
             if (tempVec != m_CurrentFlowfieldTarget)
             {
                 m_CurrentFlowfieldTarget = tempVec;
@@ -291,8 +293,8 @@ public class BoidDataManager : MonoBehaviour
         }
         else
         {
-            m_CurrentFlowfieldTarget.x = (int)(m_CurrentMovTarget.x / GridDataManager.Instance.CellSize);
-            m_CurrentFlowfieldTarget.y = (int)(m_CurrentMovTarget.z / GridDataManager.Instance.CellSize);
+            Vector2Int tempVec = new Vector2Int((int)(_TargetPos.x / GridDataManager.Instance.CellSize), (int)(_TargetPos.z / GridDataManager.Instance.CellSize));
+            m_CurrentFlowfieldTarget = tempVec;
             m_CurrentFlowfield = FlowfieldManager.Instance.QueryFlowfield(m_CurrentFlowfieldTarget);
         }
 

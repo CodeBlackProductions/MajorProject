@@ -128,6 +128,15 @@ public class FormationDataManager : MonoBehaviour
         return transform.position + rotatedOffset;
     }
 
+    public Vector3 QueryBoidOffset(int _BoidIndex) 
+    {
+        Quaternion rotation = Quaternion.LookRotation(transform.forward);
+
+        Vector3 rotatedOffset = rotation * m_BoidOffsets[_BoidIndex];
+
+        return rotatedOffset;
+    }
+
     public Vector2 QueryFlowfieldDir(Vector3 _MovTarget)
     {
         Vector2[,] flowfield;

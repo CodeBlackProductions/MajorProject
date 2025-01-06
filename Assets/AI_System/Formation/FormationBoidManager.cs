@@ -76,6 +76,7 @@ public class FormationBoidManager : MonoBehaviour
         {
             BoidDataManager boid = m_Boids[i].Value;
             boid.FormationPosition = m_DataManager.QueryBoidPosition(i);
+            boid.FormationOffset = m_DataManager.QueryBoidOffset(i);
             boid.FormationCenter = transform.position;
         }
     }

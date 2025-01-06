@@ -107,15 +107,15 @@ public class GridDataManager : MonoBehaviour
         return obj;
     }
 
-    ///// <summary>
-    ///// Checks if coordinate is within Bounds of Grid.
-    ///// </summary>
-    ///// <param name="_TilePos">Coordinate to check</param>
-    ///// <returns>true if in bounds</returns>
-    //public bool IsInBounds(int _X, int _Y)
-    //{
-    //    return _X >= 0 && _X < m_BoidGrid.GetLength(0) && _Y >= 0 && _Y < m_BoidGrid.GetLength(1);
-    //}
+    /// <summary>
+    /// Checks if coordinate is within Bounds of Grid.
+    /// </summary>
+    /// <param name="_TilePos">Coordinate to check</param>
+    /// <returns>true if in bounds</returns>
+    public bool IsInBounds(int _X, int _Y)
+    {
+        return _X >= 0 && _X < m_BoidGrid.GetLength(0) && _Y >= 0 && _Y < m_BoidGrid.GetLength(1);
+    }
 
     //public bool HasLoS(Vector2Int _From, Vector2Int _To)
     //{
