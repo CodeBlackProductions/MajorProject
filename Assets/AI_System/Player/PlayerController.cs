@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float m_CameraZoomDistance = 20;
     [SerializeField] private int m_CameraMaxZoomLevel = 5;
     [SerializeField] private float m_ClickSelectionRadius = 1;
+    [SerializeField] private float m_DownTimeToDrag = 0.2f;
     private EventManager m_EventManager;
     private Camera m_Camera;
     private Vector3 m_CamPos = Vector3.zero;
@@ -24,6 +27,9 @@ public class PlayerController : MonoBehaviour
     private float m_LeftDownTime = 0;
     private bool m_RightIsDown = false;
     private float m_RightDownTime = 0;
+
+    private Vector3 m_LeftDragStart = Vector3.zero;
+    private Vector3 m_LeftDragEnd = Vector3.zero;
 
     private void Awake()
     {
@@ -121,13 +127,19 @@ public class PlayerController : MonoBehaviour
     private void LeftClickDown(bool _ShiftDown, bool _CtrlDown)
     {
         m_LeftIsDown = true;
+
+        RaycastHit hit;
+        Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+        Physics.Raycast(ray, out hit);
+
+        m_LeftDragStart = hit.point;
     }
 
     private void LeftClickUp(bool _ShiftDown, bool _CtrlDown)
     {
         m_LeftIsDown = false;
 
-        if (m_LeftDownTime < 0.2f)
+        if (m_LeftDownTime < m_DownTimeToDrag)
         {
             RaycastHit hit;
             Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
@@ -158,8 +170,49 @@ public class PlayerController : MonoBehaviour
             {
                 UnitSelectionHandler.Instance.ClearSelection();
             }
+        }
+        else
+        {
+            RaycastHit hit;
+            Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+            Physics.Raycast(ray, out hit);
+            m_LeftDragEnd = hit.point;
 
+            Vector3 center = (m_LeftDragEnd + m_LeftDragStart) * 0.5f;
+            float halfExtentX = Mathf.Abs(m_LeftDragStart.x - m_LeftDragEnd.x) * 0.5f;
+            float halfExtentZ = Mathf.Abs(m_LeftDragStart.z - m_LeftDragEnd.z) * 0.5f;
 
+            Vector3 halfExtent = new Vector3(halfExtentX, 1, halfExtentZ);
+
+            Collider[] hits = Physics.OverlapBox(center, halfExtent, Quaternion.identity, LayerMask.GetMask("Boid"));
+
+            if (hits.Length > 0)
+            {
+                BoidDataManager boid;
+                List<Guid> guids = new List<Guid>();
+
+                for (int i = 0; i < hits.Length; i++) 
+                {
+                    if (hits[i].gameObject.TryGetComponent<BoidDataManager>(out boid))
+                    {
+                        guids.Add(boid.Guid); 
+                    }
+                }
+
+                if (_CtrlDown)
+                {
+                    UnitSelectionHandler.Instance.OnUnitDeselect(guids.ToArray());
+                }
+                else
+                {
+                    UnitSelectionHandler.Instance.OnUnitSelect(_ShiftDown, guids.ToArray());
+                }
+
+            }
+            else if (!_CtrlDown && !_ShiftDown)
+            {
+                UnitSelectionHandler.Instance.ClearSelection();
+            }
         }
 
         m_LeftDownTime = 0;
@@ -185,4 +238,14 @@ public class PlayerController : MonoBehaviour
 
         m_RightDownTime = 0;
     }
+
+    //private void OnDrawGizmos()
+    //{
+    //    var oldMatrix = Gizmos.matrix;
+        
+    //    Gizmos.matrix = Matrix4x4.TRS(debugcenter, Quaternion.identity, debugsize * 2);
+    //    Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+
+    //    Gizmos.matrix = oldMatrix;
+    //}
 }

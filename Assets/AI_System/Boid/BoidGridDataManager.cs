@@ -1,7 +1,6 @@
 using RBush;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class BoidGridDataManager : MonoBehaviour
@@ -49,7 +48,7 @@ public class BoidGridDataManager : MonoBehaviour
             {
                 float visRange = m_DataManager.QueryStat(BoidStat.VisRange);
 
-                Dictionary<GameObject, Team> neighbours = RTree_DataManager.Instance.QueryNeighboursInRange(m_Rb.position, visRange);
+                List<KeyValuePair<GameObject, Team>> neighbours = RTree_DataManager.Instance.QueryNeighboursInRange(m_Rb.position, visRange);
                 if (neighbours != null)
                 {
                     SetNeighbours(neighbours);
@@ -74,20 +73,20 @@ public class BoidGridDataManager : MonoBehaviour
         }
     }
 
-    private void SetNeighbours(Dictionary<GameObject, Team> neighbours)
+    private void SetNeighbours(List<KeyValuePair<GameObject, Team>> neighbours)
     {
-        Dictionary<Guid, Rigidbody> neighbouringAllies = new Dictionary<Guid, Rigidbody>();
-        Dictionary<Guid, Rigidbody> neighbouringEnemies = new Dictionary<Guid, Rigidbody>();
+        List<KeyValuePair<Guid, Rigidbody>> neighbouringAllies = new List<KeyValuePair<Guid, Rigidbody>>();
+        List<KeyValuePair<Guid, Rigidbody>> neighbouringEnemies = new List<KeyValuePair<Guid, Rigidbody>>();
 
         foreach (var n in neighbours)
         {
             if (n.Value == m_DataManager.Team && n.Key != gameObject)
             {
-                neighbouringAllies.Add(n.Key.GetComponent<BoidDataManager>().Guid, n.Key.GetComponent<Rigidbody>());
+                neighbouringAllies.Add(new KeyValuePair<Guid, Rigidbody>(n.Key.GetComponent<BoidDataManager>().Guid, n.Key.GetComponent<Rigidbody>()));
             }
             else if (n.Key != gameObject)
             {
-                neighbouringEnemies.Add(n.Key.GetComponent<BoidDataManager>().Guid, n.Key.GetComponent<Rigidbody>());
+                neighbouringEnemies.Add(new KeyValuePair<Guid, Rigidbody>(n.Key.GetComponent<BoidDataManager>().Guid, n.Key.GetComponent<Rigidbody>()));
             }
         }
 

@@ -58,14 +58,17 @@ public class BoidDataManager : MonoBehaviour
 
     private void Update()
     {
-        for (int i = 0; i < m_NeighbourAllyList.Count; i++)
+        if (m_IsSelectedByPlayer)
         {
-            Debug.DrawLine(m_NeighbourAllyList[i].Value.transform.position, transform.position, Color.green);
-        }
+            for (int i = 0; i < m_NeighbourAllyList.Count; i++)
+            {
+                Debug.DrawLine(m_NeighbourAllyList[i].Value.transform.position, transform.position, Color.green);
+            }
 
-        for (int i = 0; i < m_NeighbourEnemyList.Count; i++)
-        {
-            Debug.DrawLine(m_NeighbourEnemyList[i].Value.transform.position, transform.position, Color.red);
+            for (int i = 0; i < m_NeighbourEnemyList.Count; i++)
+            {
+                Debug.DrawLine(m_NeighbourEnemyList[i].Value.transform.position, transform.position, Color.red);
+            }
         }
     }
 
@@ -94,23 +97,22 @@ public class BoidDataManager : MonoBehaviour
         return m_Stats[_Stat];
     }
 
-    public void SetNeighbours(Team _Team, Dictionary<Guid, Rigidbody> _Boids)
+    public void SetNeighbours(Team _Team, List<KeyValuePair<Guid, Rigidbody>> _Boids)
     {
+        _Boids.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
+        if (_Boids.Count > m_MaxNeighboursToCalculate)
+        {
+            _Boids.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+            _Boids.RemoveRange(m_MaxNeighboursToCalculate, _Boids.Count - m_MaxNeighboursToCalculate);
+        }
+        else
+        {
+            _Boids.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
+        }
+
         if (_Team == Team.Ally)
         {
-            List<KeyValuePair<Guid, Rigidbody>> sortedAllies = _Boids.ToList();
-            sortedAllies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
-            if (sortedAllies.Count > m_MaxNeighboursToCalculate)
-            {
-                sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                sortedAllies.RemoveRange(m_MaxNeighboursToCalculate, sortedAllies.Count - m_MaxNeighboursToCalculate);
-            }
-            else
-            {
-                sortedAllies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-            }
-
-            m_NeighbourAllyList = sortedAllies;
+            m_NeighbourAllyList = _Boids;
         }
         else if (_Team == Team.Neutral)
         {
@@ -118,19 +120,7 @@ public class BoidDataManager : MonoBehaviour
         }
         else if (_Team == Team.Enemy)
         {
-            List<KeyValuePair<Guid, Rigidbody>> sortedEnemies = _Boids.ToList();
-            sortedEnemies.RemoveAll(neighbour => neighbour.Value.gameObject.activeSelf == false);
-            if (sortedEnemies.Count > m_MaxNeighboursToCalculate)
-            {
-                sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-                sortedEnemies.RemoveRange(m_MaxNeighboursToCalculate, sortedEnemies.Count - m_MaxNeighboursToCalculate);
-            }
-            else 
-            {
-                sortedEnemies.OrderBy(neighbour => Vector3.Distance(neighbour.Value.position, transform.position));
-            }
-
-            m_NeighbourEnemyList = sortedEnemies;
+            m_NeighbourEnemyList = _Boids;
         }
     }
 
@@ -138,7 +128,7 @@ public class BoidDataManager : MonoBehaviour
     {
         if (_Team == m_Team)
         {
-           KeyValuePair<Guid,Rigidbody> toRemove = m_NeighbourAllyList.Find(c => c.Key == _ID);
+            KeyValuePair<Guid, Rigidbody> toRemove = m_NeighbourAllyList.Find(c => c.Key == _ID);
 
             if (toRemove.Value != null)
             {

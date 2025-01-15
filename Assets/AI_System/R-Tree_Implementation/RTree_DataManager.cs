@@ -1,7 +1,5 @@
 using RBush;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 public class RTree_DataManager : MonoBehaviour
@@ -73,23 +71,23 @@ public class RTree_DataManager : MonoBehaviour
         }
     }
 
-    public Dictionary<GameObject, Team> QueryNeighboursInRange(Vector3 _Pos, float _Radius)
+    public List<KeyValuePair<GameObject, Team>> QueryNeighboursInRange(Vector3 _Pos, float _Radius)
     {
         IEnumerable<RTree_Object> foundObjects = m_BoidTree.Search(new Envelope(_Pos.x - _Radius, _Pos.z - _Radius, _Pos.x + _Radius, _Pos.z + _Radius));
 
         if (foundObjects != null)
         {
-            Dictionary<GameObject, Team> neighbours = new Dictionary<GameObject, Team>();
+            List<KeyValuePair<GameObject, Team>> neighbours = new List<KeyValuePair<GameObject, Team>>();
             GridDataManager gridDataManager = GridDataManager.Instance;
             int cellsize = gridDataManager.CellSize;
 
             foreach (RTree_Object obj in foundObjects)
             {
-                Vector2Int fromVec = new Vector2Int((int) (_Pos.x / cellsize),(int)(_Pos.z / cellsize));
-                Vector2Int toVec = new Vector2Int((int) (obj.Object.transform.position.x / cellsize),(int)(obj.Object.transform.position.z / cellsize));
+                Vector2Int fromVec = new Vector2Int((int)(_Pos.x / cellsize), (int)(_Pos.z / cellsize));
+                Vector2Int toVec = new Vector2Int((int)(obj.Object.transform.position.x / cellsize), (int)(obj.Object.transform.position.z / cellsize));
                 if (gridDataManager.HasLoS(fromVec, toVec))
                 {
-                    neighbours.Add(obj.Object, obj.Object.GetComponent<BoidDataManager>().Team);
+                    neighbours.Add(new KeyValuePair<GameObject, Team>(obj.Object, obj.Object.GetComponent<BoidDataManager>().Team));
                 }
             }
 
