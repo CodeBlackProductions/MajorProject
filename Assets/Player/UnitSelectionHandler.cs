@@ -133,6 +133,24 @@ public class UnitSelectionHandler : MonoBehaviour
         }
     }
 
+    public void OnFormationUpdate() 
+    {
+        List<FormationDataManager> formations = new List<FormationDataManager>();
+        for (int i = 0; i < m_CurrentSelection.Count; i++)
+        {
+           FormationDataManager temp = m_CurrentSelection[i].FormationBoidManager.GetComponent<FormationDataManager>();
+            if (!formations.Contains(temp))
+            {
+                formations.Add(temp);
+            }
+        }
+
+        for (int i = 0; i < formations.Count; i++) 
+        {
+            formations[i].UpdateBoidOffsets();
+        }
+    }
+
     public void OnGiveMoveOrder(bool _Additive, Vector3 _TargetPos)
     {
         if (GridDataManager.Instance.IsInBounds((int)(_TargetPos.x / GridDataManager.Instance.CellSize), (int)(_TargetPos.z / GridDataManager.Instance.CellSize)))

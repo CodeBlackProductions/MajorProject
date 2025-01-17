@@ -56,6 +56,7 @@ public class PlayerController : MonoBehaviour
             m_EventManager.PlayerLeftMouseUp += LeftClickUp;
             m_EventManager.PlayerRightMouseDown += RightClickDown;
             m_EventManager.PlayerRightMouseUp += RightClickUp;
+            m_EventManager.PlayerFUp += FormationChange;
         }
 
         m_Camera = Camera.main;
@@ -303,6 +304,11 @@ public class PlayerController : MonoBehaviour
             EventManager.Instance?.SpawnFormationAtPosition.Invoke(Team.Enemy, hit.point);
         }
         m_RightDownTime = 0;
+    }
+
+    private void FormationChange() 
+    {
+        UnitSelectionHandler.Instance?.OnFormationUpdate();
     }
 
     //private void OnDrawGizmos()

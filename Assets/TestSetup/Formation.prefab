@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BaseStats: {fileID: 11400000, guid: 0b5e92dfb799e724f9bbd2e21b66ccb7, type: 2}
+  m_FormationType: {fileID: 11400000, guid: 74b81d77719449e44a3646018debfa5a, type: 2}
 --- !u!114 &2978100077412509887
 MonoBehaviour:
   m_ObjectHideFlags: 0

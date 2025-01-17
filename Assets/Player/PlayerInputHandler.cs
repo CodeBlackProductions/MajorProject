@@ -72,11 +72,14 @@ public class PlayerInputHandler : MonoBehaviour
         m_CtrlAction.canceled += OnCtrlAction;
         m_CtrlAction.Enable();
 
-        m_SpaceAction = new InputAction("Space", InputActionType.Button);
-        m_SpaceAction.AddBinding("<Keyboard>/space");
-        m_SpaceAction.AddBinding("<Keyboard>/space");
+        m_SpaceAction = new InputAction("Space", InputActionType.Button, "<Keyboard>/space");
         m_SpaceAction.started += OnSpaceAction;
         m_SpaceAction.canceled += OnSpaceAction;
+        m_SpaceAction.Enable();
+
+        m_SpaceAction = new InputAction("F", InputActionType.Button, "<Keyboard>/f");
+        m_SpaceAction.started += OnFAction;
+        m_SpaceAction.canceled += OnFAction;
         m_SpaceAction.Enable();
     }
 
@@ -230,6 +233,32 @@ public class PlayerInputHandler : MonoBehaviour
 
             case InputActionPhase.Canceled:
                 m_SpaceDown = false;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void OnFAction(InputAction.CallbackContext _context) 
+    {
+        switch (_context.phase)
+        {
+            case InputActionPhase.Disabled:
+                break;
+
+            case InputActionPhase.Waiting:
+                break;
+
+            case InputActionPhase.Started:
+                m_EventManager.PlayerFDown?.Invoke();
+                break;
+
+            case InputActionPhase.Performed:
+                break;
+
+            case InputActionPhase.Canceled:
+                m_EventManager.PlayerFUp?.Invoke();
                 break;
 
             default:
