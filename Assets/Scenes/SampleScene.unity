@@ -3012,6 +3012,8 @@ MonoBehaviour:
   m_CameraZoomDistance: 20
   m_CameraMaxZoomLevel: 5
   m_ClickSelectionRadius: 1
+  m_DownTimeToDrag: 0.2
+  m_SelectionMat: {fileID: 2100000, guid: baaf69909f10ef34f9bb29fbca97ae23, type: 2}
 --- !u!1 &1289889467
 GameObject:
   m_ObjectHideFlags: 0

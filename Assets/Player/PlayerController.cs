@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.AI;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
@@ -14,6 +16,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int m_CameraMaxZoomLevel = 5;
     [SerializeField] private float m_ClickSelectionRadius = 1;
     [SerializeField] private float m_DownTimeToDrag = 0.2f;
+    [SerializeField] private Material m_SelectionMat = null;
+
     private EventManager m_EventManager;
     private Camera m_Camera;
     private Vector3 m_CamPos = Vector3.zero;
@@ -30,6 +34,7 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 m_LeftDragStart = Vector3.zero;
     private Vector3 m_LeftDragEnd = Vector3.zero;
+    private GameObject m_DragVisuals = null;
 
     private void Awake()
     {
@@ -83,6 +88,44 @@ public class PlayerController : MonoBehaviour
         if (m_LeftIsDown)
         {
             m_LeftDownTime += Time.deltaTime;
+
+            if (m_LeftDownTime >= m_DownTimeToDrag)
+            {
+                if (m_DragVisuals != null)
+                {
+                    RaycastHit hit;
+                    Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+                    Physics.Raycast(ray, out hit);
+
+                    Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
+                    pos += new Vector3(0,0.25f,0);
+                    float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) * 0.1f;
+                    float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) * 0.1f;
+
+                    Vector3 scale = new Vector3(scaleX, 1, scaleZ);
+
+                    m_DragVisuals.transform.position = pos;
+                    m_DragVisuals.transform.localScale = scale;
+                }
+                else
+                {
+                    m_DragVisuals = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                    m_DragVisuals.GetComponent<MeshRenderer>().material = m_SelectionMat;
+
+                    RaycastHit hit;
+                    Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+                    Physics.Raycast(ray, out hit);
+
+                    Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
+                    pos += new Vector3(0, 0.25f, 0);
+                    float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) *0.1f;
+                    float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) *0.1f;
+                    Vector3 scale = new Vector3(scaleX, 1, scaleZ);
+
+                    m_DragVisuals.transform.position = pos;
+                    m_DragVisuals.transform.localScale = scale;
+                }
+            }
         }
 
         if (m_RightIsDown)
@@ -191,11 +234,11 @@ public class PlayerController : MonoBehaviour
                 BoidDataManager boid;
                 List<Guid> guids = new List<Guid>();
 
-                for (int i = 0; i < hits.Length; i++) 
+                for (int i = 0; i < hits.Length; i++)
                 {
                     if (hits[i].gameObject.TryGetComponent<BoidDataManager>(out boid))
                     {
-                        guids.Add(boid.Guid); 
+                        guids.Add(boid.Guid);
                     }
                 }
 
@@ -207,12 +250,14 @@ public class PlayerController : MonoBehaviour
                 {
                     UnitSelectionHandler.Instance.OnUnitSelect(_ShiftDown, guids.ToArray());
                 }
-
             }
             else if (!_CtrlDown && !_ShiftDown)
             {
                 UnitSelectionHandler.Instance.ClearSelection();
             }
+
+            GameObject.Destroy(m_DragVisuals);
+            m_DragVisuals = null;
         }
 
         m_LeftDownTime = 0;
@@ -242,7 +287,7 @@ public class PlayerController : MonoBehaviour
     //private void OnDrawGizmos()
     //{
     //    var oldMatrix = Gizmos.matrix;
-        
+
     //    Gizmos.matrix = Matrix4x4.TRS(debugcenter, Quaternion.identity, debugsize * 2);
     //    Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
 
