@@ -11,11 +11,13 @@ public class PlayerInputHandler : MonoBehaviour
     private InputAction m_RightClickAction;
     private InputAction m_ShiftAction;
     private InputAction m_CtrlAction;
+    private InputAction m_SpaceAction;
 
     private EventManager m_EventManager;
 
     private bool m_ShiftDown = false;
     private bool m_CtrlDown = false;
+    private bool m_SpaceDown = false;
 
     private void Awake()
     {
@@ -69,6 +71,13 @@ public class PlayerInputHandler : MonoBehaviour
         m_CtrlAction.started += OnCtrlAction;
         m_CtrlAction.canceled += OnCtrlAction;
         m_CtrlAction.Enable();
+
+        m_SpaceAction = new InputAction("Space", InputActionType.Button);
+        m_SpaceAction.AddBinding("<Keyboard>/space");
+        m_SpaceAction.AddBinding("<Keyboard>/space");
+        m_SpaceAction.started += OnSpaceAction;
+        m_SpaceAction.canceled += OnSpaceAction;
+        m_SpaceAction.Enable();
     }
 
     private void Start()
@@ -109,14 +118,14 @@ public class PlayerInputHandler : MonoBehaviour
                 break;
 
             case InputActionPhase.Started:
-                m_EventManager.PlayerLeftMouseDown?.Invoke(m_ShiftDown,m_CtrlDown);
+                m_EventManager.PlayerLeftMouseDown?.Invoke(m_ShiftDown,m_CtrlDown,m_SpaceDown);
                 break;
 
             case InputActionPhase.Performed:
                 break;
 
             case InputActionPhase.Canceled:
-                m_EventManager.PlayerLeftMouseUp?.Invoke(m_ShiftDown, m_CtrlDown);
+                m_EventManager.PlayerLeftMouseUp?.Invoke(m_ShiftDown, m_CtrlDown, m_SpaceDown);
                 break;
 
             default:
@@ -135,14 +144,14 @@ public class PlayerInputHandler : MonoBehaviour
                 break;
 
             case InputActionPhase.Started:
-                m_EventManager.PlayerRightMouseDown?.Invoke(m_ShiftDown, m_CtrlDown);
+                m_EventManager.PlayerRightMouseDown?.Invoke(m_ShiftDown, m_CtrlDown, m_SpaceDown);
                 break;
 
             case InputActionPhase.Performed:
                 break;
 
             case InputActionPhase.Canceled:
-                m_EventManager.PlayerRightMouseUp?.Invoke(m_ShiftDown, m_CtrlDown);
+                m_EventManager.PlayerRightMouseUp?.Invoke(m_ShiftDown, m_CtrlDown, m_SpaceDown);
                 break;
 
             default:
@@ -195,6 +204,32 @@ public class PlayerInputHandler : MonoBehaviour
 
             case InputActionPhase.Canceled:
                 m_CtrlDown = false;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void OnSpaceAction(InputAction.CallbackContext _context) 
+    {
+        switch (_context.phase)
+        {
+            case InputActionPhase.Disabled:
+                break;
+
+            case InputActionPhase.Waiting:
+                break;
+
+            case InputActionPhase.Started:
+                m_SpaceDown = true;
+                break;
+
+            case InputActionPhase.Performed:
+                break;
+
+            case InputActionPhase.Canceled:
+                m_SpaceDown = false;
                 break;
 
             default:

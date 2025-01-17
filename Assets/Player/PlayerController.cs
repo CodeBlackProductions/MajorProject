@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Experimental.AI;
-using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float m_ClickSelectionRadius = 1;
     [SerializeField] private float m_DownTimeToDrag = 0.2f;
     [SerializeField] private Material m_SelectionMat = null;
+    [SerializeField] private bool m_AllowFreeSpawn = false;
 
     private EventManager m_EventManager;
     private Camera m_Camera;
@@ -98,7 +95,7 @@ public class PlayerController : MonoBehaviour
                     Physics.Raycast(ray, out hit);
 
                     Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
-                    pos += new Vector3(0,0.25f,0);
+                    pos += new Vector3(0, 0.25f, 0);
                     float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) * 0.1f;
                     float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) * 0.1f;
 
@@ -118,8 +115,8 @@ public class PlayerController : MonoBehaviour
 
                     Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
                     pos += new Vector3(0, 0.25f, 0);
-                    float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) *0.1f;
-                    float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) *0.1f;
+                    float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) * 0.1f;
+                    float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) * 0.1f;
                     Vector3 scale = new Vector3(scaleX, 1, scaleZ);
 
                     m_DragVisuals.transform.position = pos;
@@ -167,120 +164,144 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void LeftClickDown(bool _ShiftDown, bool _CtrlDown)
+    private void LeftClickDown(bool _ShiftDown, bool _CtrlDown, bool _SpaceDown)
     {
         m_LeftIsDown = true;
 
-        RaycastHit hit;
-        Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
-        Physics.Raycast(ray, out hit);
+        if (!_SpaceDown)
+        {
+            RaycastHit hit;
+            Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+            Physics.Raycast(ray, out hit);
 
-        m_LeftDragStart = hit.point;
+            m_LeftDragStart = hit.point;
+        }
     }
 
-    private void LeftClickUp(bool _ShiftDown, bool _CtrlDown)
+    private void LeftClickUp(bool _ShiftDown, bool _CtrlDown, bool _SpaceDown)
     {
         m_LeftIsDown = false;
 
-        if (m_LeftDownTime < m_DownTimeToDrag)
+        if (!m_AllowFreeSpawn || !_SpaceDown)
         {
-            RaycastHit hit;
-            Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
-            Physics.Raycast(ray, out hit);
-
-            Collider[] hits = Physics.OverlapSphere(hit.point, m_ClickSelectionRadius, LayerMask.GetMask("Boid"));
-
-            if (hits.Length > 0)
+            if (m_LeftDownTime < m_DownTimeToDrag)
             {
-                hits.OrderBy(h => Vector3.Distance(h.transform.position, hit.point));
+                RaycastHit hit;
+                Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+                Physics.Raycast(ray, out hit);
 
-                BoidDataManager boid;
-                if (hits[0].gameObject.TryGetComponent<BoidDataManager>(out boid))
+                Collider[] hits = Physics.OverlapSphere(hit.point, m_ClickSelectionRadius, LayerMask.GetMask("Boid"));
+
+                if (hits.Length > 0)
                 {
-                    Guid[] guids = new Guid[] { boid.Guid };
+                    hits.OrderBy(h => Vector3.Distance(h.transform.position, hit.point));
+
+                    BoidDataManager boid;
+                    if (hits[0].gameObject.TryGetComponent<BoidDataManager>(out boid))
+                    {
+                        Guid[] guids = new Guid[] { boid.Guid };
+
+                        if (_CtrlDown)
+                        {
+                            UnitSelectionHandler.Instance.OnUnitDeselect(guids);
+                        }
+                        else
+                        {
+                            UnitSelectionHandler.Instance.OnUnitSelect(_ShiftDown, guids);
+                        }
+                    }
+                }
+                else if (!_CtrlDown && !_ShiftDown)
+                {
+                    UnitSelectionHandler.Instance.ClearSelection();
+                }
+            }
+            else
+            {
+                RaycastHit hit;
+                Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+                Physics.Raycast(ray, out hit);
+                m_LeftDragEnd = hit.point;
+
+                Vector3 center = (m_LeftDragEnd + m_LeftDragStart) * 0.5f;
+                float halfExtentX = Mathf.Abs(m_LeftDragStart.x - m_LeftDragEnd.x) * 0.5f;
+                float halfExtentZ = Mathf.Abs(m_LeftDragStart.z - m_LeftDragEnd.z) * 0.5f;
+
+                Vector3 halfExtent = new Vector3(halfExtentX, 1, halfExtentZ);
+
+                Collider[] hits = Physics.OverlapBox(center, halfExtent, Quaternion.identity, LayerMask.GetMask("Boid"));
+
+                if (hits.Length > 0)
+                {
+                    BoidDataManager boid;
+                    List<Guid> guids = new List<Guid>();
+
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].gameObject.TryGetComponent<BoidDataManager>(out boid))
+                        {
+                            guids.Add(boid.Guid);
+                        }
+                    }
 
                     if (_CtrlDown)
                     {
-                        UnitSelectionHandler.Instance.OnUnitDeselect(guids);
+                        UnitSelectionHandler.Instance.OnUnitDeselect(guids.ToArray());
                     }
                     else
                     {
-                        UnitSelectionHandler.Instance.OnUnitSelect(_ShiftDown, guids);
+                        UnitSelectionHandler.Instance.OnUnitSelect(_ShiftDown, guids.ToArray());
                     }
                 }
-            }
-            else if (!_CtrlDown && !_ShiftDown)
-            {
-                UnitSelectionHandler.Instance.ClearSelection();
+                else if (!_CtrlDown && !_ShiftDown)
+                {
+                    UnitSelectionHandler.Instance.ClearSelection();
+                }
+
+                GameObject.Destroy(m_DragVisuals);
+                m_DragVisuals = null;
             }
         }
-        else
+        else if (m_AllowFreeSpawn)
         {
             RaycastHit hit;
             Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(ray, out hit);
-            m_LeftDragEnd = hit.point;
 
-            Vector3 center = (m_LeftDragEnd + m_LeftDragStart) * 0.5f;
-            float halfExtentX = Mathf.Abs(m_LeftDragStart.x - m_LeftDragEnd.x) * 0.5f;
-            float halfExtentZ = Mathf.Abs(m_LeftDragStart.z - m_LeftDragEnd.z) * 0.5f;
-
-            Vector3 halfExtent = new Vector3(halfExtentX, 1, halfExtentZ);
-
-            Collider[] hits = Physics.OverlapBox(center, halfExtent, Quaternion.identity, LayerMask.GetMask("Boid"));
-
-            if (hits.Length > 0)
-            {
-                BoidDataManager boid;
-                List<Guid> guids = new List<Guid>();
-
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].gameObject.TryGetComponent<BoidDataManager>(out boid))
-                    {
-                        guids.Add(boid.Guid);
-                    }
-                }
-
-                if (_CtrlDown)
-                {
-                    UnitSelectionHandler.Instance.OnUnitDeselect(guids.ToArray());
-                }
-                else
-                {
-                    UnitSelectionHandler.Instance.OnUnitSelect(_ShiftDown, guids.ToArray());
-                }
-            }
-            else if (!_CtrlDown && !_ShiftDown)
-            {
-                UnitSelectionHandler.Instance.ClearSelection();
-            }
-
-            GameObject.Destroy(m_DragVisuals);
-            m_DragVisuals = null;
+            EventManager.Instance?.SpawnFormationAtPosition.Invoke(Team.Ally, hit.point);
         }
 
         m_LeftDownTime = 0;
     }
 
-    private void RightClickDown(bool _ShiftDown, bool _CtrlDown)
+    private void RightClickDown(bool _ShiftDown, bool _CtrlDown, bool _SpaceDown)
     {
         m_RightIsDown = true;
     }
 
-    private void RightClickUp(bool _ShiftDown, bool _CtrlDown)
+    private void RightClickUp(bool _ShiftDown, bool _CtrlDown, bool _SpaceDown)
     {
         m_RightIsDown = false;
 
-        if (m_RightDownTime < 0.2f)
+        if (!m_AllowFreeSpawn || !_SpaceDown)
+        {
+            if (m_RightDownTime < 0.2f)
+            {
+                RaycastHit hit;
+                Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+                Physics.Raycast(ray, out hit);
+
+                UnitSelectionHandler.Instance.OnGiveMoveOrder(_ShiftDown, hit.point);
+            }
+        }
+        else if (m_AllowFreeSpawn)
         {
             RaycastHit hit;
             Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(ray, out hit);
 
-            UnitSelectionHandler.Instance.OnGiveMoveOrder(_ShiftDown, hit.point);
+            EventManager.Instance?.SpawnFormationAtPosition.Invoke(Team.Enemy, hit.point);
         }
-
         m_RightDownTime = 0;
     }
 

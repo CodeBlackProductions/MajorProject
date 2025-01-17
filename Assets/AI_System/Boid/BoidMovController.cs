@@ -1,5 +1,3 @@
-using System;
-using UnityEditor.Rendering;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -40,9 +38,23 @@ public class BoidMovController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        m_rigidbody.velocity = m_Velocity;
+        if (!float.IsNaN(m_Velocity.x) && !float.IsNaN(m_Velocity.y) && !float.IsNaN(m_Velocity.z))
+        {
+            m_rigidbody.velocity = m_Velocity;
+        }
+        else
+        {
+            m_Velocity = Vector3.zero;
+        }
 
-        m_rigidbody.transform.forward = m_Facing;
+        if (!float.IsNaN(m_Facing.x) && !float.IsNaN(m_Facing.y) && !float.IsNaN(m_Facing.z))
+        {
+            m_rigidbody.transform.forward = m_Facing;
+        }
+        else
+        {
+            m_Facing = Vector3.zero;
+        }
     }
 
     private void UpdateVelocity(Vector3 _DesiredVelocity, Vector3 _DesiredFacing)

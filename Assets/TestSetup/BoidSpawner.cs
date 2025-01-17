@@ -12,63 +12,77 @@ public class BoidSpawner : MonoBehaviour
     [SerializeField] private bool m_SpawnFormations;
 
     [SerializeField] private GameObject m_formationPrefab;
-    [SerializeField] private Transform m_AllyTarget;
-    [SerializeField] private Transform m_EnemyTarget;
-
-    private List<KeyValuePair<Guid, BoidDataManager>> TeamA = new List<KeyValuePair<Guid, BoidDataManager>>();
-    private List<KeyValuePair<Guid, BoidDataManager>> TeamB = new List<KeyValuePair<Guid, BoidDataManager>>();
-    private GameObject FormationTeamA = null;
-    private GameObject FormationTeamB = null;
+    [SerializeField] private List<Transform> m_SpawnsTeamA;
+    [SerializeField] private List<Transform> m_SpawnsTeamB;
 
     private void Start()
     {
+        EventManager.Instance.SpawnFormationAtPosition += SpawnNewFormation;
+
+        SpawnNewWave(Team.Ally);
+        SpawnNewWave(Team.Enemy);
+    }
+
+    public void SpawnNewWave(Team _Team)
+    {
+        if (_Team == Team.Ally)
+        {
+            foreach (var spawn in m_SpawnsTeamA)
+            {
+                SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, spawn.position);
+            }
+        }
+        else
+        {
+            foreach (var spawn in m_SpawnsTeamB)
+            {
+                SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, spawn.position);
+            }
+        }
+    }
+
+    public void SpawnNewFormation(Team _Team, Vector3 _Pos)
+    {
+        if (_Team == Team.Ally)
+        {
+            SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, _Pos);
+        }
+        else
+        {
+            SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, _Pos);
+        }
+    }
+
+    private void SpawnFormation(Team _Team, int _SpawnAmount, Material _BoidMat, bool _SpawnFormations, Vector3 _SpawnPos)
+    {
+        List<KeyValuePair<Guid, BoidDataManager>> boids = new List<KeyValuePair<Guid, BoidDataManager>>();
+        GameObject formation = null;
+
         if (m_SpawnFormations)
         {
-            FormationTeamA = GameObject.Instantiate(m_formationPrefab);
-            FormationTeamA.transform.position = new Vector3(m_EnemyTarget.transform.position.x, 1, m_EnemyTarget.transform.position.z);
-
-            FormationTeamB = GameObject.Instantiate(m_formationPrefab);
-            FormationTeamB.transform.position = new Vector3(m_AllyTarget.transform.position.x, 1, m_AllyTarget.transform.position.z);
+            formation = GameObject.Instantiate(m_formationPrefab);
+            formation.transform.position = new Vector3(_SpawnPos.x, 1, _SpawnPos.z);
         }
 
-        for (int i = 0; i < m_spawnAmountTeamA; i++)
+        for (int i = 0; i < _SpawnAmount; i++)
         {
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
-            temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialA;
+            temp.Value.GetComponent<MeshRenderer>().material = _BoidMat;
             temp.Value.transform.position = transform.position + transform.right * 10 * i;
-            temp.Value.GetComponent<BoidDataManager>().Team = Team.Ally;
+            temp.Value.GetComponent<BoidDataManager>().Team = _Team;
 
-            TeamA.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
+            boids.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
             if (m_SpawnFormations)
             {
-                FormationTeamA.GetComponent<FormationBoidManager>().AddBoid(TeamA[i]);
-                temp.Value.transform.position = FormationTeamA.GetComponent<FormationDataManager>().QueryBoidPosition(i);
-            }
-        }
-
-        for (int i = 0; i < m_spawnAmountTeamB; i++)
-        {
-            KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
-            temp.Value.GetComponent<MeshRenderer>().material = m_spawnMaterialB;
-            temp.Value.transform.position = transform.position + transform.forward * 200 + transform.right * 10 * i;
-            temp.Value.GetComponent<BoidDataManager>().Team = Team.Enemy;
-
-            TeamB.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
-            if (m_SpawnFormations)
-            {
-                FormationTeamB.GetComponent<FormationBoidManager>().AddBoid(TeamB[i]);
-                temp.Value.transform.position = FormationTeamB.GetComponent<FormationDataManager>().QueryBoidPosition(i);
+                formation.GetComponent<FormationBoidManager>().AddBoid(boids[i]);
+                temp.Value.transform.position = formation.GetComponent<FormationDataManager>().QueryBoidPosition(i);
             }
         }
 
         if (m_SpawnFormations)
         {
-            FormationDataManager dataManager = FormationTeamA.GetComponent<FormationDataManager>();
-            FormationBoidManager boidManager = FormationTeamA.GetComponent<FormationBoidManager>();
-            dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
-
-            dataManager = FormationTeamB.GetComponent<FormationDataManager>();
-            boidManager = FormationTeamB.GetComponent<FormationBoidManager>();
+            FormationDataManager dataManager = formation.GetComponent<FormationDataManager>();
+            FormationBoidManager boidManager = formation.GetComponent<FormationBoidManager>();
             dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
         }
     }

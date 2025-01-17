@@ -14,10 +14,12 @@ public class EventManager : MonoBehaviour
 
     public Action<Vector2> PlayerMove;
     public Action<float> PlayerScroll;
-    public Action<bool,bool> PlayerLeftMouseDown;
-    public Action<bool,bool> PlayerLeftMouseUp;
-    public Action<bool, bool> PlayerRightMouseDown;
-    public Action<bool, bool> PlayerRightMouseUp;
+    public Action<bool,bool, bool> PlayerLeftMouseDown;
+    public Action<bool,bool, bool> PlayerLeftMouseUp;
+    public Action<bool, bool, bool> PlayerRightMouseDown;
+    public Action<bool, bool, bool> PlayerRightMouseUp;
+
+    public Action<Team, Vector3> SpawnFormationAtPosition;
 
     private void Awake()
     {
