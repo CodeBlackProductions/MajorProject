@@ -55,11 +55,14 @@ public class RTree_DataManager : MonoBehaviour
     {
         if (_Obj.layer == LayerMask.NameToLayer("Boid"))
         {
-            m_BoidTree.Delete(PresentValues[_Obj]);
-            PresentValues.Remove(_Obj);
+            if (PresentValues.ContainsKey(_Obj))
+            {
+                m_BoidTree.Delete(PresentValues[_Obj]);
+                PresentValues.Remove(_Obj);
 
-            m_BoidTree.Insert(_RObj);
-            PresentValues.Add(_Obj, _RObj);
+                m_BoidTree.Insert(_RObj);
+                PresentValues.Add(_Obj, _RObj);
+            }
         }
         else if (_Obj.layer == LayerMask.NameToLayer("Obstacle"))
         {
@@ -123,4 +126,5 @@ public class RTree_DataManager : MonoBehaviour
         }
         m_BoidTree.BulkLoad(_RObjects);
     }
+
 }

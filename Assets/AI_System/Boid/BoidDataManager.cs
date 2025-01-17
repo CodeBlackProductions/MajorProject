@@ -223,6 +223,8 @@ public class BoidDataManager : MonoBehaviour
             {
                 RemoveNeighbour(m_RemoveBuffer[i].Key, m_RemoveBuffer[i].Value);
             }
+
+            m_RemoveBuffer.Clear();
         }
 
         if (closestNeighbour.Value != null && closestNeighbour.Value.gameObject.activeSelf)

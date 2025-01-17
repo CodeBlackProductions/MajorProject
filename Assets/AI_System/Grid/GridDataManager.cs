@@ -159,7 +159,7 @@ public class GridDataManager : MonoBehaviour
 
         if (dX == 0)
         {
-            return false;
+            return true;
         }
 
         int y = y0;
@@ -213,7 +213,7 @@ public class GridDataManager : MonoBehaviour
 
         if (dY == 0)
         {
-            return false;
+            return true;
         }
 
         int x = x0;
