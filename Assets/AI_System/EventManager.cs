@@ -18,10 +18,18 @@ public class EventManager : MonoBehaviour
     public Action<bool,bool, bool> PlayerLeftMouseUp;
     public Action<bool, bool, bool> PlayerRightMouseDown;
     public Action<bool, bool, bool> PlayerRightMouseUp;
-    public Action PlayerFDown;
-    public Action PlayerFUp;
+    public Action PlayerFormationDown;
+    public Action PlayerFormationUp;
+    public Action<bool> PlayerUnitsSelected;
+    public Action PlayerSpaceDown;
+    public Action PlayerSpaceUp;
+    public Action Player1Down;
+    public Action Player1Up;
+    public Action Player2Down;
+    public Action Player2Up;
 
     public Action<Team, Vector3> SpawnFormationAtPosition;
+    public Action<Team> SpawnNewWave;
 
     private void Awake()
     {

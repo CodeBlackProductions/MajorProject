@@ -15,9 +15,13 @@ public class BoidSpawner : MonoBehaviour
     [SerializeField] private List<Transform> m_SpawnsTeamA;
     [SerializeField] private List<Transform> m_SpawnsTeamB;
 
+    private EventManager m_EventManager = null;
+
     private void Start()
     {
-        EventManager.Instance.SpawnFormationAtPosition += SpawnNewFormation;
+        m_EventManager = EventManager.Instance;
+        m_EventManager.SpawnNewWave += SpawnNewWave;
+        m_EventManager.SpawnFormationAtPosition += SpawnNewFormation;
 
         SpawnNewWave(Team.Ally);
         SpawnNewWave(Team.Enemy);

@@ -12,6 +12,9 @@ public class PlayerInputHandler : MonoBehaviour
     private InputAction m_ShiftAction;
     private InputAction m_CtrlAction;
     private InputAction m_SpaceAction;
+    private InputAction m_FormationAction;
+    private InputAction m_1Action;
+    private InputAction m_2Action;
 
     private EventManager m_EventManager;
 
@@ -77,10 +80,20 @@ public class PlayerInputHandler : MonoBehaviour
         m_SpaceAction.canceled += OnSpaceAction;
         m_SpaceAction.Enable();
 
-        m_SpaceAction = new InputAction("F", InputActionType.Button, "<Keyboard>/f");
-        m_SpaceAction.started += OnFAction;
-        m_SpaceAction.canceled += OnFAction;
-        m_SpaceAction.Enable();
+        m_FormationAction = new InputAction("F", InputActionType.Button, "<Keyboard>/f");
+        m_FormationAction.started += OnFormationAction;
+        m_FormationAction.canceled += OnFormationAction;
+        m_FormationAction.Enable();
+
+        m_1Action = new InputAction("1", InputActionType.Button, "<Keyboard>/1");
+        m_1Action.started += On1Action;
+        m_1Action.canceled += On1Action;
+        m_1Action.Enable();
+
+        m_2Action = new InputAction("2", InputActionType.Button, "<Keyboard>/2");
+        m_2Action.started += On2Action;
+        m_2Action.canceled += On2Action;
+        m_2Action.Enable();
     }
 
     private void Start()
@@ -226,6 +239,7 @@ public class PlayerInputHandler : MonoBehaviour
 
             case InputActionPhase.Started:
                 m_SpaceDown = true;
+                m_EventManager.PlayerSpaceDown?.Invoke();
                 break;
 
             case InputActionPhase.Performed:
@@ -233,6 +247,7 @@ public class PlayerInputHandler : MonoBehaviour
 
             case InputActionPhase.Canceled:
                 m_SpaceDown = false;
+                m_EventManager.PlayerSpaceUp?.Invoke();
                 break;
 
             default:
@@ -240,7 +255,7 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
-    private void OnFAction(InputAction.CallbackContext _context) 
+    private void OnFormationAction(InputAction.CallbackContext _context) 
     {
         switch (_context.phase)
         {
@@ -251,14 +266,66 @@ public class PlayerInputHandler : MonoBehaviour
                 break;
 
             case InputActionPhase.Started:
-                m_EventManager.PlayerFDown?.Invoke();
+                m_EventManager.PlayerFormationDown?.Invoke();
                 break;
 
             case InputActionPhase.Performed:
                 break;
 
             case InputActionPhase.Canceled:
-                m_EventManager.PlayerFUp?.Invoke();
+                m_EventManager.PlayerFormationUp?.Invoke();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void On1Action(InputAction.CallbackContext _context) 
+    {
+        switch (_context.phase)
+        {
+            case InputActionPhase.Disabled:
+                break;
+
+            case InputActionPhase.Waiting:
+                break;
+
+            case InputActionPhase.Started:
+                m_EventManager.Player1Down?.Invoke();
+                break;
+
+            case InputActionPhase.Performed:
+                break;
+
+            case InputActionPhase.Canceled:
+                m_EventManager.Player1Up?.Invoke();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void On2Action(InputAction.CallbackContext _context)
+    {
+        switch (_context.phase)
+        {
+            case InputActionPhase.Disabled:
+                break;
+
+            case InputActionPhase.Waiting:
+                break;
+
+            case InputActionPhase.Started:
+                m_EventManager.Player2Down?.Invoke();
+                break;
+
+            case InputActionPhase.Performed:
+                break;
+
+            case InputActionPhase.Canceled:
+                m_EventManager.Player2Up?.Invoke();
                 break;
 
             default:

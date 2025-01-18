@@ -33,6 +33,9 @@ public class PlayerController : MonoBehaviour
     private Vector3 m_LeftDragEnd = Vector3.zero;
     private GameObject m_DragVisuals = null;
 
+    private bool m_UnitsSeclected = false;
+    private bool m_FormationModeActive = false;
+
     private void Awake()
     {
         if (Instance == null)
@@ -56,7 +59,11 @@ public class PlayerController : MonoBehaviour
             m_EventManager.PlayerLeftMouseUp += LeftClickUp;
             m_EventManager.PlayerRightMouseDown += RightClickDown;
             m_EventManager.PlayerRightMouseUp += RightClickUp;
-            m_EventManager.PlayerFUp += FormationChange;
+            m_EventManager.PlayerFormationDown += FormationMode;
+            m_EventManager.PlayerFormationUp += FormationModeEnd;
+            m_EventManager.PlayerUnitsSelected += OnUnitSelectionChange;
+            m_EventManager.Player1Up += FormationChangeSquare;
+            m_EventManager.Player2Up += FormationChangeCircle;
         }
 
         m_Camera = Camera.main;
@@ -306,18 +313,37 @@ public class PlayerController : MonoBehaviour
         m_RightDownTime = 0;
     }
 
-    private void FormationChange() 
+    private void OnUnitSelectionChange(bool _UnitsSelected)
     {
-        UnitSelectionHandler.Instance?.OnFormationUpdate();
+        m_UnitsSeclected = _UnitsSelected;
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    var oldMatrix = Gizmos.matrix;
+    private void FormationMode()
+    {
+        if (m_UnitsSeclected)
+        {
+            m_FormationModeActive = true;
+        }
+    }
 
-    //    Gizmos.matrix = Matrix4x4.TRS(debugcenter, Quaternion.identity, debugsize * 2);
-    //    Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+    private void FormationModeEnd()
+    {
+        m_FormationModeActive = false;
+    }
 
-    //    Gizmos.matrix = oldMatrix;
-    //}
+    private void FormationChangeSquare()
+    {
+        if (m_FormationModeActive)
+        {
+            UnitSelectionHandler.Instance?.OnFormationChange("Square");
+        }
+    }
+
+    private void FormationChangeCircle()
+    {
+        if (m_FormationModeActive)
+        {
+            UnitSelectionHandler.Instance?.OnFormationChange("Circle");
+        }
+    }
 }

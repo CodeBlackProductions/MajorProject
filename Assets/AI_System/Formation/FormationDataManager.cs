@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 public class FormationDataManager : MonoBehaviour
 {
     [SerializeField] private SO_FormationStats m_BaseStats;
-    [SerializeField] private SO_FormationOffsetCalculation m_FormationType;
+    [SerializeField] private List<SO_FormationOffsetCalculation> m_FormationTypes;
+
+    private SO_FormationOffsetCalculation m_CurrentFormationType;
 
     private Dictionary<FormationStat, float> m_Stats = new Dictionary<FormationStat, float>();
 
@@ -27,7 +26,9 @@ public class FormationDataManager : MonoBehaviour
             m_Stats.Add(stat.Key, stat.Value);
         }
 
-        m_BoidOffsets = m_FormationType.CalculateOffsets(
+        m_CurrentFormationType = m_FormationTypes[0];
+
+        m_BoidOffsets = m_CurrentFormationType.CalculateOffsets(
                 (int)m_Stats[FormationStat.MaxUnitCount],
                 m_Stats[FormationStat.WidthScale],
                 m_Stats[FormationStat.DepthScale],
@@ -55,7 +56,7 @@ public class FormationDataManager : MonoBehaviour
     {
         m_Stats[FormationStat.MaxUnitCount] = _NewBoidCount;
 
-        m_BoidOffsets = m_FormationType.CalculateOffsets(
+        m_BoidOffsets = m_CurrentFormationType.CalculateOffsets(
             _NewBoidCount,
             m_Stats[FormationStat.WidthScale],
             m_Stats[FormationStat.DepthScale],
@@ -64,15 +65,25 @@ public class FormationDataManager : MonoBehaviour
             );
     }
 
-    public void UpdateBoidOffsets()
+    private void UpdateBoidOffsets()
     {
-        m_BoidOffsets = m_FormationType.CalculateOffsets(
+        m_BoidOffsets = m_CurrentFormationType.CalculateOffsets(
             (int)m_Stats[FormationStat.MaxUnitCount],
             m_Stats[FormationStat.WidthScale],
             m_Stats[FormationStat.DepthScale],
             m_Stats[FormationStat.UnitSize],
             m_Stats[FormationStat.UnitSpacing]
             );
+    }
+
+    public void SetFormationType(int _Type)
+    {
+        if (_Type >= m_FormationTypes.Count)
+        {
+            return;
+        }
+        m_CurrentFormationType = m_FormationTypes[_Type];
+        UpdateBoidOffsets();
     }
 
     public Vector3 QueryBoidPosition(int _BoidIndex)

@@ -75,6 +75,8 @@ public class UnitSelectionHandler : MonoBehaviour
                 }
             }
         }
+
+        SendSelectionStatus();
     }
 
     private void RemoveFromSelection(Guid[] _Guids)
@@ -102,6 +104,8 @@ public class UnitSelectionHandler : MonoBehaviour
                 }
             }
         }
+
+        SendSelectionStatus();
     }
 
     public void ClearSelection()
@@ -111,6 +115,12 @@ public class UnitSelectionHandler : MonoBehaviour
             UpdateBoidStatus(m_CurrentSelection[i], false);
         }
         m_CurrentSelection.Clear();
+        SendSelectionStatus();
+    }
+
+    private void SendSelectionStatus()
+    {
+        EventManager.Instance?.PlayerUnitsSelected.Invoke(m_CurrentSelection.Count > 0);
     }
 
     private void UpdateBoidStatus(BoidDataManager _Boid, bool _Status)
@@ -133,21 +143,28 @@ public class UnitSelectionHandler : MonoBehaviour
         }
     }
 
-    public void OnFormationUpdate() 
+    public void OnFormationChange(string _Formation)
     {
         List<FormationDataManager> formations = new List<FormationDataManager>();
         for (int i = 0; i < m_CurrentSelection.Count; i++)
         {
-           FormationDataManager temp = m_CurrentSelection[i].FormationBoidManager.GetComponent<FormationDataManager>();
+            FormationDataManager temp = m_CurrentSelection[i].FormationBoidManager.GetComponent<FormationDataManager>();
             if (!formations.Contains(temp))
             {
                 formations.Add(temp);
             }
         }
 
-        for (int i = 0; i < formations.Count; i++) 
+        for (int i = 0; i < formations.Count; i++)
         {
-            formations[i].UpdateBoidOffsets();
+            if (_Formation == "Square")
+            {
+                formations[i].SetFormationType(0);
+            }
+            else if (_Formation == "Circle")
+            {
+                formations[i].SetFormationType(1);
+            }
         }
     }
 
