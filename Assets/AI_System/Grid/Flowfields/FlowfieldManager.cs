@@ -23,7 +23,7 @@ public class FlowfieldManager : MonoBehaviour
 
     private void Start()
     {
-        if (m_Database != null && m_Database.LevelName == SceneManager.GetActiveScene().name)
+        if (m_Database != null)
         {
             if (m_Database.Calculate)
             {

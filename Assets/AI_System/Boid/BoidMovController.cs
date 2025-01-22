@@ -21,11 +21,11 @@ public class BoidMovController : MonoBehaviour
     {
         m_rigidbody = GetComponent<Rigidbody>();
         m_DataManager = GetComponent<BoidDataManager>();
-        GetComponent<BoidFlockingManager>().OnBehaviourUpdate += UpdateVelocity;
     }
 
     private void Start()
     {
+        GetComponent<BoidFlockingManager>().OnBehaviourUpdate += UpdateVelocity;
         m_maxSteering = m_DataManager.QueryStat(BoidStat.TurnRate);
         m_MaxVelocity = m_DataManager.QueryStat(BoidStat.MovSpeed);
         m_Mass = m_DataManager.QueryStat(BoidStat.Mass);

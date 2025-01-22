@@ -6,6 +6,8 @@ public class UnitSelectionHandler : MonoBehaviour
 {
     public static UnitSelectionHandler Instance;
 
+    [SerializeField] private bool m_AllowEnemySelection = true;
+
     private List<BoidDataManager> m_CurrentSelection = new List<BoidDataManager>();
 
     private void Awake()
@@ -35,11 +37,16 @@ public class UnitSelectionHandler : MonoBehaviour
         BoidDataManager temp;
         List<BoidDataManager> formationBoids = new List<BoidDataManager>();
 
-        if (_Additive)
+        if (!_Additive)
         {
-            for (int i = 0; i < _Guids.Length; i++)
+            ClearSelection();
+        }
+
+        for (int i = 0; i < _Guids.Length; i++)
+        {
+            temp = BoidPool.Instance.GetActiveBoid(_Guids[i]).GetComponent<BoidDataManager>();
+            if (m_AllowEnemySelection)
             {
-                temp = BoidPool.Instance.GetActiveBoid(_Guids[i]).GetComponent<BoidDataManager>();
                 if (temp != null && !m_CurrentSelection.Contains(temp))
                 {
                     m_CurrentSelection.Add(temp);
@@ -47,15 +54,9 @@ public class UnitSelectionHandler : MonoBehaviour
                     CheckForFormation(temp, ref formationBoids);
                 }
             }
-        }
-        else
-        {
-            ClearSelection();
-
-            for (int i = 0; i < _Guids.Length; i++)
+            else
             {
-                temp = BoidPool.Instance.GetActiveBoid(_Guids[i]).GetComponent<BoidDataManager>();
-                if (temp != null && !m_CurrentSelection.Contains(temp))
+                if (temp != null && !m_CurrentSelection.Contains(temp) && temp.Team == Team.Ally)
                 {
                     m_CurrentSelection.Add(temp);
                     UpdateBoidStatus(temp, true);

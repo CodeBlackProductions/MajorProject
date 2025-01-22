@@ -260,7 +260,7 @@ public class BoidFlockingManager : MonoBehaviour
 
         Vector3 smoothedVelocity = Vector3.SmoothDamp(m_Rigidbody.velocity, _DesiredVelocity, ref m_CurrentVelocity, 0.1f);
         Vector3 smoothedFacing = Vector3.SmoothDamp(m_Rigidbody.transform.forward, desiredFacing, ref m_CurrentFacing, 0.1f);
-        OnBehaviourUpdate.Invoke(smoothedVelocity, desiredFacing);
+        OnBehaviourUpdate?.Invoke(smoothedVelocity, desiredFacing);
     }
 
     private void DebugMethod(List<KeyValuePair<Guid, Rigidbody>> _Enemies)

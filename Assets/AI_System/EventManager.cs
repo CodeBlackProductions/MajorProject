@@ -30,6 +30,7 @@ public class EventManager : MonoBehaviour
 
     public Action<Team, Vector3> SpawnFormationAtPosition;
     public Action<Team> SpawnNewWave;
+    public Action EnableSpawningUI;
 
     private void Awake()
     {

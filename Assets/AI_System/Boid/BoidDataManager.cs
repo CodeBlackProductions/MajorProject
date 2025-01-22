@@ -51,7 +51,7 @@ public class BoidDataManager : MonoBehaviour
 
     private List<KeyValuePair<Team, Guid>> m_RemoveBuffer = new List<KeyValuePair<Team, Guid>>();
 
-    private void Awake()
+    private void OnEnable()
     {
         Initialize();
     }
@@ -76,7 +76,14 @@ public class BoidDataManager : MonoBehaviour
     {
         foreach (var stat in m_BaseStats.Stats)
         {
-            m_Stats.Add(stat.Key, stat.Value);
+            if (m_Stats.ContainsKey(stat.Key))
+            {
+                m_Stats[stat.Key] = stat.Value;
+            }
+            else
+            {
+                m_Stats.Add(stat.Key, stat.Value);
+            }
         }
 
         m_SelectionIndicator.SetActive(false);

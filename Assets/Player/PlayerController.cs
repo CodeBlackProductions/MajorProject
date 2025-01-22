@@ -64,6 +64,11 @@ public class PlayerController : MonoBehaviour
             m_EventManager.PlayerUnitsSelected += OnUnitSelectionChange;
             m_EventManager.Player1Up += FormationChangeSquare;
             m_EventManager.Player2Up += FormationChangeCircle;
+
+            if (m_AllowFreeSpawn)
+            {
+                m_EventManager.EnableSpawningUI.Invoke();
+            }
         }
 
         m_Camera = Camera.main;

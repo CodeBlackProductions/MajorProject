@@ -22,6 +22,8 @@ public class UIController : MonoBehaviour
 
     private EventManager m_EventManager;
 
+    private bool m_SpawnModeEnabled = false;
+
     private void Awake()
     {
         if (!m_ShowWaveSpawner)
@@ -35,6 +37,7 @@ public class UIController : MonoBehaviour
     {
         m_EventManager = EventManager.Instance;
 
+        m_EventManager.EnableSpawningUI += OnEnableSpawnMode;
         m_EventManager.PlayerSpaceDown += OnSpawnMode;
         m_EventManager.PlayerSpaceUp += OnSpawnModeEnd;
         m_EventManager.Player1Up += OnMeleeSelect;
@@ -57,18 +60,30 @@ public class UIController : MonoBehaviour
         EventManager.Instance?.SpawnNewWave?.Invoke(Team.Enemy);
     }
 
+    private void OnEnableSpawnMode()
+    {
+        m_SpawnModeEnabled = true;
+        m_UISpawnPrompt.SetActive(true);
+    }
+
     private void OnSpawnMode()
     {
-        m_UISpawnPrompt.SetActive(false);
-        m_UISpawnTypePrompts.SetActive(true);
-        m_UISpawnTeamPrompts.SetActive(true);
+        if (m_SpawnModeEnabled)
+        {
+            m_UISpawnPrompt.SetActive(false);
+            m_UISpawnTypePrompts.SetActive(true);
+            m_UISpawnTeamPrompts.SetActive(true);
+        }
     }
 
     private void OnSpawnModeEnd()
     {
-        m_UISpawnPrompt.SetActive(true);
-        m_UISpawnTypePrompts.SetActive(false);
-        m_UISpawnTeamPrompts.SetActive(false);
+        if (m_SpawnModeEnabled)
+        {
+            m_UISpawnPrompt.SetActive(true);
+            m_UISpawnTypePrompts.SetActive(false);
+            m_UISpawnTeamPrompts.SetActive(false);
+        }
     }
 
     private void OnMeleeSelect()
