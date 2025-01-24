@@ -27,6 +27,7 @@ public class EventManager : MonoBehaviour
     public Action Player1Up;
     public Action Player2Down;
     public Action Player2Up;
+    public Action PlayerESCUp;
 
     public Action<Team, Vector3> SpawnFormationAtPosition;
     public Action<Team> SpawnNewWave;

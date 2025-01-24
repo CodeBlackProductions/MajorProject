@@ -1,4 +1,6 @@
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
@@ -19,6 +21,9 @@ public class UIController : MonoBehaviour
 
     [SerializeField] private GameObject m_UIFormationPrompt;
     [SerializeField] private GameObject m_UIFormationTypePrompts;
+
+    [Header("Pause Menu")]
+    [SerializeField] private GameObject m_UIPauseMenu;
 
     private EventManager m_EventManager;
 
@@ -45,6 +50,7 @@ public class UIController : MonoBehaviour
         m_EventManager.PlayerFormationDown += OnFormationMode;
         m_EventManager.PlayerFormationUp += OnFormationModeEnd;
         m_EventManager.PlayerUnitsSelected += OnUnitsSelectionChange;
+        m_EventManager.PlayerESCUp += OnTogglePauseMenu;
 
         m_UIMeleePrompt.GetComponent<Image>().color = Color.cyan;
         m_UIRangePrompt.GetComponent<Image>().color = Color.white;
@@ -119,5 +125,30 @@ public class UIController : MonoBehaviour
     {
         m_UIFormationPrompt.SetActive(true);
         m_UIFormationTypePrompts.SetActive(false);
+    }
+
+    private void OnTogglePauseMenu() 
+    {
+        if (m_UIPauseMenu.activeSelf) 
+        {
+            m_UIPauseMenu.SetActive(false);
+            Time.timeScale = 1f;
+        }
+        else
+        {
+            m_UIPauseMenu.SetActive(true);
+            Time.timeScale = 0f;
+        }
+    }
+
+    public void OnResume()
+    {
+        m_UIPauseMenu.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+    public void OnMainMenu() 
+    {
+        SceneManager.LoadScene(0);
     }
 }

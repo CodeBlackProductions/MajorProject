@@ -15,6 +15,7 @@ public class PlayerInputHandler : MonoBehaviour
     private InputAction m_FormationAction;
     private InputAction m_1Action;
     private InputAction m_2Action;
+    private InputAction m_EscAction;
 
     private EventManager m_EventManager;
 
@@ -94,6 +95,25 @@ public class PlayerInputHandler : MonoBehaviour
         m_2Action.started += On2Action;
         m_2Action.canceled += On2Action;
         m_2Action.Enable();
+
+        m_EscAction = new InputAction("ESC", InputActionType.Button, "<Keyboard>/Escape");
+        m_EscAction.canceled += OnESCAction;
+        m_EscAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        m_MoveAction.Disable();
+        m_ScrollAction.Disable();
+        m_LeftClickAction.Disable();
+        m_RightClickAction.Disable();
+        m_ShiftAction.Disable();
+        m_CtrlAction.Disable();
+        m_SpaceAction.Disable();
+        m_FormationAction.Disable();
+        m_1Action.Disable();
+        m_2Action.Disable();
+        m_EscAction.Disable();
     }
 
     private void Start()
@@ -134,7 +154,7 @@ public class PlayerInputHandler : MonoBehaviour
                 break;
 
             case InputActionPhase.Started:
-                m_EventManager.PlayerLeftMouseDown?.Invoke(m_ShiftDown,m_CtrlDown,m_SpaceDown);
+                m_EventManager.PlayerLeftMouseDown?.Invoke(m_ShiftDown, m_CtrlDown, m_SpaceDown);
                 break;
 
             case InputActionPhase.Performed:
@@ -227,7 +247,7 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
-    private void OnSpaceAction(InputAction.CallbackContext _context) 
+    private void OnSpaceAction(InputAction.CallbackContext _context)
     {
         switch (_context.phase)
         {
@@ -255,7 +275,7 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
-    private void OnFormationAction(InputAction.CallbackContext _context) 
+    private void OnFormationAction(InputAction.CallbackContext _context)
     {
         switch (_context.phase)
         {
@@ -281,7 +301,7 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
-    private void On1Action(InputAction.CallbackContext _context) 
+    private void On1Action(InputAction.CallbackContext _context)
     {
         switch (_context.phase)
         {
@@ -326,6 +346,31 @@ public class PlayerInputHandler : MonoBehaviour
 
             case InputActionPhase.Canceled:
                 m_EventManager.Player2Up?.Invoke();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void OnESCAction(InputAction.CallbackContext _context)
+    {
+        switch (_context.phase)
+        {
+            case InputActionPhase.Disabled:
+                break;
+
+            case InputActionPhase.Waiting:
+                break;
+
+            case InputActionPhase.Started:
+                break;
+
+            case InputActionPhase.Performed:
+                break;
+
+            case InputActionPhase.Canceled:
+                m_EventManager.PlayerESCUp?.Invoke();
                 break;
 
             default:
