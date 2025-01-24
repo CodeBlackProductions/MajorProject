@@ -64,6 +64,8 @@ public class PlayerController : MonoBehaviour
             m_EventManager.PlayerUnitsSelected += OnUnitSelectionChange;
             m_EventManager.Player1Up += FormationChangeSquare;
             m_EventManager.Player2Up += FormationChangeCircle;
+            m_EventManager.Player3Up += FormationDisband;
+            m_EventManager.Player4Up += FormationCreation;
 
             if (m_AllowFreeSpawn)
             {
@@ -350,5 +352,18 @@ public class PlayerController : MonoBehaviour
         {
             UnitSelectionHandler.Instance?.OnFormationChange("Circle");
         }
+    }
+
+    private void FormationDisband() 
+    {
+        if (m_FormationModeActive)
+        {
+            UnitSelectionHandler.Instance?.OnFormationDisband();
+        }
+    }
+
+    private void FormationCreation() 
+    {
+        UnitSelectionHandler.Instance?.OnFormationAssembly();
     }
 }

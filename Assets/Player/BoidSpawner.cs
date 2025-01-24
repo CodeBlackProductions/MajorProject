@@ -22,6 +22,7 @@ public class BoidSpawner : MonoBehaviour
         m_EventManager = EventManager.Instance;
         m_EventManager.SpawnNewWave += SpawnNewWave;
         m_EventManager.SpawnFormationAtPosition += SpawnNewFormation;
+        m_EventManager.AssembleFormation += NewFormationFromBoids;
 
         SpawnNewWave(Team.Ally);
         SpawnNewWave(Team.Enemy);
@@ -89,5 +90,53 @@ public class BoidSpawner : MonoBehaviour
             FormationBoidManager boidManager = formation.GetComponent<FormationBoidManager>();
             dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
         }
+    }
+
+    public void NewFormationFromBoids(List<BoidDataManager> _Boids)
+    {
+        List<KeyValuePair<Guid, BoidDataManager>> allyBoids = new List<KeyValuePair<Guid, BoidDataManager>>();
+        List<KeyValuePair<Guid, BoidDataManager>> EnemyBoids = new List<KeyValuePair<Guid, BoidDataManager>>();
+
+        for (int i = 0; i < _Boids.Count; i++)
+        {
+            KeyValuePair<Guid, BoidDataManager> temp = new KeyValuePair<Guid, BoidDataManager>(_Boids[i].Guid, _Boids[i]);
+            if (_Boids[i].Team == Team.Ally)
+            {
+                allyBoids.Add(temp);
+            }
+            else
+            {
+                EnemyBoids.Add(temp);
+            }
+            if (_Boids[i].FormationBoidManager != null)
+            {
+                _Boids[i].FormationBoidManager.RemoveBoid(temp);
+            }
+        }
+
+        AssembleFormation(allyBoids);
+        AssembleFormation(EnemyBoids);
+    }
+
+    private void AssembleFormation(List<KeyValuePair<Guid, BoidDataManager>> _Boids)
+    {
+        GameObject formation = null;
+
+        if (_Boids.Count <= 0)
+        {
+            return;
+        }
+
+        formation = GameObject.Instantiate(m_formationPrefab);
+        formation.transform.position = _Boids[0].Value.transform.position;
+        FormationBoidManager boidManager = formation.GetComponent<FormationBoidManager>();
+
+        for (int i = 0; i < _Boids.Count; i++)
+        {
+            boidManager.AddBoid(_Boids[i]);
+        }
+
+        FormationDataManager dataManager = formation.GetComponent<FormationDataManager>();
+        dataManager.UpdateBoidOffsets(boidManager.Boids.Count);
     }
 }

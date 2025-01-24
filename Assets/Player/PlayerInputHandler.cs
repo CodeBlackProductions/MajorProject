@@ -15,6 +15,8 @@ public class PlayerInputHandler : MonoBehaviour
     private InputAction m_FormationAction;
     private InputAction m_1Action;
     private InputAction m_2Action;
+    private InputAction m_3Action;
+    private InputAction m_4Action;
     private InputAction m_EscAction;
 
     private EventManager m_EventManager;
@@ -96,6 +98,14 @@ public class PlayerInputHandler : MonoBehaviour
         m_2Action.canceled += On2Action;
         m_2Action.Enable();
 
+        m_3Action = new InputAction("3", InputActionType.Button, "<Keyboard>/3");
+        m_3Action.canceled += On3Action;
+        m_3Action.Enable();
+
+        m_4Action = new InputAction("4", InputActionType.Button, "<Keyboard>/4");
+        m_4Action.canceled += On4Action;
+        m_4Action.Enable();
+
         m_EscAction = new InputAction("ESC", InputActionType.Button, "<Keyboard>/Escape");
         m_EscAction.canceled += OnESCAction;
         m_EscAction.Enable();
@@ -113,6 +123,8 @@ public class PlayerInputHandler : MonoBehaviour
         m_FormationAction.Disable();
         m_1Action.Disable();
         m_2Action.Disable();
+        m_3Action.Disable();
+        m_4Action.Disable();
         m_EscAction.Disable();
     }
 
@@ -346,6 +358,56 @@ public class PlayerInputHandler : MonoBehaviour
 
             case InputActionPhase.Canceled:
                 m_EventManager.Player2Up?.Invoke();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void On3Action(InputAction.CallbackContext _context)
+    {
+        switch (_context.phase)
+        {
+            case InputActionPhase.Disabled:
+                break;
+
+            case InputActionPhase.Waiting:
+                break;
+
+            case InputActionPhase.Started:
+                break;
+
+            case InputActionPhase.Performed:
+                break;
+
+            case InputActionPhase.Canceled:
+                m_EventManager.Player3Up?.Invoke();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void On4Action(InputAction.CallbackContext _context)
+    {
+        switch (_context.phase)
+        {
+            case InputActionPhase.Disabled:
+                break;
+
+            case InputActionPhase.Waiting:
+                break;
+
+            case InputActionPhase.Started:
+                break;
+
+            case InputActionPhase.Performed:
+                break;
+
+            case InputActionPhase.Canceled:
+                m_EventManager.Player4Up?.Invoke();
                 break;
 
             default:

@@ -135,8 +135,9 @@ public class UnitSelectionHandler : MonoBehaviour
         {
             for (int i = 0; i < _Boid.FormationBoidManager.Boids.Count; i++)
             {
-                BoidDataManager temp = _Boid.FormationBoidManager.Boids[i].Value.GetComponent<BoidDataManager>();
-                if (temp != _Boid && !_FormationBoids.Contains(temp))
+                BoidDataManager temp = null;
+                _Boid.FormationBoidManager.Boids[i].Value.TryGetComponent<BoidDataManager>(out temp);
+                if (temp != null && temp != _Boid && !_FormationBoids.Contains(temp))
                 {
                     _FormationBoids.Add(temp);
                 }
@@ -149,10 +150,14 @@ public class UnitSelectionHandler : MonoBehaviour
         List<FormationDataManager> formations = new List<FormationDataManager>();
         for (int i = 0; i < m_CurrentSelection.Count; i++)
         {
-            FormationDataManager temp = m_CurrentSelection[i].FormationBoidManager.GetComponent<FormationDataManager>();
-            if (!formations.Contains(temp))
+            FormationDataManager temp = null;
+            if (m_CurrentSelection[i].FormationBoidManager != null)
             {
-                formations.Add(temp);
+                m_CurrentSelection[i].FormationBoidManager.TryGetComponent<FormationDataManager>(out temp);
+                if (temp != null && !formations.Contains(temp))
+                {
+                    formations.Add(temp);
+                }
             }
         }
 
@@ -167,6 +172,29 @@ public class UnitSelectionHandler : MonoBehaviour
                 formations[i].SetFormationType(1);
             }
         }
+    }
+
+    public void OnFormationDisband()
+    {
+        List<FormationBoidManager> formations = new List<FormationBoidManager>();
+        for (int i = 0; i < m_CurrentSelection.Count; i++)
+        {
+            FormationBoidManager temp = m_CurrentSelection[i].FormationBoidManager;
+            if (temp != null && !formations.Contains(temp))
+            {
+                formations.Add(temp);
+            }
+        }
+
+        for (int i = 0; i < formations.Count; i++)
+        {
+            formations[i].DisbandFormation();
+        }
+    }
+
+    public void OnFormationAssembly() 
+    {
+        EventManager.Instance?.AssembleFormation(m_CurrentSelection);
     }
 
     public void OnGiveMoveOrder(bool _Additive, Vector3 _TargetPos)

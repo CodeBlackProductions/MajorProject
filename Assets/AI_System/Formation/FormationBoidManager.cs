@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 [RequireComponent(typeof(FormationDataManager))]
@@ -83,9 +84,9 @@ public class FormationBoidManager : MonoBehaviour
 
     public void DisbandFormation() 
     {
-        foreach (var boid in m_Boids)
+        for (int i = m_Boids.Count -1; i > 0 ; i--) 
         {
-            RemoveBoid(boid);
+            RemoveBoid(m_Boids[i]);
         }
     }
 
