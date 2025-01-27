@@ -4,18 +4,30 @@ using UnityEngine;
 
 public class BoidSpawner : MonoBehaviour
 {
+    [Header("General")]
     [SerializeField] private int m_spawnAmountTeamA;
+
     [SerializeField] private Material m_spawnMaterialA;
+    [SerializeField] private List<Transform> m_SpawnsTeamA;
     [SerializeField] private int m_spawnAmountTeamB;
     [SerializeField] private Material m_spawnMaterialB;
+    [SerializeField] private List<Transform> m_SpawnsTeamB;
 
+    [Header("Formation")]
     [SerializeField] private bool m_SpawnFormations;
 
     [SerializeField] private GameObject m_formationPrefab;
-    [SerializeField] private List<Transform> m_SpawnsTeamA;
-    [SerializeField] private List<Transform> m_SpawnsTeamB;
+
+    [Header("Optional")]
+    [SerializeField] private List<Transform> m_WaypointsTeamA = new List<Transform>();
+    [SerializeField] private List<int> m_WaypointsPerSpawnTeamA = new List<int>();
+
+    [SerializeField] private List<Transform> m_WaypointsTeamB = new List<Transform>();
+    [SerializeField] private List<int> m_WaypointsPerSpawnTeamB = new List<int>();
 
     private EventManager m_EventManager = null;
+    private List<KeyValuePair<Vector3, Transform>> m_WPTeamA = new List<KeyValuePair<Vector3, Transform>>();
+    private List<KeyValuePair<Vector3, Transform>> m_WPTeamB = new List<KeyValuePair<Vector3, Transform>>();
 
     private void Start()
     {
@@ -23,6 +35,36 @@ public class BoidSpawner : MonoBehaviour
         m_EventManager.SpawnNewWave += SpawnNewWave;
         m_EventManager.SpawnFormationAtPosition += SpawnNewFormation;
         m_EventManager.AssembleFormation += NewFormationFromBoids;
+
+        int tempIndex = 0;
+
+        for (int o = 0; o < m_SpawnsTeamA.Count; o++)
+        {
+            if (m_WaypointsPerSpawnTeamA.Count == 0 || m_WaypointsTeamA.Count == 0)
+            {
+                break;
+            }
+            for (int i = 0; i < m_WaypointsPerSpawnTeamA[o]; i++)
+            {
+                m_WPTeamA.Add(new KeyValuePair<Vector3, Transform>(m_SpawnsTeamA[o].position, m_WaypointsTeamA[tempIndex + i]));
+            }
+            tempIndex += m_WaypointsPerSpawnTeamA[o];
+        }
+
+        tempIndex = 0;
+
+        for (int o = 0; o < m_SpawnsTeamB.Count; o++)
+        {
+            if (m_WaypointsPerSpawnTeamB.Count == 0 || m_WaypointsTeamB.Count == 0)
+            {
+                break;
+            }
+            for (int i = 0; i < m_WaypointsPerSpawnTeamB[o]; i++)
+            {
+                m_WPTeamB.Add(new KeyValuePair<Vector3, Transform>(m_SpawnsTeamB[o].position, m_WaypointsTeamB[tempIndex + i]));
+            }
+            tempIndex += m_WaypointsPerSpawnTeamB[o];
+        }
 
         SpawnNewWave(Team.Ally);
         SpawnNewWave(Team.Enemy);
@@ -34,14 +76,14 @@ public class BoidSpawner : MonoBehaviour
         {
             foreach (var spawn in m_SpawnsTeamA)
             {
-                SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, spawn.position);
+                SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, spawn.position, m_WPTeamA);
             }
         }
         else
         {
             foreach (var spawn in m_SpawnsTeamB)
             {
-                SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, spawn.position);
+                SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, spawn.position, m_WPTeamB);
             }
         }
     }
@@ -50,15 +92,15 @@ public class BoidSpawner : MonoBehaviour
     {
         if (_Team == Team.Ally)
         {
-            SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, _Pos);
+            SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, _Pos, m_WPTeamA);
         }
         else
         {
-            SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, _Pos);
+            SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, _Pos, m_WPTeamB);
         }
     }
 
-    private void SpawnFormation(Team _Team, int _SpawnAmount, Material _BoidMat, bool _SpawnFormations, Vector3 _SpawnPos)
+    private void SpawnFormation(Team _Team, int _SpawnAmount, Material _BoidMat, bool _SpawnFormations, Vector3 _SpawnPos, List<KeyValuePair<Vector3, Transform>> _OptionalWaypoints)
     {
         List<KeyValuePair<Guid, BoidDataManager>> boids = new List<KeyValuePair<Guid, BoidDataManager>>();
         GameObject formation = null;
@@ -73,8 +115,21 @@ public class BoidSpawner : MonoBehaviour
         {
             KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
             temp.Value.GetComponent<MeshRenderer>().material = _BoidMat;
-            temp.Value.transform.position = transform.position + transform.right * 10 * i;
-            temp.Value.GetComponent<BoidDataManager>().Team = _Team;
+            temp.Value.transform.position = _SpawnPos + transform.right * 10 * i;
+
+            BoidDataManager tempManager = temp.Value.GetComponent<BoidDataManager>();
+            tempManager.Team = _Team;
+
+            if (_OptionalWaypoints.Count > 0)
+            {
+                for (int o = 0; o < _OptionalWaypoints.Count; o++)
+                {
+                    if (_OptionalWaypoints[o].Key == _SpawnPos)
+                    {
+                        tempManager.AddMovTarget(_OptionalWaypoints[o].Value.position);
+                    }
+                }
+            }
 
             boids.Add(new KeyValuePair<Guid, BoidDataManager>(temp.Key, temp.Value.GetComponent<BoidDataManager>()));
             if (m_SpawnFormations)

@@ -1,5 +1,5 @@
-using UnityEngine;
 using RBush;
+using UnityEngine;
 
 public enum CellType
 {
@@ -46,12 +46,10 @@ public class GridDataManager : MonoBehaviour
                 m_BoidGrid[x, y] = new GridTile();
             }
         }
-
     }
 
     private void Start()
     {
-
         InitializeObstacles();
     }
 
@@ -68,7 +66,7 @@ public class GridDataManager : MonoBehaviour
                 {
                     m_BoidGrid[x, y].cellType = CellType.Obstacle;
                     GameObject tempObj = new GameObject("Obstacle_" + x + "_" + y);
-                    tempObj.transform.localScale = new Vector3(m_CellSize,m_CellSize,m_CellSize);
+                    tempObj.transform.localScale = new Vector3(m_CellSize, m_CellSize, m_CellSize);
                     tempObj.transform.position = pos;
                     tempObj.layer = LayerMask.NameToLayer("Obstacle");
                     RTree_BoidManager.Instance?.RegisterObject(tempObj, CreateTreeEntry(tempObj));
@@ -80,7 +78,14 @@ public class GridDataManager : MonoBehaviour
 
     public GridTile QueryGridTile(int _PosX, int _PosY)
     {
-        return m_BoidGrid[_PosX, _PosY];
+        if (IsInBounds(_PosX, _PosY))
+        {
+            return m_BoidGrid[_PosX, _PosY];
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -167,7 +172,8 @@ public class GridDataManager : MonoBehaviour
 
         for (int i = 0; i < dX + 1; i++)
         {
-            if (QueryGridTile(x0 + i, y).cellType == CellType.Obstacle)
+            GridTile tempTile = QueryGridTile(x0 + i, y);
+            if (tempTile == null || tempTile.cellType == CellType.Obstacle)
             {
                 return false;
             }
@@ -221,7 +227,8 @@ public class GridDataManager : MonoBehaviour
 
         for (int i = 0; i < dY + 1; i++)
         {
-            if (QueryGridTile(x, y0 + i).cellType == CellType.Obstacle)
+            GridTile tempTile = QueryGridTile(x, y0 + i);
+            if (tempTile == null || tempTile.cellType == CellType.Obstacle)
             {
                 return false;
             }

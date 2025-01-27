@@ -35,10 +35,8 @@ public class BoidCombatController : MonoBehaviour
             if (m_AtkTimer <= 0)
             {
                 KeyValuePair<Guid, Rigidbody> targetEnemy = m_DataManager.QueryClosestNeighbour(Team.Enemy);
-                if (targetEnemy.Value != null && Vector3.Distance(targetEnemy.Value.position, transform.position) <= m_DataManager.QueryStat(BoidStat.AtkRange) + m_DataManager.QueryStat(BoidStat.AtkRange) * 0.1f)
+                if (targetEnemy.Value != null && Vector3.Distance(targetEnemy.Value.position, transform.position) <= (m_DataManager.QueryStat(BoidStat.AtkRange) + (m_DataManager.QueryStat(BoidStat.AtkRange) * 0.1f)))
                 {
-                    Debug.DrawLine(transform.position, targetEnemy.Value.position);
-
                     EventManager.Instance.BoidAttack?.Invoke(m_AtkDamage, targetEnemy.Key);
                     m_AtkTimer = m_AtkTime;
                 }

@@ -123,12 +123,20 @@ public class BoidFlockingManager : MonoBehaviour
         {
             int x = (int)Mathf.Floor(pos.x / GridDataManager.Instance.CellSize);
             int y = (int)Mathf.Floor(pos.z / GridDataManager.Instance.CellSize);
-            Vector2 dir = _Flowfield[x, y];
 
-            Vector3 flowDir = new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget);
-            flowDir.y = transform.position.y;
+            if (GridDataManager.Instance.IsInBounds(x,y))
+            {
+                Vector2 dir = _Flowfield[x, y];
 
-            movementVelocity += flowDir;
+                Vector3 flowDir = new Vector3(dir.x, transform.position.y, dir.y) * _MovSpeed * m_WeightManager.QueryWeight(Weight.MovTarget);
+                flowDir.y = transform.position.y;
+
+                movementVelocity += flowDir;
+            }
+            else if (_MovTarget != Vector3.zero)
+            {
+                movementVelocity += SteeringBehaviours.Arrive(_MovTarget, pos, _MovSpeed, _SlowRadius, _StopRange) * m_WeightManager.QueryWeight(Weight.MovTarget) * 0.5f;
+            }
         }
         else if (_MovTarget != Vector3.zero)
         {

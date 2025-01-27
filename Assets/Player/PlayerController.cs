@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -36,6 +37,8 @@ public class PlayerController : MonoBehaviour
     private bool m_UnitsSeclected = false;
     private bool m_FormationModeActive = false;
 
+    private bool m_Initialized = false;
+
     private void Awake()
     {
         if (Instance == null)
@@ -49,6 +52,17 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Start()
+    {
+        StartCoroutine(DelayedInit());
+    }
+
+    private IEnumerator DelayedInit() 
+    {
+        yield return new WaitForEndOfFrame();
+        Initialize();
+    }
+
+    private void Initialize()
     {
         if (EventManager.Instance)
         {
@@ -69,80 +83,84 @@ public class PlayerController : MonoBehaviour
 
             if (m_AllowFreeSpawn)
             {
-                m_EventManager.EnableSpawningUI.Invoke();
+                m_EventManager.EnableSpawningUI?.Invoke();
             }
         }
 
         m_Camera = Camera.main;
+        m_Initialized = true;
     }
 
     private void Update()
     {
-        m_CamPos = m_Camera.transform.position;
-
-        if (m_Moving)
+        if (m_Initialized)
         {
-            float lerpFactor = Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Time.deltaTime * m_CameraSpeed));
-            m_Camera.transform.position = Vector3.Lerp(m_CamPos, m_CamPos + m_CamTargetDir, Time.deltaTime * m_CameraSpeed * lerpFactor);
-        }
+            m_CamPos = m_Camera.transform.position;
 
-        if (m_CamZoomTarget != Vector3.zero)
-        {
-            float lerpFactor = Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Time.deltaTime * m_CameraSpeed));
-            m_Camera.transform.position = Vector3.Lerp(m_CamPos, m_CamZoomTarget, Time.deltaTime * 5 * lerpFactor);
-
-            if (Vector3.Distance(m_CamZoomTarget, m_CamPos) <= 0.5f)
+            if (m_Moving)
             {
-                m_CamZoomTarget = Vector3.zero;
+                float lerpFactor = Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Time.deltaTime * m_CameraSpeed));
+                m_Camera.transform.position = Vector3.Lerp(m_CamPos, m_CamPos + m_CamTargetDir, Time.deltaTime * m_CameraSpeed * lerpFactor);
             }
-        }
 
-        if (m_LeftIsDown)
-        {
-            m_LeftDownTime += Time.deltaTime;
-
-            if (m_LeftDownTime >= m_DownTimeToDrag)
+            if (m_CamZoomTarget != Vector3.zero)
             {
-                if (m_DragVisuals != null)
+                float lerpFactor = Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Time.deltaTime * m_CameraSpeed));
+                m_Camera.transform.position = Vector3.Lerp(m_CamPos, m_CamZoomTarget, Time.deltaTime * 5 * lerpFactor);
+
+                if (Vector3.Distance(m_CamZoomTarget, m_CamPos) <= 0.5f)
                 {
-                    RaycastHit hit;
-                    Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
-                    Physics.Raycast(ray, out hit);
-
-                    Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
-                    pos += new Vector3(0, 0.25f, 0);
-                    float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) * 0.1f;
-                    float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) * 0.1f;
-
-                    Vector3 scale = new Vector3(scaleX, 1, scaleZ);
-
-                    m_DragVisuals.transform.position = pos;
-                    m_DragVisuals.transform.localScale = scale;
-                }
-                else
-                {
-                    m_DragVisuals = GameObject.CreatePrimitive(PrimitiveType.Plane);
-                    m_DragVisuals.GetComponent<MeshRenderer>().material = m_SelectionMat;
-
-                    RaycastHit hit;
-                    Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
-                    Physics.Raycast(ray, out hit);
-
-                    Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
-                    pos += new Vector3(0, 0.25f, 0);
-                    float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) * 0.1f;
-                    float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) * 0.1f;
-                    Vector3 scale = new Vector3(scaleX, 1, scaleZ);
-
-                    m_DragVisuals.transform.position = pos;
-                    m_DragVisuals.transform.localScale = scale;
+                    m_CamZoomTarget = Vector3.zero;
                 }
             }
-        }
 
-        if (m_RightIsDown)
-        {
-            m_RightDownTime += Time.deltaTime;
+            if (m_LeftIsDown)
+            {
+                m_LeftDownTime += Time.deltaTime;
+
+                if (m_LeftDownTime >= m_DownTimeToDrag)
+                {
+                    if (m_DragVisuals != null)
+                    {
+                        RaycastHit hit;
+                        Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+                        Physics.Raycast(ray, out hit);
+
+                        Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
+                        pos += new Vector3(0, 0.25f, 0);
+                        float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) * 0.1f;
+                        float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) * 0.1f;
+
+                        Vector3 scale = new Vector3(scaleX, 1, scaleZ);
+
+                        m_DragVisuals.transform.position = pos;
+                        m_DragVisuals.transform.localScale = scale;
+                    }
+                    else
+                    {
+                        m_DragVisuals = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                        m_DragVisuals.GetComponent<MeshRenderer>().material = m_SelectionMat;
+
+                        RaycastHit hit;
+                        Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
+                        Physics.Raycast(ray, out hit);
+
+                        Vector3 pos = (m_LeftDragStart + hit.point) * 0.5f;
+                        pos += new Vector3(0, 0.25f, 0);
+                        float scaleX = Mathf.Abs(m_LeftDragStart.x - hit.point.x) * 0.1f;
+                        float scaleZ = Mathf.Abs(m_LeftDragStart.z - hit.point.z) * 0.1f;
+                        Vector3 scale = new Vector3(scaleX, 1, scaleZ);
+
+                        m_DragVisuals.transform.position = pos;
+                        m_DragVisuals.transform.localScale = scale;
+                    }
+                }
+            }
+
+            if (m_RightIsDown)
+            {
+                m_RightDownTime += Time.deltaTime;
+            }
         }
     }
 
@@ -354,7 +372,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void FormationDisband() 
+    private void FormationDisband()
     {
         if (m_FormationModeActive)
         {
@@ -362,7 +380,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void FormationCreation() 
+    private void FormationCreation()
     {
         UnitSelectionHandler.Instance?.OnFormationAssembly();
     }

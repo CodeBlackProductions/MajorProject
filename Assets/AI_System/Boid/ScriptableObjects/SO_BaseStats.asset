@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SO_BaseStats
   m_EditorClassIdentifier: 
   m_Health: 500
-  m_MovSpeed: 10
+  m_MovSpeed: 12
   m_VisRange: 20
   m_Mass: 0.75
   m_AtkRange: 3
