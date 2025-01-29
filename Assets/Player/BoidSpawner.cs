@@ -7,9 +7,11 @@ public class BoidSpawner : MonoBehaviour
     [Header("General")]
     [SerializeField] private int m_spawnAmountTeamA;
 
+    [SerializeField][Range(0, 1)] private List<float> m_RangePercentTeamA;
     [SerializeField] private Material m_spawnMaterialA;
     [SerializeField] private List<Transform> m_SpawnsTeamA;
     [SerializeField] private int m_spawnAmountTeamB;
+    [SerializeField][Range(0, 1)] private List<float> m_RangePercentTeamB;
     [SerializeField] private Material m_spawnMaterialB;
     [SerializeField] private List<Transform> m_SpawnsTeamB;
 
@@ -20,6 +22,7 @@ public class BoidSpawner : MonoBehaviour
 
     [Header("Optional")]
     [SerializeField] private List<Transform> m_WaypointsTeamA = new List<Transform>();
+
     [SerializeField] private List<int> m_WaypointsPerSpawnTeamA = new List<int>();
 
     [SerializeField] private List<Transform> m_WaypointsTeamB = new List<Transform>();
@@ -74,33 +77,40 @@ public class BoidSpawner : MonoBehaviour
     {
         if (_Team == Team.Ally)
         {
-            foreach (var spawn in m_SpawnsTeamA)
+            for (int i = 0; i < m_SpawnsTeamA.Count; i++) 
             {
-                SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, spawn.position, m_WPTeamA);
+                SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, m_SpawnsTeamA[i].position, m_WPTeamA, m_RangePercentTeamA[i]);
             }
         }
         else
         {
-            foreach (var spawn in m_SpawnsTeamB)
+            for (int i = 0; i < m_SpawnsTeamB.Count; i++)
             {
-                SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, spawn.position, m_WPTeamB);
+                SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, m_SpawnsTeamB[i].position, m_WPTeamB, m_RangePercentTeamB[i]);
             }
         }
     }
 
-    public void SpawnNewFormation(Team _Team, Vector3 _Pos)
+    public void SpawnNewFormation(Team _Team, Vector3 _Pos, bool _Ranged)
     {
+        float rangePercent = 0;
+
+        if (_Ranged)
+        {
+            rangePercent = 1;
+        }
+
         if (_Team == Team.Ally)
         {
-            SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, _Pos, m_WPTeamA);
+            SpawnFormation(Team.Ally, m_spawnAmountTeamA, m_spawnMaterialA, m_SpawnFormations, _Pos, m_WPTeamA, rangePercent);
         }
         else
         {
-            SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, _Pos, m_WPTeamB);
+            SpawnFormation(Team.Enemy, m_spawnAmountTeamB, m_spawnMaterialB, m_SpawnFormations, _Pos, m_WPTeamB, rangePercent);
         }
     }
 
-    private void SpawnFormation(Team _Team, int _SpawnAmount, Material _BoidMat, bool _SpawnFormations, Vector3 _SpawnPos, List<KeyValuePair<Vector3, Transform>> _OptionalWaypoints)
+    private void SpawnFormation(Team _Team, int _SpawnAmount, Material _BoidMat, bool _SpawnFormations, Vector3 _SpawnPos, List<KeyValuePair<Vector3, Transform>> _OptionalWaypoints, float _RangePercent)
     {
         List<KeyValuePair<Guid, BoidDataManager>> boids = new List<KeyValuePair<Guid, BoidDataManager>>();
         GameObject formation = null;
@@ -111,12 +121,22 @@ public class BoidSpawner : MonoBehaviour
             formation.transform.position = new Vector3(_SpawnPos.x, 1, _SpawnPos.z);
         }
 
+        int meleeAmount = _SpawnAmount - (int)(_SpawnAmount * _RangePercent);
+
         for (int i = 0; i < _SpawnAmount; i++)
         {
-            KeyValuePair<Guid, GameObject> temp = BoidPool.Instance.GetNewBoid();
+            KeyValuePair<Guid, GameObject> temp;
+            if (meleeAmount > i)
+            {
+                temp = BoidPool.Instance.GetNewBoid(false);
+            }
+            else
+            {
+                temp = BoidPool.Instance.GetNewBoid(true);
+            }
+
             temp.Value.GetComponent<MeshRenderer>().material = _BoidMat;
             temp.Value.transform.position = _SpawnPos + transform.right * 10 * i;
-
             BoidDataManager tempManager = temp.Value.GetComponent<BoidDataManager>();
             tempManager.Team = _Team;
 

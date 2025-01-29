@@ -74,7 +74,7 @@ public class RTree_DataManager : MonoBehaviour
         }
     }
 
-    public List<KeyValuePair<GameObject, Team>> QueryNeighboursInRange(Vector3 _Pos, float _Radius)
+    public List<KeyValuePair<GameObject, Team>> QueryNeighboursInRange(Vector3 _Pos, float _Radius, bool _CheckLoS)
     {
         IEnumerable<RTree_Object> foundObjects = m_BoidTree.Search(new Envelope(_Pos.x - _Radius, _Pos.z - _Radius, _Pos.x + _Radius, _Pos.z + _Radius));
 
@@ -88,10 +88,19 @@ public class RTree_DataManager : MonoBehaviour
             {
                 Vector2Int fromVec = new Vector2Int((int)(_Pos.x / cellsize), (int)(_Pos.z / cellsize));
                 Vector2Int toVec = new Vector2Int((int)(obj.Object.transform.position.x / cellsize), (int)(obj.Object.transform.position.z / cellsize));
-                if (gridDataManager.HasLoS(fromVec, toVec))
+
+                if (_CheckLoS)
+                {
+                    if (gridDataManager.HasLoS(fromVec, toVec))
+                    {
+                        neighbours.Add(new KeyValuePair<GameObject, Team>(obj.Object, obj.Object.GetComponent<BoidDataManager>().Team));
+                    }
+                }
+                else
                 {
                     neighbours.Add(new KeyValuePair<GameObject, Team>(obj.Object, obj.Object.GetComponent<BoidDataManager>().Team));
                 }
+                
             }
 
             return neighbours;

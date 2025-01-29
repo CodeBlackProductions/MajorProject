@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
 
     private bool m_UnitsSeclected = false;
     private bool m_FormationModeActive = false;
+    private bool m_RangedSpawnMode = false;
 
     private bool m_Initialized = false;
 
@@ -56,7 +57,7 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(DelayedInit());
     }
 
-    private IEnumerator DelayedInit() 
+    private IEnumerator DelayedInit()
     {
         yield return new WaitForEndOfFrame();
         Initialize();
@@ -77,7 +78,9 @@ public class PlayerController : MonoBehaviour
             m_EventManager.PlayerFormationUp += FormationModeEnd;
             m_EventManager.PlayerUnitsSelected += OnUnitSelectionChange;
             m_EventManager.Player1Up += FormationChangeSquare;
+            m_EventManager.Player1Up += OnSelectMelee;
             m_EventManager.Player2Up += FormationChangeCircle;
+            m_EventManager.Player2Up += OnSelectRanged;
             m_EventManager.Player3Up += FormationDisband;
             m_EventManager.Player4Up += FormationCreation;
 
@@ -301,7 +304,7 @@ public class PlayerController : MonoBehaviour
             Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(ray, out hit);
 
-            EventManager.Instance?.SpawnFormationAtPosition.Invoke(Team.Ally, hit.point);
+            EventManager.Instance?.SpawnFormationAtPosition.Invoke(Team.Ally, hit.point, m_RangedSpawnMode);
         }
 
         m_LeftDownTime = 0;
@@ -333,7 +336,7 @@ public class PlayerController : MonoBehaviour
             Ray ray = m_Camera.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(ray, out hit);
 
-            EventManager.Instance?.SpawnFormationAtPosition.Invoke(Team.Enemy, hit.point);
+            EventManager.Instance?.SpawnFormationAtPosition.Invoke(Team.Enemy, hit.point, m_RangedSpawnMode);
         }
         m_RightDownTime = 0;
     }
@@ -383,5 +386,15 @@ public class PlayerController : MonoBehaviour
     private void FormationCreation()
     {
         UnitSelectionHandler.Instance?.OnFormationAssembly();
+    }
+
+    private void OnSelectMelee()
+    {
+        m_RangedSpawnMode = false;
+    }
+
+    private void OnSelectRanged()
+    {
+        m_RangedSpawnMode = true;
     }
 }

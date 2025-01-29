@@ -31,7 +31,7 @@ public class EventManager : MonoBehaviour
     public Action Player4Up;
     public Action PlayerESCUp;
 
-    public Action<Team, Vector3> SpawnFormationAtPosition;
+    public Action<Team, Vector3, bool> SpawnFormationAtPosition;
     public Action<Team> SpawnNewWave;
     public Action EnableSpawningUI;
     public Action<List<BoidDataManager>> AssembleFormation;

@@ -8,6 +8,7 @@ public class BoidGridDataManager : MonoBehaviour
     [SerializeField] private float m_TreeUpdateInterval = 0.5f;
 
     private BoidDataManager m_DataManager;
+    private BoidCombatController m_CombatController;
     private Rigidbody m_Rb;
     private Vector3 m_OldPos;
     private float m_Timer;
@@ -18,6 +19,7 @@ public class BoidGridDataManager : MonoBehaviour
     {
         m_Rb = GetComponent<Rigidbody>();
         m_DataManager = GetComponent<BoidDataManager>();
+        m_CombatController = GetComponent<BoidCombatController>();
         m_OldPos = Vector3.zero;
     }
 
@@ -48,7 +50,7 @@ public class BoidGridDataManager : MonoBehaviour
             {
                 float visRange = m_DataManager.QueryStat(BoidStat.VisRange);
 
-                List<KeyValuePair<GameObject, Team>> neighbours = RTree_DataManager.Instance.QueryNeighboursInRange(m_Rb.position, visRange);
+                List<KeyValuePair<GameObject, Team>> neighbours = RTree_DataManager.Instance.QueryNeighboursInRange(m_Rb.position, visRange, !m_CombatController.IsRanged);
                 if (neighbours != null)
                 {
                     SetNeighbours(neighbours);

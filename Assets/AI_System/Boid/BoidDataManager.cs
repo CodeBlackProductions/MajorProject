@@ -49,6 +49,8 @@ public class BoidDataManager : MonoBehaviour
         }
     }
 
+    public SO_BoidStats BaseStats { get => m_BaseStats; set => m_BaseStats = value; }
+
     private List<KeyValuePair<Team, Guid>> m_RemoveBuffer = new List<KeyValuePair<Team, Guid>>();
 
     private void OnEnable()

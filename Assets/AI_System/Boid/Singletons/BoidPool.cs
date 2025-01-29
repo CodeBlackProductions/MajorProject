@@ -8,6 +8,8 @@ public class BoidPool : MonoBehaviour
     public static BoidPool Instance;
 
     [SerializeField] private GameObject m_BoidPrefab;
+    [SerializeField] private SO_BoidStats m_BaseStats;
+    [SerializeField] private SO_BoidStats m_BaseStatsRanged;
 
     private Dictionary<Guid, GameObject> m_InUsePool;
     private Dictionary<Guid, GameObject> m_NonActivePool;
@@ -32,13 +34,27 @@ public class BoidPool : MonoBehaviour
         return m_NonActivePool.Count == 0;
     }
 
-    public KeyValuePair<Guid, GameObject> GetNewBoid()
+    public KeyValuePair<Guid, GameObject> GetNewBoid(bool _Ranged)
     {
         if (IsPoolEmpty())
         {
             GameObject temp = GameObject.Instantiate(m_BoidPrefab);
             Guid tempGUID = Guid.NewGuid();
             temp.GetComponent<BoidDataManager>().Guid = tempGUID;
+
+            if (_Ranged)
+            {
+                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStatsRanged;
+                temp.GetComponent<BoidCombatController>().IsRanged = true;
+            }
+            else
+            {
+                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStats;
+                temp.GetComponent<BoidCombatController>().IsRanged = false;
+            }
+
+            temp.SetActive(false);
+            temp.SetActive(true);
 
             m_InUsePool.Add(tempGUID, temp);
 
@@ -51,6 +67,17 @@ public class BoidPool : MonoBehaviour
 
             m_InUsePool.Add(tempGUID, temp);
             m_NonActivePool.Remove(tempGUID);
+
+            if (_Ranged)
+            {
+                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStatsRanged;
+                temp.GetComponent<BoidCombatController>().IsRanged = true;
+            }
+            else
+            {
+                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStats;
+                temp.GetComponent<BoidCombatController>().IsRanged = false;
+            }
 
             temp.SetActive(true);
 

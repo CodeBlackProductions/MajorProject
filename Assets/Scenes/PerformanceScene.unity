@@ -1216,6 +1216,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_BoidPrefab: {fileID: 178594431284864211, guid: 6d57738302258534eab96c9888450709,
     type: 3}
+  m_BaseStats: {fileID: 11400000, guid: f5af0e14a0d00a645a6a3a36a162baf0, type: 2}
+  m_BaseStatsRanged: {fileID: 11400000, guid: 2247662593728db4ea69b1834d0213f6, type: 2}
 --- !u!4 &441516132
 Transform:
   m_ObjectHideFlags: 0
@@ -1718,22 +1720,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_spawnAmountTeamA: 10
+  m_RangePercentTeamA:
+  - 1
+  - 1
+  - 0
+  - 0
   m_spawnMaterialA: {fileID: 2100000, guid: b689aa46f1e28414b91c5093f18d9b82, type: 2}
+  m_SpawnsTeamA:
+  - {fileID: 125053018}
+  - {fileID: 1907540828}
+  - {fileID: 1269308530}
+  - {fileID: 1613418993}
   m_spawnAmountTeamB: 10
+  m_RangePercentTeamB:
+  - 1
+  - 1
+  - 0
+  - 0
   m_spawnMaterialB: {fileID: 2100000, guid: 6b47ecd32675a344b8ce04e693e2b4f9, type: 2}
+  m_SpawnsTeamB:
+  - {fileID: 1789504809}
+  - {fileID: 966879803}
+  - {fileID: 1205831162}
+  - {fileID: 1792432649}
   m_SpawnFormations: 1
   m_formationPrefab: {fileID: 1113447224013948974, guid: d5891ce3f0f259d48995fd18fd0809c3,
     type: 3}
-  m_SpawnsTeamA:
-  - {fileID: 1907540828}
-  - {fileID: 1613418993}
-  - {fileID: 125053018}
-  - {fileID: 1269308530}
-  m_SpawnsTeamB:
-  - {fileID: 1205831162}
-  - {fileID: 1789504809}
-  - {fileID: 1792432649}
-  - {fileID: 966879803}
+  m_WaypointsTeamA: []
+  m_WaypointsPerSpawnTeamA: 
+  m_WaypointsTeamB: []
+  m_WaypointsPerSpawnTeamB: 
 --- !u!4 &650255440
 Transform:
   m_ObjectHideFlags: 0
