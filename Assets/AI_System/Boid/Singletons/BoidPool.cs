@@ -44,13 +44,15 @@ public class BoidPool : MonoBehaviour
 
             if (_Ranged)
             {
-                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStatsRanged;
-                temp.GetComponent<BoidCombatController>().IsRanged = true;
+                BoidDataManager tempManager = temp.GetComponent<BoidDataManager>();
+                tempManager.BaseStats = m_BaseStatsRanged;
+                tempManager.IsRanged = true;
             }
             else
             {
-                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStats;
-                temp.GetComponent<BoidCombatController>().IsRanged = false;
+                BoidDataManager tempManager = temp.GetComponent<BoidDataManager>();
+                tempManager.BaseStats = m_BaseStats;
+                tempManager.IsRanged = false;
             }
 
             temp.SetActive(false);
@@ -70,13 +72,15 @@ public class BoidPool : MonoBehaviour
 
             if (_Ranged)
             {
-                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStatsRanged;
-                temp.GetComponent<BoidCombatController>().IsRanged = true;
+                BoidDataManager tempManager = temp.GetComponent<BoidDataManager>();
+                tempManager.BaseStats = m_BaseStatsRanged;
+                tempManager.IsRanged = true;
             }
             else
             {
-                temp.GetComponent<BoidDataManager>().BaseStats = m_BaseStats;
-                temp.GetComponent<BoidCombatController>().IsRanged = false;
+                BoidDataManager tempManager = temp.GetComponent<BoidDataManager>();
+                tempManager.BaseStats = m_BaseStats;
+                tempManager.IsRanged = false;
             }
 
             temp.SetActive(true);

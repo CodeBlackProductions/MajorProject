@@ -28,6 +28,7 @@ public class BoidDataManager : MonoBehaviour
     private Vector2[,] m_CurrentFlowfield;
     private Vector2Int m_CurrentFlowfieldTarget = Vector2Int.zero;
     private bool m_IsSelectedByPlayer = false;
+    private bool m_IsRanged = false;
 
     public FormationBoidManager FormationBoidManager { get => m_FormationBoidManager; set => m_FormationBoidManager = value; }
     public Vector3 FormationPosition { get => m_FormationPosition; set => m_FormationPosition = value; }
@@ -50,6 +51,7 @@ public class BoidDataManager : MonoBehaviour
     }
 
     public SO_BoidStats BaseStats { get => m_BaseStats; set => m_BaseStats = value; }
+    public bool IsRanged { get => m_IsRanged; set => m_IsRanged = value; }
 
     private List<KeyValuePair<Team, Guid>> m_RemoveBuffer = new List<KeyValuePair<Team, Guid>>();
 
@@ -189,20 +191,20 @@ public class BoidDataManager : MonoBehaviour
                 return FindClosestNeighbour(m_NeighbourAllyList);
 
             case Team.Neutral:
-                return new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
+                return new KeyValuePair<Guid, Rigidbody>(Guid.Empty, null);
 
             case Team.Enemy:
                 return FindClosestNeighbour(m_NeighbourEnemyList);
 
             default:
-                return new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
+                return new KeyValuePair<Guid, Rigidbody>(Guid.Empty, null);
         }
     }
 
     private KeyValuePair<Guid, Rigidbody> FindClosestNeighbour(List<KeyValuePair<Guid, Rigidbody>> _Neighbours)
     {
         float dist = float.MaxValue;
-        KeyValuePair<Guid, Rigidbody> closestNeighbour = new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
+        KeyValuePair<Guid, Rigidbody> closestNeighbour = new KeyValuePair<Guid, Rigidbody>(Guid.Empty, null);
         if (_Neighbours.Count > 1)
         {
             foreach (var neighbour in _Neighbours)
@@ -242,15 +244,19 @@ public class BoidDataManager : MonoBehaviour
         }
         else
         {
-            return new KeyValuePair<Guid, Rigidbody>(Guid.NewGuid(), null);
+            return new KeyValuePair<Guid, Rigidbody>(Guid.Empty, null);
         }
     }
 
     public Vector3 QueryNextMovTarget()
     {
-        if (m_MovTargets.Count > 0 && (Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.VisRange] * 0.5f || m_CurrentMovTarget == Vector3.zero))
+        if (m_MovTargets.Count > 0 && (Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.StopRange] * 4 || m_CurrentMovTarget == Vector3.zero))
         {
             m_CurrentMovTarget = m_MovTargets.Dequeue();
+        }
+        else if (Vector3.Distance(m_CurrentMovTarget, transform.position) <= m_Stats[BoidStat.StopRange] * 4)
+        {
+            m_CurrentMovTarget = Vector3.zero;
         }
 
         return m_CurrentMovTarget;
@@ -264,8 +270,7 @@ public class BoidDataManager : MonoBehaviour
     public void SetMovTarget(Vector3 _Pos)
     {
         m_MovTargets.Clear();
-        m_MovTargets.Enqueue(_Pos);
-        m_CurrentMovTarget = Vector3.zero;
+        m_CurrentMovTarget = _Pos;
     }
 
     public void SetObstacles(List<Vector3> _Obstacles)

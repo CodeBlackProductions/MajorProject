@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class BoidCombatController : MonoBehaviour
 {
-    [SerializeField] private bool m_IsRanged = false;
-    [SerializeField] private GameObject m_ProjectilePrefab;
     [SerializeField] private GameObject m_BowVisuals;
+    [SerializeField] private Healthbar m_Healthbar;
 
     private float m_AtkDamage = 0;
     private float m_AtkSpeed = 0;
@@ -17,9 +16,10 @@ public class BoidCombatController : MonoBehaviour
     private Team m_Team = Team.Neutral;
 
     private BoidDataManager m_DataManager;
+    private ProjectilePool m_ProjectilePool;
+    private BoidFlockingManager m_FlockingManager;
 
-    public bool IsRanged { get => m_IsRanged; set => m_IsRanged = value; }
-    public Team Team { get => m_Team;}
+    public Team Team { get => m_Team; }
 
     private void Start()
     {
@@ -33,12 +33,21 @@ public class BoidCombatController : MonoBehaviour
         m_AtkTime = 1 / m_AtkSpeed;
         m_AtkTimer = m_AtkTime;
 
-        m_BowVisuals.SetActive(m_IsRanged);
+        m_BowVisuals.SetActive(m_DataManager.IsRanged);
 
         if (EventManager.Instance)
         {
             EventManager.Instance.BoidAttack += OnAttacked;
         }
+
+        if (ProjectilePool.Instance)
+        {
+            m_ProjectilePool = ProjectilePool.Instance;
+        }
+
+        TryGetComponent<BoidFlockingManager>(out m_FlockingManager);
+
+        m_Healthbar.MaxHealth = m_DataManager.QueryStat(BoidStat.Health);
     }
 
     private void Update()
@@ -51,19 +60,21 @@ public class BoidCombatController : MonoBehaviour
 
                 if (targetEnemy.Value != null && Vector3.Distance(targetEnemy.Value.position, transform.position) <= (m_AtkRange + (m_AtkRange * 0.1f)))
                 {
-                    if (m_IsRanged)
+                    if (m_DataManager.IsRanged)
                     {
-                        GameObject projectile = GameObject.Instantiate(m_ProjectilePrefab);
+                        GameObject projectile = m_ProjectilePool.GetNewProjectile();
                         projectile.transform.position = transform.position;
                         Projectile projectileController = projectile.GetComponent<Projectile>();
                         projectileController.Damage = m_AtkDamage;
                         projectileController.Team = m_Team;
                         projectileController.TargetPos = targetEnemy.Value.position;
+                        projectileController.ParentBoid = m_DataManager.Guid;
+                        projectile.SetActive(true);
                         m_AtkTimer = m_AtkTime;
                     }
                     else
                     {
-                        EventManager.Instance.BoidAttack?.Invoke(m_AtkDamage, targetEnemy.Key);
+                        EventManager.Instance.BoidAttack?.Invoke(m_AtkDamage, targetEnemy.Key, m_DataManager.Guid);
                         m_AtkTimer = m_AtkTime;
                     }
                 }
@@ -75,7 +86,7 @@ public class BoidCombatController : MonoBehaviour
         }
     }
 
-    private void OnAttacked(float _Damage, Guid _Target)
+    private void OnAttacked(float _Damage, Guid _Target, Guid _Source)
     {
         if (_Target == m_DataManager.Guid)
         {
@@ -88,11 +99,17 @@ public class BoidCombatController : MonoBehaviour
             else
             {
                 m_DataManager.SetStat(BoidStat.Health, newHealth);
+                m_Healthbar.UpdateHealth(newHealth);
+                if (m_FlockingManager && (m_FlockingManager.CurrentTargetEnemy.Value == null || !m_FlockingManager.CurrentTargetEnemy.Value.gameObject.activeSelf)) 
+                {
+                    Rigidbody rb = BoidPool.Instance.GetActiveBoid(_Source).GetComponent<Rigidbody>();
+                    m_FlockingManager.CurrentTargetEnemy = new KeyValuePair<Guid, Rigidbody>(_Source, rb);
+                }
             }
         }
     }
 
-    public void OnArrowHit(float _Damage) 
+    public void OnArrowHit(float _Damage, Guid _Source)
     {
         float newHealth = m_DataManager.QueryStat(BoidStat.Health) - _Damage;
 
@@ -103,6 +120,12 @@ public class BoidCombatController : MonoBehaviour
         else
         {
             m_DataManager.SetStat(BoidStat.Health, newHealth);
+            m_Healthbar.UpdateHealth(newHealth);
+            if (m_FlockingManager && (m_FlockingManager.CurrentTargetEnemy.Value == null || !m_FlockingManager.CurrentTargetEnemy.Value.gameObject.activeSelf))
+            {
+                Rigidbody rb = BoidPool.Instance.GetActiveBoid(_Source).GetComponent<Rigidbody>();
+                m_FlockingManager.CurrentTargetEnemy = new KeyValuePair<Guid, Rigidbody>(_Source, rb);
+            }
         }
     }
 

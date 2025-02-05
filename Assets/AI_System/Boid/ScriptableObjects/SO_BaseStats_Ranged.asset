@@ -12,11 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f884bb5bdaafc34088a84af87e8b06c, type: 3}
   m_Name: SO_BaseStats_Ranged
   m_EditorClassIdentifier: 
-  m_Health: 250
+  m_Health: 150
   m_MovSpeed: 12
   m_VisRange: 45
   m_Mass: 0.75
   m_AtkRange: 30
-  m_AtkDamage: 50
+  m_StopRange: 3
+  m_AtkDamage: 25
   m_AtkSpeed: 1
   m_TurnRate: 0.2
+  m_FormationRadius: 20

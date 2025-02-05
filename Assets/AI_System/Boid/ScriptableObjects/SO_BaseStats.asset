@@ -17,6 +17,8 @@ MonoBehaviour:
   m_VisRange: 20
   m_Mass: 0.75
   m_AtkRange: 3
+  m_StopRange: 2
   m_AtkDamage: 100
   m_AtkSpeed: 1
   m_TurnRate: 0.2
+  m_FormationRadius: 20

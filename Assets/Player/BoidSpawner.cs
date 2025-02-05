@@ -32,13 +32,8 @@ public class BoidSpawner : MonoBehaviour
     private List<KeyValuePair<Vector3, Transform>> m_WPTeamA = new List<KeyValuePair<Vector3, Transform>>();
     private List<KeyValuePair<Vector3, Transform>> m_WPTeamB = new List<KeyValuePair<Vector3, Transform>>();
 
-    private void Start()
+    private void Awake()
     {
-        m_EventManager = EventManager.Instance;
-        m_EventManager.SpawnNewWave += SpawnNewWave;
-        m_EventManager.SpawnFormationAtPosition += SpawnNewFormation;
-        m_EventManager.AssembleFormation += NewFormationFromBoids;
-
         int tempIndex = 0;
 
         for (int o = 0; o < m_SpawnsTeamA.Count; o++)
@@ -68,6 +63,14 @@ public class BoidSpawner : MonoBehaviour
             }
             tempIndex += m_WaypointsPerSpawnTeamB[o];
         }
+    }
+
+    private void Start()
+    {
+        m_EventManager = EventManager.Instance;
+        m_EventManager.SpawnNewWave += SpawnNewWave;
+        m_EventManager.SpawnFormationAtPosition += SpawnNewFormation;
+        m_EventManager.AssembleFormation += NewFormationFromBoids;
 
         SpawnNewWave(Team.Ally);
         SpawnNewWave(Team.Enemy);

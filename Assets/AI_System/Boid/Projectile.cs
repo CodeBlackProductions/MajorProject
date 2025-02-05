@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
@@ -9,14 +10,16 @@ public class Projectile : MonoBehaviour
     private float m_Damage = 0;
     private Vector3 m_TargetPos = Vector3.zero;
     private Vector3 m_StartPos;
+    private Guid m_ParentBoid;
 
     public Vector3 TargetPos { get => m_TargetPos; set => m_TargetPos = value; }
     public float Speed { get => m_Speed; set => m_Speed = value; }
     public float ArcHeight { get => m_ArcHeight; set => m_ArcHeight = value; }
     public float Damage { get => m_Damage; set => m_Damage = value; }
     public Team Team { get => m_Team; set => m_Team = value; }
+    public Guid ParentBoid { get => m_ParentBoid; set => m_ParentBoid = value; }
 
-    private void Start()
+    private void OnEnable()
     {
         m_StartPos = transform.position;
     }
@@ -54,8 +57,8 @@ public class Projectile : MonoBehaviour
             {
                 if (m_Team != controller.Team)
                 {
-                    controller.OnArrowHit(m_Damage);
-                    gameObject.SetActive(false);
+                    controller.OnArrowHit(m_Damage, m_ParentBoid);
+                    ProjectilePool.Instance.ReturnProjectile(this.gameObject);
                 }
             }
         }
@@ -67,8 +70,8 @@ public class Projectile : MonoBehaviour
         BoidCombatController controller;
         if (hits[0].TryGetComponent<BoidCombatController>(out controller) && controller.Team != m_Team)
         {
-            controller.OnArrowHit(m_Damage);
+            controller.OnArrowHit(m_Damage,m_ParentBoid);
         }
-        gameObject.SetActive(false);
+        ProjectilePool.Instance.ReturnProjectile(this.gameObject);
     }
 }

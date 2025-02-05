@@ -4,8 +4,6 @@ using UnityEngine;
 [RequireComponent(typeof(BoidFlockingManager))]
 public class BoidMovController : MonoBehaviour
 {
-    [SerializeField] private bool m_ShowDebug = false;
-
     private Vector3 m_Velocity = Vector3.zero;
     private Vector3 m_Facing = Vector3.zero;
     private Rigidbody m_rigidbody;
@@ -79,20 +77,6 @@ public class BoidMovController : MonoBehaviour
         {
             m_Facing = Vector3.Slerp(m_Facing, _DesiredFacing, 0.5f);
             m_Facing.y = Vector3.forward.y; ;
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (m_ShowDebug)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(BoidStat.VisRange));
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(BoidStat.AtkRange));
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, m_DataManager.QueryStat(BoidStat.MovSpeed) * 0.5f);
-            Gizmos.color = Color.white;
         }
     }
 }

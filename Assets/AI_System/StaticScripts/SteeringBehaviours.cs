@@ -139,12 +139,12 @@ public static class SteeringBehaviours
         return result;
     }
 
-    public static Vector3 FormationCohesion(Vector3 _TargetPos, Vector3 _Pos, float _VisRange, float _MaxVelocity)
+    public static Vector3 FormationCohesion(Vector3 _TargetPos, Vector3 _Pos, float _FormationRadius, float _MaxVelocity)
     {
         Vector3 cohesion = Vector3.zero;
 
         float dist = (_TargetPos - _Pos).magnitude;
-        float distFactor = CalculateDistanceFactor(dist, _VisRange);
+        float distFactor = CalculateDistanceFactor(dist, _FormationRadius);
         distFactor = distFactor <= 0.1f ? 0 : distFactor * 2;
         if (distFactor >= 1)
         {

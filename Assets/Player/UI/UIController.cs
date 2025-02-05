@@ -1,4 +1,4 @@
-using UnityEditor;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -25,6 +25,13 @@ public class UIController : MonoBehaviour
     [Header("Pause Menu")]
     [SerializeField] private GameObject m_UIPauseMenu;
 
+    [Header("FPS")]
+    [SerializeField] private GameObject m_FPSCounterObj;
+
+    private TextMeshProUGUI m_FPSCounter;
+    private float m_FPSTimer = 0;
+    private float m_FPSTime = 0.25f;
+
     private EventManager m_EventManager;
 
     private bool m_SpawnModeEnabled = false;
@@ -36,6 +43,8 @@ public class UIController : MonoBehaviour
             m_BTNSpawnAllyWave.SetActive(false);
             m_BTNSpawnEnemyWave.SetActive(false);
         }
+
+        m_FPSCounter = m_FPSCounterObj.GetComponent<TextMeshProUGUI>();
     }
 
     private void Start()
@@ -54,6 +63,22 @@ public class UIController : MonoBehaviour
 
         m_UIMeleePrompt.GetComponent<Image>().color = Color.cyan;
         m_UIRangePrompt.GetComponent<Image>().color = Color.white;
+    }
+
+    private void Update()
+    {
+        if (m_FPSTimer <= 0) 
+        {
+            float fps = 1.0f / Time.deltaTime;
+            int fpsText = Mathf.RoundToInt(fps);
+            m_FPSCounter.text = "FPS: " + fpsText.ToString();
+            m_FPSTimer = m_FPSTime;
+        }
+        else
+        {
+            m_FPSTimer -= Time.deltaTime;
+        }
+     
     }
 
     public void OnSpawnAllyWavePressed()
@@ -127,9 +152,9 @@ public class UIController : MonoBehaviour
         m_UIFormationTypePrompts.SetActive(false);
     }
 
-    private void OnTogglePauseMenu() 
+    private void OnTogglePauseMenu()
     {
-        if (m_UIPauseMenu.activeSelf) 
+        if (m_UIPauseMenu.activeSelf)
         {
             m_UIPauseMenu.SetActive(false);
             Time.timeScale = 1f;
@@ -147,7 +172,7 @@ public class UIController : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public void OnMainMenu() 
+    public void OnMainMenu()
     {
         SceneManager.LoadScene(0);
     }

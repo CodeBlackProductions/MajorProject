@@ -6,7 +6,7 @@ public class EventManager : MonoBehaviour
 {
     public static EventManager Instance;
 
-    public Action<float, Guid> BoidAttack;
+    public Action<float, Guid, Guid> BoidAttack;
     public Action<KeyValuePair<Guid, BoidDataManager>> BoidDeath;
     public Action<GameObject, RTree_Object> SendTreeBoidUpdate;
     public Action<GameObject, RTree_Object> SendTreeBoidRegister;
